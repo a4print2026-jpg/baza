@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A4-Принт | Premium кассовая система</title>
+    <title>A4-Принт | CMYK Professional</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -13,31 +13,63 @@
             box-sizing: border-box;
         }
 
+        /* CMYK Color Palette */
+        :root {
+            --c-cyan: #00A3E0;
+            --c-magenta: #E2007A;
+            --c-yellow: #FFD100;
+            --c-black: #231F20;
+            --c-cyan-light: #E6F4FA;
+            --c-magenta-light: #FCE6F2;
+            --c-yellow-light: #FFF8E0;
+            --c-gray-light: #F5F5F5;
+            --c-gray: #8C8C8C;
+            --c-white: #FFFFFF;
+        }
+
         body {
-            background: #f0f2f5;
+            background: var(--c-gray-light);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             padding: 28px;
-            color: #1a2634;
-            transition: background 0.2s, color 0.2s;
+            color: var(--c-black);
+            transition: background 0.2s;
         }
 
+        /* Тёмная версия CMYK (чёрная) */
         body.dark {
-            background: #0f172a;
-            color: #e9edf2;
-        }
-
-        .card, .cart-panel, .history-section {
-            background: white;
-            border-radius: 32px;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s;
+            background: var(--c-black);
+            color: var(--c-gray-light);
         }
 
         body.dark .card,
         body.dark .cart-panel,
-        body.dark .history-section {
-            background: #1e293b;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+        body.dark .history-section,
+        body.dark .shift-bar {
+            background: #2D2A2C;
+            border-color: #3D3A3C;
+        }
+
+        body.dark .service-card,
+        body.dark .cart-item,
+        body.dark .history-item,
+        body.dark .stat-card {
+            background: #1A1A1C;
+            border-color: #3D3A3C;
+        }
+
+        body.dark input, body.dark select, body.dark textarea {
+            background: #2D2A2C;
+            border-color: #4D4A4C;
+            color: var(--c-gray-light);
+        }
+
+        body.dark .user-bar {
+            background: #2D2A2C;
+        }
+
+        body.dark .btn-outline {
+            border-color: #5D5A5C;
+            color: var(--c-gray-light);
         }
 
         .app {
@@ -45,6 +77,7 @@
             margin: 0 auto;
         }
 
+        /* Шапка с CMYK лентой */
         .header {
             display: flex;
             justify-content: space-between;
@@ -52,7 +85,32 @@
             flex-wrap: wrap;
             gap: 16px;
             margin-bottom: 28px;
+            padding: 16px 24px;
+            background: var(--c-white);
+            border-radius: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-left: 8px solid var(--c-cyan);
+            border-bottom: 3px solid var(--c-magenta);
         }
+
+        body.dark .header {
+            background: #2D2A2C;
+        }
+
+        .cmyk-strip {
+            display: flex;
+            gap: 2px;
+            margin-top: 8px;
+        }
+        .cmyk-strip span {
+            width: 50px;
+            height: 4px;
+            border-radius: 2px;
+        }
+        .cyan-bg { background: var(--c-cyan); }
+        .magenta-bg { background: var(--c-magenta); }
+        .yellow-bg { background: var(--c-yellow); }
+        .black-bg { background: var(--c-black); }
 
         .logo-area {
             display: flex;
@@ -63,49 +121,35 @@
         .logo {
             height: 48px;
             width: auto;
-            border-radius: 16px;
+            border-radius: 12px;
             background: white;
             padding: 4px;
         }
 
         h1 {
             font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-            background: linear-gradient(135deg, #1e3c72, #2b4c8a);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--c-black);
         }
-
-        body.dark h1 {
-            background: linear-gradient(135deg, #a5d8ff, #70b9ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
+        body.dark h1 { color: var(--c-gray-light); }
 
         .sub {
             font-size: 12px;
-            color: #6c7a8e;
+            color: var(--c-gray);
         }
 
         .user-bar {
             display: flex;
             gap: 12px;
             align-items: center;
-            background: white;
+            background: var(--c-gray-light);
             padding: 6px 20px;
             border-radius: 60px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        }
-
-        body.dark .user-bar {
-            background: #0f172a;
-            border: 1px solid #334155;
         }
 
         button {
-            background: #2c5f8a;
+            background: var(--c-black);
             border: none;
             padding: 8px 22px;
             border-radius: 40px;
@@ -114,35 +158,23 @@
             font-size: 13px;
             cursor: pointer;
             transition: 0.15s ease;
-            letter-spacing: 0.3px;
         }
 
         button:hover {
-            background: #1e4a6e;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            filter: brightness(0.9);
         }
 
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid #cbd5e1;
-            color: #2c5f8a;
-        }
-
-        body.dark .btn-outline {
-            border-color: #475569;
-            color: #cbd5e6;
-        }
-
+        .btn-cyan { background: var(--c-cyan); color: var(--c-black); }
+        .btn-magenta { background: var(--c-magenta); }
+        .btn-yellow { background: var(--c-yellow); color: var(--c-black); }
+        .btn-outline { background: transparent; border: 2px solid var(--c-black); color: var(--c-black); }
+        body.dark .btn-outline { border-color: var(--c-gray-light); color: var(--c-gray-light); }
         .btn-success { background: #1f8a5c; }
-        .btn-success:hover { background: #166b47; }
         .btn-danger { background: #c2412c; }
-        .btn-danger:hover { background: #9c2e1c; }
-        .btn-warning { background: #d97706; }
-        .btn-info { background: #3b82f6; }
 
         .shift-bar {
-            background: white;
+            background: var(--c-white);
             border-radius: 60px;
             padding: 12px 24px;
             margin-bottom: 24px;
@@ -152,11 +184,7 @@
             gap: 16px;
             font-size: 13px;
             font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-        }
-
-        body.dark .shift-bar {
-            background: #1e293b;
+            border-left: 4px solid var(--c-cyan);
         }
 
         .dashboard {
@@ -169,25 +197,36 @@
         .card {
             flex: 2;
             min-width: 380px;
+            background: var(--c-white);
+            border-radius: 32px;
             padding: 28px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            border-top: 3px solid var(--c-cyan);
         }
 
         .cart-panel {
             flex: 1.2;
             min-width: 360px;
+            background: var(--c-white);
+            border-radius: 32px;
             padding: 28px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            border-top: 3px solid var(--c-magenta);
         }
 
         .history-section {
+            background: var(--c-white);
+            border-radius: 32px;
             padding: 28px;
+            border-top: 3px solid var(--c-yellow);
         }
 
         .panel-title {
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #718096;
+            letter-spacing: 2px;
+            color: var(--c-gray);
             margin-bottom: 22px;
         }
 
@@ -201,23 +240,24 @@
         }
 
         .service-card {
-            background: #f8fafc;
+            background: var(--c-gray-light);
             border-radius: 28px;
             padding: 16px 12px;
             text-align: center;
             transition: all 0.2s;
-            border: 1px solid #eef2f8;
+            border: 1px solid #E0E0E0;
+            cursor: pointer;
         }
 
         body.dark .service-card {
-            background: #0f172a;
-            border-color: #334155;
+            background: #2D2A2C;
+            border-color: #4D4A4C;
         }
 
         .service-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            border-color: #2c5f8a;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: var(--c-cyan);
         }
 
         .service-name {
@@ -229,7 +269,7 @@
         .service-price {
             font-size: 18px;
             font-weight: 800;
-            color: #2c5f8a;
+            color: var(--c-magenta);
             margin-bottom: 12px;
         }
 
@@ -242,7 +282,7 @@
         }
 
         .qty-btn {
-            background: #e4e8ef;
+            background: #E0E0E0;
             width: 36px;
             height: 36px;
             border-radius: 60px;
@@ -250,10 +290,7 @@
             font-size: 18px;
             font-weight: bold;
         }
-
-        body.dark .qty-btn {
-            background: #2d3a4e;
-        }
+        body.dark .qty-btn { background: #4D4A4C; color: white; }
 
         .qty-value {
             font-weight: 700;
@@ -262,11 +299,13 @@
         }
 
         .add-btn {
-            background: #2c5f8a;
+            background: var(--c-cyan);
+            color: var(--c-black);
             margin-top: 14px;
             width: 100%;
             padding: 10px;
             font-size: 13px;
+            font-weight: 700;
         }
 
         .cart-list {
@@ -280,7 +319,7 @@
         }
 
         .cart-item {
-            background: #ffffff;
+            background: var(--c-gray-light);
             border-radius: 24px;
             padding: 16px 18px;
             display: flex;
@@ -288,51 +327,33 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-            border: 1px solid #edf2f7;
-            transition: all 0.2s;
+            border-left: 4px solid var(--c-magenta);
         }
 
         body.dark .cart-item {
-            background: #0f172a;
-            border-color: #334155;
+            background: #2D2A2C;
         }
 
-        .cart-item-info {
-            flex: 2;
-        }
-
-        .cart-item-name {
-            font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .cart-item-detail {
-            font-size: 12px;
-            color: #6c7a8e;
-        }
-
-        .cart-item-price {
-            font-weight: 800;
-            font-size: 16px;
-            color: #1f8a5c;
-        }
+        .cart-item-info { flex: 2; }
+        .cart-item-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+        .cart-item-detail { font-size: 12px; color: var(--c-gray); }
+        .cart-item-price { font-weight: 800; font-size: 16px; color: var(--c-magenta); }
 
         .remove-btn {
-            background: #fee2e2;
-            color: #c2412c;
+            background: #FCE6F2;
+            color: var(--c-magenta);
             padding: 8px 18px;
             border-radius: 40px;
             font-size: 12px;
             font-weight: 600;
         }
+        body.dark .remove-btn { background: #4D2A3C; }
 
         input, select, textarea {
             width: 100%;
             padding: 14px 18px;
-            background: #f9fbfd;
-            border: 1px solid #e2e8f0;
+            background: var(--c-gray-light);
+            border: 1px solid #D0D0D0;
             border-radius: 24px;
             font-size: 14px;
             transition: 0.15s;
@@ -341,23 +362,24 @@
 
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #2c5f8a;
-            box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.1);
+            border-color: var(--c-cyan);
+            box-shadow: 0 0 0 3px rgba(0,163,224,0.1);
         }
 
         .total-line {
             display: flex;
             justify-content: space-between;
             padding: 14px 0;
-            border-top: 1px solid #edf2f7;
+            border-top: 1px solid #E0E0E0;
             font-weight: 600;
             font-size: 15px;
         }
+        body.dark .total-line { border-top-color: #4D4A4C; }
 
         .grand-total {
             font-size: 24px;
             font-weight: 800;
-            color: #1f8a5c;
+            color: var(--c-cyan);
         }
 
         .row-2 {
@@ -376,17 +398,12 @@
         }
 
         .history-item {
-            background: #fafcff;
+            background: var(--c-gray-light);
             border-radius: 28px;
             padding: 18px;
-            border: 1px solid #edf2f8;
-            transition: 0.15s;
+            border-left: 4px solid var(--c-yellow);
         }
-
-        body.dark .history-item {
-            background: #0f172a;
-            border-color: #334155;
-        }
+        body.dark .history-item { background: #2D2A2C; }
 
         .modal {
             position: fixed;
@@ -394,7 +411,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.5);
             backdrop-filter: blur(4px);
             display: none;
             align-items: center;
@@ -403,33 +420,25 @@
         }
 
         .modal-card {
-            background: white;
+            background: var(--c-white);
             border-radius: 48px;
             max-width: 700px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
             padding: 32px;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.2);
+            border-top: 5px solid var(--c-cyan);
         }
-
-        body.dark .modal-card {
-            background: #1e293b;
-        }
+        body.dark .modal-card { background: #2D2A2C; }
 
         .stat-card {
-            background: #f8fafc;
+            background: var(--c-gray-light);
             border-radius: 24px;
             padding: 18px;
             margin-bottom: 14px;
-            transition: 0.15s;
-            border: 1px solid #eef2f8;
+            border-left: 4px solid var(--c-cyan);
         }
-
-        body.dark .stat-card {
-            background: #0f172a;
-            border-color: #334155;
-        }
+        body.dark .stat-card { background: #1A1A1C; }
 
         .stat-row {
             display: flex;
@@ -437,11 +446,10 @@
             margin-bottom: 10px;
             font-size: 14px;
         }
-
         .stat-value {
             font-weight: 800;
             font-size: 18px;
-            color: #2c5f8a;
+            color: var(--c-magenta);
         }
 
         .pdf-report {
@@ -462,10 +470,13 @@
 
 <div id="loginOverlay" class="modal" style="display: flex;">
     <div class="modal-card" style="max-width: 380px;">
+        <div class="cmyk-strip" style="justify-content: center; margin-bottom: 16px;">
+            <span class="cyan-bg"></span><span class="magenta-bg"></span><span class="yellow-bg"></span><span class="black-bg"></span>
+        </div>
         <h2 style="text-align:center; margin-bottom: 20px;">A4-Принт</h2>
         <input type="text" id="loginUsername" placeholder="Логин" style="margin-bottom: 14px;">
         <input type="password" id="loginPassword" placeholder="Пароль">
-        <button id="loginBtn" style="width:100%; margin-top: 24px;">Войти</button>
+        <button id="loginBtn" style="width:100%; margin-top: 24px; background: var(--c-black);">Войти</button>
         <div id="loginError" style="color:#c2412c; margin-top: 16px; text-align:center;"></div>
     </div>
 </div>
@@ -475,14 +486,18 @@
     <div class="header">
         <div class="logo-area">
             <img src="https://github.com/a4print2026-jpg/baza/blob/dbcda72ab60f0a9f8d8984e17375f6649cf677f0/images/logo_soc2.png?raw=true" class="logo" onerror="this.style.display='none'">
-            <div><h1>A4‑ПРИНТ</h1><div class="sub">Кассовая система</div></div>
+            <div>
+                <h1>A4‑ПРИНТ</h1>
+                <div class="cmyk-strip"><span class="cyan-bg"></span><span class="magenta-bg"></span><span class="yellow-bg"></span><span class="black-bg"></span></div>
+                <div class="sub">CMYK Professional</div>
+            </div>
         </div>
         <div class="user-bar">
             <span id="currentOperatorName" style="font-weight: 500;"></span>
-            <button id="themeToggleBtn">🌙 Тёмная</button>
-            <button id="adminPanelBtn" style="background:#475569;">Админ</button>
-            <button id="shiftToggleBtn" class="btn-warning">🚀 Открыть смену</button>
-            <button id="pdfReportBtn" class="btn-success">📄 Отчёт</button>
+            <button id="themeToggleBtn" class="btn-outline">🌙 Тёмная</button>
+            <button id="adminPanelBtn" style="background: var(--c-cyan); color: var(--c-black);">Админ</button>
+            <button id="shiftToggleBtn" style="background: var(--c-yellow); color: var(--c-black);">🚀 Открыть смену</button>
+            <button id="pdfReportBtn" style="background: var(--c-magenta);">📄 Отчёт</button>
             <button id="logoutBtn" class="btn-outline">Выйти</button>
         </div>
     </div>
@@ -495,12 +510,12 @@
 
     <div class="dashboard">
         <div class="card">
-            <div class="panel-title">📋 Услуги (выбери количество)</div>
+            <div class="panel-title">📋 УСЛУГИ (CMYK)</div>
             <div id="servicesGrid" class="services-grid"></div>
         </div>
 
         <div class="cart-panel">
-            <div class="panel-title">🧾 Оформление</div>
+            <div class="panel-title">🧾 ОФОРМЛЕНИЕ</div>
             <input type="text" id="clientName" placeholder="Клиент (необязательно)" style="margin-bottom: 20px;">
             
             <div class="cart-list" id="cartList"></div>
@@ -523,7 +538,7 @@
             <div class="total-line grand-total"><span>ИТОГО</span><span id="cartTotal">0 ₽</span></div>
 
             <div class="row-2">
-                <button id="completeOrderBtn" class="btn-success" style="flex:2;">✅ Оформить</button>
+                <button id="completeOrderBtn" style="background: var(--c-cyan); color: var(--c-black); flex:2;">✅ Оформить</button>
                 <button id="clearCartBtn" class="btn-outline" style="flex:1;">Очистить</button>
             </div>
         </div>
@@ -531,9 +546,9 @@
 
     <div class="history-section">
         <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
-            <div class="panel-title" style="margin-bottom:0;">📜 История заказов</div>
+            <div class="panel-title" style="margin-bottom:0;">📜 ИСТОРИЯ ЗАКАЗОВ</div>
             <div style="display: flex; gap: 12px;">
-                <button id="exportExcelBtn" class="btn-success">📎 Excel</button>
+                <button id="exportExcelBtn" style="background: var(--c-yellow); color: var(--c-black);">📎 Excel</button>
                 <button id="clearHistoryBtn" class="btn-danger">🗑 Очистить мои</button>
             </div>
         </div>
@@ -542,7 +557,6 @@
 </div>
 </div>
 
-<!-- АДМИН МОДАЛКА (с отдельной кнопкой статистики) -->
 <div id="adminModal" class="modal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -550,15 +564,14 @@
             <button id="closeAdminModal" style="background:none; font-size: 28px;">✕</button>
         </div>
         
-        <!-- Новая кнопка для просмотра статистики операторов -->
-        <button id="viewOperatorsStatsBtn" class="btn-info" style="width:100%; margin: 10px 0 20px; background:#3b82f6;">📊 Полная статистика операторов</button>
+        <button id="viewOperatorsStatsBtn" style="background: var(--c-cyan); color: var(--c-black); width:100%; margin: 10px 0 20px;">📊 Полная статистика операторов</button>
         
         <h3>📋 Управление услугами</h3>
         <div id="adminServicesList"></div>
         <div style="display: flex; gap: 12px; margin-top: 16px;">
             <input type="text" id="newServiceName" placeholder="Название услуги">
             <input type="number" id="newServicePrice" placeholder="Цена">
-            <button id="addServiceBtn" class="btn-success">Добавить</button>
+            <button id="addServiceBtn" style="background: var(--c-cyan); color: var(--c-black);">Добавить</button>
         </div>
         <hr style="margin: 20px 0;">
         <h3>👥 Управление операторами</h3>
@@ -567,12 +580,11 @@
             <input type="text" id="newOpLogin" placeholder="Логин">
             <input type="text" id="newOpName" placeholder="Имя">
             <input type="text" id="newOpPass" placeholder="Пароль">
-            <button id="addOperatorBtn" class="btn-success">Добавить</button>
+            <button id="addOperatorBtn" style="background: var(--c-magenta);">Добавить</button>
         </div>
     </div>
 </div>
 
-<!-- МОДАЛКА СТАТИСТИКИ ОПЕРАТОРОВ -->
 <div id="operatorsStatsModal" class="modal">
     <div class="modal-card" style="max-width: 700px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -580,7 +592,7 @@
             <button id="closeStatsModal" style="background:none; font-size: 28px;">✕</button>
         </div>
         <div id="operatorsStatsContent"></div>
-        <button id="exportStatsExcelBtn" class="btn-success" style="margin-top: 24px; width:100%;">📎 Экспорт статистики в Excel</button>
+        <button id="exportStatsExcelBtn" style="background: var(--c-yellow); color: var(--c-black); margin-top: 24px; width:100%;">📎 Экспорт статистики в Excel</button>
     </div>
 </div>
 
@@ -611,7 +623,7 @@
     let allOrders = [], currentUser = null, cart = [], discountPct = 0, discountAmt = 0;
     let shiftOpen = null, shiftClose = null;
 
-    const SERVICES_KEY = "a4print_services_pro", OPERATORS_KEY = "a4print_operators", ORDERS_KEY = "a4print_orders", SHIFT_KEY = "a4print_shift";
+    const SERVICES_KEY = "a4print_services_cmyk", OPERATORS_KEY = "a4print_operators", ORDERS_KEY = "a4print_orders", SHIFT_KEY = "a4print_shift";
 
     function saveServices() { localStorage.setItem(SERVICES_KEY, JSON.stringify(services)); }
     function saveOperators() { localStorage.setItem(OPERATORS_KEY, JSON.stringify(operators)); }
@@ -628,8 +640,8 @@
         document.getElementById("shiftOpenTime").innerText = shiftOpen || "—";
         document.getElementById("shiftCloseTime").innerText = shiftClose || "—";
         let btn = document.getElementById("shiftToggleBtn");
-        if (shiftOpen && !shiftClose) { btn.innerText = "🔒 Закрыть смену"; btn.style.background = "#c2412c"; }
-        else { btn.innerText = "🚀 Открыть смену"; btn.style.background = "#d97706"; }
+        if (shiftOpen && !shiftClose) { btn.innerText = "🔒 Закрыть смену"; btn.style.background = "#c2412c"; btn.style.color = "white"; }
+        else { btn.innerText = "🚀 Открыть смену"; btn.style.background = "#FFD100"; btn.style.color = "#231F20"; }
     }
     function toggleShift() {
         if (!shiftOpen || shiftClose) { shiftOpen = new Date().toLocaleString(); shiftClose = null; saveShift(); updateShiftUI(); alert("Смена открыта: " + shiftOpen); }
@@ -695,7 +707,7 @@
                         <button class="remove-btn" data-idx="${idx}">Удалить</button>
                     </div>`;
         });
-        container.innerHTML = html || "<div style='padding:30px; text-align:center; color:#718096;'>Корзина пуста</div>";
+        container.innerHTML = html || "<div style='padding:30px; text-align:center; color:#8C8C8C;'>Корзина пуста</div>";
         document.querySelectorAll(".remove-btn").forEach(btn => btn.onclick = () => { let idx = parseInt(btn.getAttribute("data-idx")); cart.splice(idx, 1); renderCart(); });
         let discount = 0;
         if (discountPct > 0) discount = subtotal * discountPct / 100;
@@ -734,16 +746,16 @@
     function renderHistory() {
         let my = getMyOrders();
         let container = document.getElementById("historyList");
-        if (my.length === 0) { container.innerHTML = "<div style='padding:40px; text-align:center; color:#718096;'>Нет заказов</div>"; return; }
+        if (my.length === 0) { container.innerHTML = "<div style='padding:40px; text-align:center; color:#8C8C8C;'>Нет заказов</div>"; return; }
         let html = "";
         [...my].reverse().forEach(o => {
             let itemsShort = o.items.map(i => `${i.name} x${i.qty}`).join(", ");
             html += `<div class="history-item">
                         <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                             <span><strong>${escapeHtml(o.client)}</strong> | ${o.date}</span>
-                            <span style="font-weight: 800;">${o.finalTotal} ₽</span>
+                            <span style="font-weight: 800; color: var(--c-magenta);">${o.finalTotal} ₽</span>
                         </div>
-                        <div style="font-size: 12px; margin: 8px 0; color: #6c7a8e;">${itemsShort}</div>
+                        <div style="font-size: 12px; margin: 8px 0; color: #8C8C8C;">${itemsShort}</div>
                         <div style="font-size: 12px;">${o.paymentMethod === "cash" ? "💵 Наличные" : "💳 Карта"} ${o.comment ? " | " + o.comment : ""}</div>
                         <button class="delete-order" data-id="${o.id}" style="margin-top: 10px; background:#c2412c; border:none; border-radius:30px; padding:6px 16px; color:white; font-size:12px;">Удалить</button>
                     </div>`;
@@ -754,7 +766,6 @@
     
     function clearMyOrders() { if (confirm("Очистить все свои заказы?")) { if (currentUser.role === "admin") allOrders = []; else allOrders = allOrders.filter(o => o.operator !== currentUser.name); saveOrders(); renderHistory(); } }
     
-    // ========== ПОЛНАЯ СТАТИСТИКА ПО ОПЕРАТОРАМ ==========
     function getFullOperatorsStats() {
         let stats = [];
         for (let [login, data] of Object.entries(operators)) {
@@ -763,16 +774,7 @@
             let totalCash = operatorOrders.filter(o => o.paymentMethod === "cash").reduce((sum, o) => sum + o.finalTotal, 0);
             let totalCard = operatorOrders.filter(o => o.paymentMethod === "card").reduce((sum, o) => sum + o.finalTotal, 0);
             let avgCheck = operatorOrders.length > 0 ? Math.round(totalRevenue / operatorOrders.length) : 0;
-            stats.push({
-                login: login,
-                name: data.name,
-                role: data.role,
-                ordersCount: operatorOrders.length,
-                totalRevenue: totalRevenue,
-                totalCash: totalCash,
-                totalCard: totalCard,
-                avgCheck: avgCheck
-            });
+            stats.push({ login, name: data.name, role: data.role, ordersCount: operatorOrders.length, totalRevenue, totalCash, totalCard, avgCheck });
         }
         return stats.sort((a,b) => b.totalRevenue - a.totalRevenue);
     }
@@ -782,22 +784,17 @@
         let container = document.getElementById("operatorsStatsContent");
         let html = `<div style="margin-bottom: 20px;"><strong>Общая статистика по всем операторам</strong></div>`;
         stats.forEach(stat => {
-            html += `
-                <div class="stat-card">
-                    <div class="stat-row"><span><strong>${escapeHtml(stat.name)}</strong> ${stat.role === "admin" ? "👑" : "👤"}</span><span class="stat-value">${stat.ordersCount} заказов</span></div>
-                    <div class="stat-row"><span>💰 Общая выручка:</span><span class="stat-value">${stat.totalRevenue.toLocaleString()} ₽</span></div>
-                    <div class="stat-row"><span>💵 Наличные:</span><span>${stat.totalCash.toLocaleString()} ₽</span></div>
-                    <div class="stat-row"><span>💳 Карта:</span><span>${stat.totalCard.toLocaleString()} ₽</span></div>
-                    <div class="stat-row"><span>📊 Средний чек:</span><span class="stat-value">${stat.avgCheck.toLocaleString()} ₽</span></div>
-                </div>
-            `;
+            html += `<div class="stat-card">
+                        <div class="stat-row"><span><strong>${escapeHtml(stat.name)}</strong> ${stat.role === "admin" ? "👑" : "👤"}</span><span class="stat-value">${stat.ordersCount} заказов</span></div>
+                        <div class="stat-row"><span>💰 Общая выручка:</span><span class="stat-value">${stat.totalRevenue.toLocaleString()} ₽</span></div>
+                        <div class="stat-row"><span>💵 Наличные:</span><span>${stat.totalCash.toLocaleString()} ₽</span></div>
+                        <div class="stat-row"><span>💳 Карта:</span><span>${stat.totalCard.toLocaleString()} ₽</span></div>
+                        <div class="stat-row"><span>📊 Средний чек:</span><span class="stat-value">${stat.avgCheck.toLocaleString()} ₽</span></div>
+                    </div>`;
         });
         let totalRevenueAll = stats.reduce((sum, s) => sum + s.totalRevenue, 0);
         let totalOrdersAll = stats.reduce((sum, s) => sum + s.ordersCount, 0);
-        html += `<div class="stat-card" style="background: #e8f0fe;">
-                    <div class="stat-row"><span><strong>📊 ИТОГО ПО ЦЕНТРУ</strong></span><span class="stat-value">${totalOrdersAll} заказов</span></div>
-                    <div class="stat-row"><span>💰 Общая выручка:</span><span class="stat-value">${totalRevenueAll.toLocaleString()} ₽</span></div>
-                </div>`;
+        html += `<div class="stat-card" style="background: #E6F4FA;"><div class="stat-row"><span><strong>📊 ИТОГО ПО ЦЕНТРУ</strong></span><span class="stat-value">${totalOrdersAll} заказов</span></div><div class="stat-row"><span>💰 Общая выручка:</span><span class="stat-value">${totalRevenueAll.toLocaleString()} ₽</span></div></div>`;
         container.innerHTML = html;
         document.getElementById("operatorsStatsModal").style.display = "flex";
     }
@@ -805,9 +802,7 @@
     function exportStatsToExcel() {
         let stats = getFullOperatorsStats();
         let data = [["Оператор", "Роль", "Кол-во заказов", "Выручка (₽)", "Наличные (₽)", "Карта (₽)", "Средний чек (₽)"]];
-        stats.forEach(stat => {
-            data.push([stat.name, stat.role === "admin" ? "Администратор" : "Оператор", stat.ordersCount, stat.totalRevenue, stat.totalCash, stat.totalCard, stat.avgCheck]);
-        });
+        stats.forEach(stat => data.push([stat.name, stat.role === "admin" ? "Администратор" : "Оператор", stat.ordersCount, stat.totalRevenue, stat.totalCash, stat.totalCard, stat.avgCheck]));
         let totalRevenueAll = stats.reduce((sum, s) => sum + s.totalRevenue, 0);
         let totalOrdersAll = stats.reduce((sum, s) => sum + s.ordersCount, 0);
         data.push(["ИТОГО", "", totalOrdersAll, totalRevenueAll, "", "", ""]);
@@ -839,13 +834,13 @@
         let adminServices = document.getElementById("adminServicesList");
         adminServices.innerHTML = "";
         services.forEach(s => {
-            adminServices.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:100px;"><button class="updateService" data-id="${s.id}" style="background:#2c5f8a;">💾</button><button class="deleteService" data-id="${s.id}" style="background:#c2412c;">🗑</button></div>`;
+            adminServices.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:100px;"><button class="updateService" data-id="${s.id}" style="background: var(--c-cyan); color: var(--c-black);">💾</button><button class="deleteService" data-id="${s.id}" style="background: var(--c-magenta);">🗑</button></div>`;
         });
         document.querySelectorAll(".updateService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); let s = services.find(x => x.id === id); if (s) { s.price = parseInt(document.getElementById(`price_${id}`).value); saveServices(); renderServices(); renderAdmin(); } });
         document.querySelectorAll(".deleteService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); if (services.length <= 1) return alert("Нельзя удалить последнюю услугу"); services = services.filter(x => x.id !== id); saveServices(); renderServices(); renderAdmin(); });
         let opsDiv = document.getElementById("operatorsList");
         opsDiv.innerHTML = "";
-        for (let [login, data] of Object.entries(operators)) { if (login === "admin") continue; opsDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="Новый пароль"><button class="changePass" data-login="${login}" style="background:#2c5f8a;">🔑</button><button class="deleteOp" data-login="${login}" style="background:#c2412c;">🗑</button></div>`; }
+        for (let [login, data] of Object.entries(operators)) { if (login === "admin") continue; opsDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="Новый пароль"><button class="changePass" data-login="${login}" style="background: var(--c-yellow); color: var(--c-black);">🔑</button><button class="deleteOp" data-login="${login}" style="background: var(--c-magenta);">🗑</button></div>`; }
         document.querySelectorAll(".changePass").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); let newP = document.getElementById(`pass_${log}`).value; if (newP) { operators[log].password = newP; saveOperators(); alert("Пароль изменён"); } });
         document.querySelectorAll(".deleteOp").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); if (confirm("Удалить оператора?")) { delete operators[log]; saveOperators(); renderAdmin(); } });
     }
@@ -877,7 +872,6 @@
         document.getElementById("adminPanelBtn").onclick = () => { renderAdmin(); adminModal.style.display = "flex"; };
         document.getElementById("closeAdminModal").onclick = () => adminModal.style.display = "none";
         
-        // Статистика операторов
         document.getElementById("viewOperatorsStatsBtn").onclick = showOperatorsStats;
         document.getElementById("closeStatsModal").onclick = () => document.getElementById("operatorsStatsModal").style.display = "none";
         document.getElementById("exportStatsExcelBtn").onclick = exportStatsToExcel;
