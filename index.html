@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A4-Принт | Копировальный центр</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: white;
+            padding: 2rem 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Шапка с логотипом */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            height: 60px;
+            width: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+        }
+
+        /* Карточки статистики */
+        .stats-grid {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eee;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+            color: #888;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.2;
+        }
+
+        /* Форма добавления */
+        .form-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            border: 1px solid #eee;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 0.3rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 16px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #999;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+        }
+
+        button {
+            background: #1a1a1a;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            background: #333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #1a1a1a;
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: #f5f5f5;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Таблица */
+        .table-wrapper {
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #eee;
+            overflow-x: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 1rem;
+            background: #fafafa;
+            font-weight: 600;
+            color: #444;
+            border-bottom: 1px solid #eee;
+        }
+
+        td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid #f5f5f5;
+            color: #333;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            padding: 0.3rem 0.8rem;
+            border-radius: 30px;
+            color: #b91c1c;
+            font-size: 0.75rem;
+            box-shadow: none;
+        }
+        .delete-btn:hover {
+            background: #fecaca;
+            transform: none;
+        }
+
+        .empty-row td {
+            text-align: center;
+            padding: 2rem;
+            color: #aaa;
+        }
+
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+            color: #666;
+        }
+
+        @media (max-width: 680px) {
+            body { padding: 1rem; }
+            th, td { padding: 0.7rem 0.5rem; font-size: 0.8rem; }
+            .logo { height: 40px; }
+            h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo-area">
+            <img src="https://github.com/a4print2026-jpg/baza/blob/dbcda72ab60f0a9f8d8984e17375f6649cf677f0/images/logo_soc2.png?raw=true" 
+                 alt="A4-Принт" 
+                 class="logo"
+                 onerror="this.src='https://via.placeholder.com/60x60?text=A4'">
+            <div>
+                <h1>A4-Принт</h1>
+                <div class="subtitle">Копировальный центр</div>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">ЗАКАЗОВ</div><div class="stat-number" id="totalOrders">0</div></div>
+            <div class="stat-card"><div class="stat-label">ВЫРУЧКА (₽)</div><div class="stat-number" id="totalRevenue">0</div></div>
+        </div>
+    </div>
+
+    <!-- Форма нового заказа -->
+    <div class="form-card">
+        <div class="form-row">
+            <div class="input-group">
+                <label>Имя клиента</label>
+                <input type="text" id="clientName" placeholder="Анна Смирнова">
+            </div>
+            <div class="input-group">
+                <label>Услуга</label>
+                <select id="serviceType">
+                    <option value="Цветная печать A4">🖨️ Цветная печать A4</option>
+                    <option value="Ч/Б печать A4">⚫ Ч/Б печать A4</option>
+                    <option value="Ламинация">✨ Ламинация</option>
+                    <option value="Сканирование">🔍 Сканирование</option>
+                    <option value="Брошюровка">📘 Брошюровка</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Кол-во</label>
+                <input type="number" id="quantity" value="1" min="1">
+            </div>
+            <div class="input-group">
+                <label>Цена за ед. (₽)</label>
+                <input type="number" id="unitPrice" value="15" step="5">
+            </div>
+            <div class="input-group">
+                <button id="addOrderBtn">➕ Добавить заказ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Панель отчетов -->
+    <div class="action-bar">
+        <span style="font-weight: 500;">📋 Все заказы</span>
+        <div style="display: flex; gap: 0.8rem;">
+            <button id="exportExcelBtn" class="btn-success">📎 Экспорт в Excel</button>
+            <button id="syncToSheetsBtn" class="btn-outline">☁️ Синхронизировать с Google</button>
+            <button id="clearAllBtn" class="btn-danger">🗑 Очистить всё</button>
+        </div>
+    </div>
+
+    <!-- Таблица -->
+    <div class="table-wrapper">
+        <table id="ordersTable">
+            <thead><tr><th>ID</th><th>Клиент</th><th>Услуга</th><th>Кол-во</th><th>Цена/шт</th><th>Сумма (₽)</th><th>Дата</th><th></th></tr></thead>
+            <tbody id="ordersTableBody"><tr class="empty-row"><td colspan="8">Нет заказов. Добавьте первый ➕</td></tr></tbody>
+        </table>
+    </div>
+</div>
+<div class="sync-status" id="syncStatus">💾 Локальное сохранение</div>
+
+<script>
+    // ==================== НАСТРОЙКА GOOGLE SHEETS ====================
+    // ⚠️ ЗАМЕНИ ЭТИ ЗНАЧЕНИЯ НА СВОИ:
+    const GOOGLE_SHEET_ID = "ТВОЙ_ID_ТАБЛИЦЫ";      // ID из URL Google Sheets
+    const GOOGLE_API_KEY = "ТВОЙ_API_КЛЮЧ";          // Ключ из Google Cloud Console
+    const SHEET_NAME = "Лист1";                       // Название листа в таблице
+    
+    // ==================== ОСНОВНОЙ КОД ====================
+    const STORAGE_KEY = "a4_print_orders";
+    let orders = [];
+
+    // Сохранение и загрузка
+    function saveToLocalStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+    }
+
+    function loadFromLocalStorage() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            orders = JSON.parse(stored);
+        } else {
+            orders = [];
+        }
+        renderTable();
+        updateStats();
+    }
+
+    // Отображение
+    function updateStats() {
+        document.getElementById("totalOrders").innerText = orders.length;
+        const totalRevenueSum = orders.reduce((sum, order) => sum + order.total, 0);
+        document.getElementById("totalRevenue").innerHTML = totalRevenueSum.toLocaleString() + " ₽";
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById("ordersTableBody");
+        if (!orders.length) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="8">✨ Нет заказов. Добавьте первый заказ</td></tr>';
+            return;
+        }
+        let html = "";
+        orders.forEach(order => {
+            html += `<tr>
+                <td style="opacity:0.6;">${order.id}</td>
+                <td><strong>${escapeHtml(order.client)}</strong></td>
+                <td>${escapeHtml(order.service)}</td>
+                <td>${order.quantity}</td>
+                <td>${order.unitPrice} ₽</td>
+                <td style="font-weight:600;">${order.total} ₽</td>
+                <td style="font-size:0.75rem;">${order.date}</td>
+                <td><button class="delete-btn" data-id="${order.id}">Удалить</button></td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const id = parseInt(btn.getAttribute("data-id"));
+                deleteOrderById(id);
+            });
+        });
+    }
+
+    function deleteOrderById(id) {
+        orders = orders.filter(order => order.id !== id);
+        saveToLocalStorage();
+        renderTable();
+        updateStats();
+        showSyncStatus("✅ Заказ удален");
+    }
+
+    function addOrder(client, service, quantity, unitPrice) {
+        if (!client.trim()) { alert("Введите имя клиента"); return false; }
+        if (quantity <= 0 || unitPrice < 0) { alert("Проверьте количество и цену"); return false; }
+        const newOrder = {
+            id: Date.now(),
+            client: client.trim(),
+            service: service,
+            quantity: parseInt(quantity),
+            unitPrice: parseFloat(unitPrice),
+            total: quantity * unitPrice,
+            date: new Date().toLocaleString()
+        };
+        orders.unshift(newOrder);
+        saveToLocalStorage();
+        renderTable();
+        updateStats();
+        showSyncStatus("📝 Заказ добавлен");
+        return true;
+    }
+
+    function clearAllOrders() {
+        if (confirm("Удалить ВСЕ заказы?")) {
+            orders = [];
+            saveToLocalStorage();
+            renderTable();
+            updateStats();
+            showSyncStatus("🗑 База очищена");
+        }
+    }
+
+    // Экспорт в Excel
+    function exportToExcel() {
+        if (orders.length === 0) { alert("Нет данных для экспорта"); return; }
+        const excelData = [["ID", "Клиент", "Услуга", "Количество", "Цена за ед. (₽)", "Итого (₽)", "Дата"]];
+        orders.forEach(order => {
+            excelData.push([order.id, order.client, order.service, order.quantity, order.unitPrice, order.total, order.date]);
+        });
+        const totalSum = orders.reduce((acc, o) => acc + o.total, 0);
+        excelData.push(["", "", "", "", "ВСЕГО:", totalSum + " ₽", ""]);
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "A4_Принт");
+        XLSX.writeFile(wb, `A4print_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+    }
+
+    // Синхронизация с Google Sheets
+    async function syncToGoogleSheets() {
+        if (!GOOGLE_SHEET_ID || GOOGLE_SHEET_ID === "ТВОЙ_ID_ТАБЛИЦЫ") {
+            alert("⚠️ Сначала настрой Google Sheets:\n1. Получи ID таблицы\n2. Вставь его в код (строка 276)");
+            return;
+        }
+        
+        showSyncStatus("☁️ Синхронизация...");
+        
+        // Формируем данные для отправки
+        const rows = [];
+        rows.push(["ID", "Клиент", "Услуга", "Количество", "Цена за ед.", "Итого", "Дата", "Синхронизировано"]);
+        
+        orders.forEach(order => {
+            rows.push([
+                order.id,
+                order.client,
+                order.service,
+                order.quantity,
+                order.unitPrice,
+                order.total,
+                order.date,
+                new Date().toLocaleString()
+            ]);
+        });
+        
+        // Добавляем итоговую строку
+        const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+        rows.push(["", "", "", "", "ИТОГО:", totalRevenue + " ₽", `Всего заказов: ${orders.length}`, ""]);
+        
+        // Конвертируем в формат для Google Sheets API
+        const sheetData = {
+            values: rows
+        };
+        
+        // URL для записи через Google Sheets API v4
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEET_ID}/values/${SHEET_NAME}!A1:append?valueInputOption=RAW&key=${GOOGLE_API_KEY}`;
+        
+        try {
+            // Сначала очистим лист (опционально)
+            await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEET_ID}/values/${SHEET_NAME}!A1:Z1000:clear?key=${GOOGLE_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            // Отправляем новые данные
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sheetData)
+            });
+            
+            if (response.ok) {
+                showSyncStatus("✅ Синхронизировано с Google Sheets!");
+                alert("Данные успешно отправлены в Google Таблицу!\nТеперь другие пользователи могут их смотреть.");
+            } else {
+                const error = await response.json();
+                console.error(error);
+                showSyncStatus("❌ Ошибка синхронизации");
+                alert("Ошибка API. Проверь:\n1. ID таблицы\n2. API ключ\n3. Таблица опубликована");
+            }
+        } catch (error) {
+            console.error(error);
+            showSyncStatus("❌ Ошибка сети");
+            alert("Ошибка соединения. Проверь интернет.");
+        }
+    }
+    
+    // Функция для просмотра общих данных (только чтение)
+    async function loadPublicStats() {
+        if (!GOOGLE_SHEET_ID || GOOGLE_SHEET_ID === "ТВОЙ_ID_ТАБЛИЦЫ") return;
+        
+        const publicUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/export?format=csv`;
+        try {
+            const response = await fetch(publicUrl);
+            const csvText = await response.text();
+            // Здесь можно обработать CSV для отображения общей статистики
+            console.log("Публичные данные загружены");
+        } catch (error) {
+            console.log("Не удалось загрузить публичную статистику");
+        }
+    }
+
+    function showSyncStatus(message) {
+        const statusDiv = document.getElementById("syncStatus");
+        statusDiv.textContent = message;
+        setTimeout(() => {
+            if (statusDiv.textContent === message) {
+                statusDiv.textContent = "💾 Готово";
+            }
+        }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Инициализация
+    document.addEventListener("DOMContentLoaded", () => {
+        loadFromLocalStorage();
+        
+        document.getElementById("addOrderBtn").addEventListener("click", () => {
+            addOrder(
+                document.getElementById("clientName").value,
+                document.getElementById("serviceType").value,
+                document.getElementById("quantity").value,
+                document.getElementById("unitPrice").value
+            );
+            document.getElementById("clientName").value = "";
+            document.getElementById("quantity").value = "1";
+        });
+        
+        document.getElementById("exportExcelBtn").addEventListener("click", exportToExcel);
+        document.getElementById("syncToSheetsBtn").addEventListener("click", syncToGoogleSheets);
+        document.getElementById("clearAllBtn").addEventListener("click", clearAllOrders);
+        
+        // Загружаем публичную статистику с Google
+        loadPublicStats();
+    });
+</script>
+</body>
+</html>
