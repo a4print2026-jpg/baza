@@ -2,662 +2,692 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>A4-Принт | Кассовый терминал</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>A4-Принт | Панель оператора</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #e0e2e5;  /* серый фон как на чеке / терминале */
-            font-family: 'Courier New', 'Courier', 'Source Code Pro', monospace;
-            padding: 24px 16px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: #f1f5f9;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 20px;
         }
 
-        /* Главный блок — как «чек» или экран терминала */
-        .terminal {
-            max-width: 550px;
-            width: 100%;
+        .app {
+            max-width: 1600px;
             margin: 0 auto;
-            background: #f3f4f6;   /* светло-серый фон под纸张 */
-            border-radius: 28px;
-            padding: 24px 20px 32px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
-            border: 1px solid #cbd5e1;
         }
 
-        /* всё как на чеке: моноширинный, чёткие блоки */
-        .receipt-line {
-            border-top: 1px dashed #9ca3af;
-            margin: 16px 0;
-        }
-
-        .receipt-line-solid {
-            border-top: 2px solid #1f2937;
-            margin: 16px 0;
-        }
-
-        .header-title {
-            text-align: center;
-            font-weight: 700;
-            font-size: 26px;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-        }
-
-        .header-sub {
-            text-align: center;
-            font-size: 14px;
-            color: #2c3e50;
-            border-bottom: 1px dashed #9ca3af;
-            padding-bottom: 12px;
-            margin-bottom: 16px;
-        }
-
-        /* крупные цифры, как на кассе */
-        .big-number {
-            font-size: 34px;
-            font-weight: 700;
-            font-family: monospace;
-        }
-
-        .row-space {
+        /* ========== ШАПКА ========== */
+        .header {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
-            margin: 12px 0;
-            font-size: 18px;
+            align-items: center;
             flex-wrap: wrap;
+            gap: 15px;
+            background: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            height: 45px;
+            border-radius: 12px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .user-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: #1e293b;
+            padding: 6px 20px;
+            border-radius: 60px;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-header {
+            background: #3b82f6;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: #ef4444;
+        }
+
+        /* ========== ОСНОВНАЯ СЕТКА ========== */
+        .dashboard {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* ЛЕВАЯ КОЛОНКА — КНОПКИ УСЛУГ */
+        .services-panel {
+            flex: 2;
+            min-width: 300px;
+            background: white;
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .services-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        /* БОЛЬШАЯ КНОПКА УСЛУГИ */
+        .service-btn {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 28px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.1s linear;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            flex-direction: column;
             gap: 8px;
         }
 
-        .total-row {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 12px 0;
-            border-top: 2px solid #1f2937;
-            padding-top: 12px;
-        }
-
-        /* кнопки — в стиле терминала, крупные */
-        .btn-terminal {
-            background: #1e293b;
-            border: none;
-            border-radius: 48px;
-            padding: 14px 20px;
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 18px;
-            color: white;
-            width: 100%;
-            margin-top: 8px;
-            transition: 0.05s linear;
-            text-align: center;
-        }
-
-        .btn-terminal:active {
+        .service-btn:active {
             transform: scale(0.97);
-            background: #0f172a;
         }
 
-        .btn-outline-term {
-            background: transparent;
-            border: 2px solid #1e293b;
-            color: #1e293b;
+        .service-emoji {
+            font-size: 32px;
         }
 
-        .grid-2 {
-            display: flex;
-            gap: 12px;
-            margin: 10px 0;
-        }
-
-        .grid-2 button {
-            flex: 1;
-        }
-
-        input, select {
-            background: white;
-            border: 1px solid #cbd5e1;
-            padding: 12px 14px;
+        .service-price {
+            color: #3b82f6;
             font-size: 18px;
-            font-family: monospace;
-            border-radius: 24px;
-            width: 100%;
         }
 
-        .label-term {
-            font-size: 13px;
-            color: #334155;
-            margin-bottom: 4px;
-            display: block;
-            font-weight: bold;
+        /* РЕДАКТИРОВАНИЕ КНОПОК (drag & drop) */
+        .service-btn.dragging {
+            opacity: 0.5;
         }
 
-        .payment-badge {
-            background: #e2e8f0;
-            padding: 6px 12px;
-            border-radius: 40px;
-            font-size: 14px;
-            display: inline-block;
+        .drag-handle {
+            cursor: grab;
+            font-size: 18px;
+            opacity: 0.5;
+        }
+
+        /* ПРАВАЯ КОЛОНКА — КОРЗИНА + ОФОРМЛЕНИЕ */
+        .cart-panel {
+            flex: 1.2;
+            min-width: 320px;
+            background: white;
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         .cart-item {
             background: #f8fafc;
-            padding: 10px 12px;
             border-radius: 20px;
-            margin-bottom: 8px;
-            border-left: 4px solid #475569;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
-        .operator-line {
-            font-size: 12px;
-            text-align: right;
-            margin-top: 20px;
-            border-top: 1px dashed #9ca3af;
-            padding-top: 12px;
-            color: #475569;
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 12px 0;
+            border-top: 2px solid #e2e8f0;
+            margin-top: 12px;
         }
 
-        /* модалки / вход */
-        .modal-term {
+        .big-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        input, select, textarea {
+            padding: 12px 16px;
+            border-radius: 28px;
+            border: 1px solid #cbd5e1;
+            font-size: 15px;
+            width: 100%;
+        }
+
+        .row-2 {
+            display: flex;
+            gap: 12px;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #1e293b;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+        }
+
+        .btn-primary { background: #3b82f6; }
+        .btn-success { background: #10b981; }
+        .btn-danger { background: #ef4444; }
+        .btn-outline { background: transparent; border: 2px solid #cbd5e1; color: #1e293b; }
+
+        /* Модалка */
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.5);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
         .modal-card {
-            background: #f3f4f6;
-            max-width: 450px;
+            background: white;
+            border-radius: 48px;
+            max-width: 600px;
             width: 90%;
-            border-radius: 36px;
             padding: 28px;
-            font-family: monospace;
+            max-height: 85vh;
+            overflow-y: auto;
         }
-        .close-modal {
-            background: none;
-            font-size: 28px;
-            float: right;
+
+        /* Адаптация */
+        @media (max-width: 900px) {
+            .dashboard { flex-direction: column; }
+            .services-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+            .service-btn { padding: 14px; }
         }
     </style>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
-<div id="loginOverlay" class="modal-term" style="display: flex;">
-    <div class="modal-card">
+<!-- ВХОД -->
+<div id="loginOverlay" class="modal" style="display: flex;">
+    <div class="modal-card" style="max-width: 380px;">
         <h2 style="text-align:center;">A4-Принт</h2>
-        <p style="text-align:center; margin:10px 0;">вход в терминал</p>
-        <input type="text" id="loginUsername" placeholder="Логин" style="margin:10px 0;">
+        <input type="text" id="loginUsername" placeholder="Логин" style="margin: 10px 0;">
         <input type="password" id="loginPassword" placeholder="Пароль">
-        <button id="loginBtn" class="btn-terminal" style="margin-top:20px;">ВОЙТИ</button>
-        <div id="loginError" style="color:red; font-size:12px; text-align:center; margin-top:12px;"></div>
+        <button id="loginBtn" class="btn" style="width:100%; margin-top:20px;">ВОЙТИ</button>
+        <div id="loginError" style="color:red; margin-top:12px;"></div>
     </div>
 </div>
 
+<!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
 <div id="mainContent" style="display: none;">
-<div class="terminal">
-    <div class="header-title">A4-ПРИНТ</div>
-    <div class="header-sub">КОПИРОВАЛЬНЫЙ ЦЕНТР</div>
-
-    <!-- Блок статистики (как итоги на чеке) -->
-    <div class="row-space">
-        <span>📋 ЗАКАЗОВ (мои):</span>
-        <span class="big-number" id="statOrders">0</span>
-    </div>
-    <div class="row-space">
-        <span>💰 ВЫРУЧКА:</span>
-        <span class="big-number" id="statRevenue">0 ₽</span>
-    </div>
-    <div class="receipt-line"></div>
-
-    <!-- Корзина / текущий заказ -->
-    <div style="margin: 10px 0;">
-        <div style="display:flex; justify-content:space-between;">
-            <span><strong>🛒 ТЕКУЩИЙ ЗАКАЗ</strong></span>
-            <span id="cartCount" class="payment-badge">0 поз.</span>
+<div class="app">
+    <div class="header">
+        <div class="logo-area">
+            <img src="https://github.com/a4print2026-jpg/baza/blob/dbcda72ab60f0a9f8d8984e17375f6649cf677f0/images/logo_soc2.png?raw=true" class="logo" onerror="this.style.display='none'">
+            <div><h1>A4-Принт</h1><div style="font-size:12px;">Копировальный центр</div></div>
         </div>
-        <div id="cartItemsList" style="margin: 12px 0; max-height: 200px; overflow-y: auto;"></div>
+        <div class="user-bar">
+            <span class="user-name" id="currentOperatorName"></span>
+            <button id="adminPanelBtn" class="btn-header">⚙️ Админ</button>
+            <button id="logoutBtn" class="btn-header btn-logout">Выйти</button>
+        </div>
     </div>
 
-    <!-- ИТОГО ПО КОРЗИНЕ (как на картинке) -->
-    <div class="row-space">
-        <span>ПОДЫТОГ:</span>
-        <span id="cartSubtotal">0.00</span>
-    </div>
-    <div class="row-space" id="discountRow" style="display:none;">
-        <span>СКИДКА:</span>
-        <span id="cartDiscount">-0.00</span>
-    </div>
-    <div class="total-row">
-        <span>✅ ИТОГО К ОПЛАТЕ:</span>
-        <span id="cartTotal">0.00 ₽</span>
-    </div>
-    <div class="receipt-line-solid"></div>
+    <div class="dashboard">
+        <!-- ЛЕВАЯ ЧАСТЬ: КНОПКИ УСЛУГ -->
+        <div class="services-panel">
+            <div class="services-header">
+                <h2>📋 Частые услуги</h2>
+                <div style="display:flex; gap:8px;">
+                    <span style="font-size:12px; color:#666;">🖱️ перетащи, чтобы изменить порядок</span>
+                    <button id="editServicesBtn" class="btn btn-outline" style="padding:6px 16px;">✏️ Редактировать</button>
+                </div>
+            </div>
+            <div id="servicesGrid" class="services-grid"></div>
+        </div>
 
-    <!-- Быстрое добавление в корзину (как выбор услуг) -->
-    <div class="row-space">
-        <span>📋 УСЛУГА</span>
-        <select id="serviceType" style="width:auto; flex:1;"></select>
-    </div>
-    <div class="grid-2">
-        <div><span class="label-term">КОЛ-ВО</span><input type="number" id="quantity" value="1" min="1" inputmode="numeric"></div>
-        <div><span class="label-term">ЦЕНА ₽</span><input type="number" id="unitPrice" value="0" step="5" inputmode="decimal"></div>
-        <button id="addToCartBtn" class="btn-terminal" style="margin-top:20px;">➕ ДОБАВИТЬ</button>
-    </div>
+        <!-- ПРАВАЯ ЧАСТЬ: КОРЗИНА -->
+        <div class="cart-panel">
+            <h2>🛒 Заказ</h2>
+            <div class="row-2">
+                <div style="flex:2;"><label>👤 Имя клиента</label><input type="text" id="clientName" placeholder="Клиент" inputmode="text"></div>
+            </div>
+            <div id="cartItemsList" style="max-height: 280px; overflow-y: auto; margin: 16px 0;"></div>
+            
+            <div class="row-2">
+                <div><label>Скидка %</label><input type="number" id="discountPercent" value="0" inputmode="numeric"></div>
+                <div><label>Скидка ₽</label><input type="number" id="discountAmount" value="0" inputmode="decimal"></div>
+                <button id="applyDiscountBtn" class="btn btn-outline" style="margin-top:24px;">Применить</button>
+            </div>
 
-    <!-- Скидка + оплата -->
-    <div class="grid-2" style="margin-top: 12px;">
-        <input type="number" id="discountPercent" placeholder="скидка %" value="0" inputmode="numeric">
-        <input type="number" id="discountAmount" placeholder="скидка ₽" value="0" inputmode="decimal">
-        <button id="applyDiscountBtn" class="btn-terminal btn-outline-term">ПРИМЕНИТЬ</button>
-    </div>
+            <div class="row-2">
+                <label style="display:flex; gap:16px;"><input type="radio" name="payment" value="cash" checked> 💵 Наличные</label>
+                <label style="display:flex; gap:16px;"><input type="radio" name="payment" value="card"> 💳 Карта</label>
+            </div>
 
-    <div class="grid-2">
-        <label class="payment-badge"><input type="radio" name="paymentMethod" value="cash" checked> 💵 НАЛИЧНЫЕ</label>
-        <label class="payment-badge"><input type="radio" name="paymentMethod" value="card"> 💳 КАРТА</label>
-    </div>
+            <div class="total-line">
+                <span>Подытог:</span>
+                <span id="cartSubtotal">0 ₽</span>
+            </div>
+            <div class="total-line" id="discountLine" style="display:none; color:#dc2626;">
+                <span>Скидка:</span>
+                <span id="cartDiscount">0 ₽</span>
+            </div>
+            <div class="total-line" style="border-top: 3px solid #1e293b; font-size: 24px;">
+                <span>ИТОГО:</span>
+                <span id="cartTotal" class="big-price">0 ₽</span>
+            </div>
 
-    <div class="grid-2">
-        <button id="completeOrderBtn" class="btn-terminal" style="background:#0f3b2c;">✅ ОФОРМИТЬ</button>
-        <button id="clearCartBtn" class="btn-terminal btn-outline-term">🗑 ОЧИСТИТЬ</button>
-    </div>
+            <div class="row-2">
+                <textarea id="orderComment" rows="2" placeholder="Комментарий к заказу..." style="resize:none;"></textarea>
+            </div>
 
-    <div class="receipt-line"></div>
-
-    <!-- Добавление комментария и имени (опционально) -->
-    <div class="label-term">👤 ИМЯ КЛИЕНТА (необяз.)</div>
-    <input type="text" id="clientName" placeholder="Клиент" inputmode="text" style="margin-bottom:8px;">
-    <div class="label-term">📝 КОММЕНТАРИЙ</div>
-    <textarea id="orderComment" rows="1" placeholder="пожелания..." style="font-family:monospace; font-size:14px;"></textarea>
-
-    <div class="receipt-line"></div>
-
-    <!-- История заказов (в стиле чек) -->
-    <div class="row-space">
-        <span>📜 ИСТОРИЯ ЗАКАЗОВ</span>
-        <button id="exportExcelBtn" class="payment-badge" style="background:#1e293b; color:white;">📎 EXCEL</button>
-        <button id="clearAllBtn" class="payment-badge" style="background:#991b1b; color:white;">🗑 МОИ</button>
+            <div class="row-2">
+                <button id="completeOrderBtn" class="btn btn-success">✅ Оформить заказ</button>
+                <button id="clearCartBtn" class="btn btn-outline">🗑 Очистить</button>
+            </div>
+        </div>
     </div>
 
-    <div id="historyContainer" style="max-height: 280px; overflow-y: auto; background:#fefce8; padding: 8px; border-radius: 20px;">
-        <div style="text-align:center; padding:20px;">нет заказов</div>
+    <!-- История заказов -->
+    <div style="background: white; border-radius: 32px; padding: 20px; margin-top: 24px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+            <h3>📜 История заказов</h3>
+            <div><button id="exportExcelBtn" class="btn btn-success" style="padding:8px 20px;">📎 Экспорт Excel</button></div>
+        </div>
+        <div id="historyList" style="max-height: 300px; overflow-y: auto;"></div>
     </div>
-
-    <div class="operator-line" id="operatorInfo">оператор: —</div>
 </div>
 </div>
 
-<!-- админ-панель (минимальный чек-стиль) -->
-<div id="adminModal" class="modal-term">
-    <div class="modal-card" style="max-width:600px;">
-        <div style="display:flex; justify-content:space-between;">
-            <h2>⚙️ АДМИН</h2>
-            <button id="closeModalBtn" style="background:none; font-size:28px;">✕</button>
-        </div>
-        <div id="operatorsStatsList" style="margin:15px 0;"></div>
-        <hr>
-        <h3>УСЛУГИ</h3>
-        <div id="servicesList"></div>
-        <div style="display:flex; gap:8px; margin:12px 0;">
-            <input type="text" id="newServiceName" placeholder="услуга">
-            <input type="number" id="newServicePrice" placeholder="цена">
-            <button id="addServiceBtn" class="btn-terminal">ДОБАВИТЬ</button>
-        </div>
-        <hr>
-        <h3>ОПЕРАТОРЫ</h3>
-        <div id="operatorsList"></div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <input type="text" id="newOperatorLogin" placeholder="логин">
-            <input type="text" id="newOperatorName" placeholder="имя">
-            <input type="text" id="newOperatorPass" placeholder="пароль">
-            <button id="addOperatorBtn" class="btn-terminal">ДОБАВИТЬ</button>
-        </div>
-    </div>
-</div>
-
-<div id="receiptModal" class="modal-term">
+<!-- МОДАЛКА АДМИНКИ -->
+<div id="adminModal" class="modal">
     <div class="modal-card">
-        <div style="text-align:center;" id="receiptContent"></div>
-        <button id="printReceiptModalBtn" class="btn-terminal" style="margin-top:20px;">🖨️ ПЕЧАТЬ ЧЕКА</button>
+        <div style="display:flex; justify-content:space-between;">
+            <h2>⚙️ Админ-панель</h2>
+            <button id="closeAdminModal" style="background:none; font-size:28px;">✕</button>
+        </div>
+        <h3>📊 Статистика операторов</h3>
+        <div id="operatorsStats"></div>
+        <hr>
+        <h3>✏️ Редактор кнопок услуг</h3>
+        <div id="adminServicesList"></div>
+        <div class="row-2">
+            <input type="text" id="newServiceName" placeholder="Название">
+            <input type="number" id="newServicePrice" placeholder="Цена">
+            <input type="text" id="newServiceEmoji" placeholder="Эмодзи 🖨️" value="📄">
+            <button id="addServiceBtn" class="btn btn-success">➕ Добавить</button>
+        </div>
+        <hr>
+        <h3>👥 Операторы</h3>
+        <div id="operatorsList"></div>
+        <div class="row-2">
+            <input type="text" id="newOpLogin" placeholder="Логин">
+            <input type="text" id="newOpName" placeholder="Имя">
+            <input type="text" id="newOpPass" placeholder="Пароль">
+            <button id="addOperatorBtn" class="btn btn-success">➕ Добавить</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // ========== ДАННЫЕ ==========
-    let services = [
-        { id:1, name:"Цветная печать A4", price:25 },
-        { id:2, name:"Ч/Б печать A4", price:10 },
-        { id:3, name:"Ламинация", price:50 },
-        { id:4, name:"Сканирование", price:30 },
-        { id:5, name:"Брошюровка", price:100 }
+    // ========== БАЗА ДАННЫХ ==========
+    let services = [  // id, name, price, emoji, order
+        { id: 1, name: "Цветная печать A4", price: 25, emoji: "🖨️", order: 0 },
+        { id: 2, name: "Ч/Б печать A4", price: 10, emoji: "⚫", order: 1 },
+        { id: 3, name: "Ламинация", price: 50, emoji: "✨", order: 2 },
+        { id: 4, name: "Сканирование", price: 30, emoji: "🔍", order: 3 },
+        { id: 5, name: "Брошюровка", price: 100, emoji: "📘", order: 4 }
     ];
+    
     let operators = {
-        "admin":{ password:"admin123", name:"Администратор", role:"admin" },
-        "anna":{ password:"anna321", name:"Анна", role:"operator" },
-        "sergey":{ password:"sergey321", name:"Сергей", role:"operator" }
+        "admin": { password: "admin123", name: "Администратор", role: "admin" },
+        "anna": { password: "anna321", name: "Анна", role: "operator" },
+        "sergey": { password: "sergey321", name: "Сергей", role: "operator" }
     };
+    
     let allOrders = [];
     let currentUser = null;
     let cart = [];
-    let currentDiscountPercent = 0, currentDiscountAmount = 0;
-    let lastReceipt = null;
-
-    const SERVICES_KEY = "a4print_services";
+    let discountPct = 0, discountAmt = 0;
+    
+    const SERVICES_KEY = "a4print_services_v2";
     const OPERATORS_KEY = "a4print_operators";
     const ORDERS_KEY = "a4print_orders";
-
-    function saveAll() {
-        localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
-        localStorage.setItem(OPERATORS_KEY, JSON.stringify(operators));
-        localStorage.setItem(ORDERS_KEY, JSON.stringify(allOrders));
-    }
+    
+    // ========== СОХРАНЕНИЕ ==========
+    function saveServices() { localStorage.setItem(SERVICES_KEY, JSON.stringify(services)); }
+    function saveOperators() { localStorage.setItem(OPERATORS_KEY, JSON.stringify(operators)); }
+    function saveOrders() { localStorage.setItem(ORDERS_KEY, JSON.stringify(allOrders)); }
+    
     function loadData() {
-        let s = localStorage.getItem(SERVICES_KEY); if(s) services = JSON.parse(s);
+        let s = localStorage.getItem(SERVICES_KEY); if(s) { services = JSON.parse(s); services.sort((a,b)=>a.order-b.order); }
         let o = localStorage.getItem(OPERATORS_KEY); if(o) operators = JSON.parse(o);
         let ord = localStorage.getItem(ORDERS_KEY); if(ord) allOrders = JSON.parse(ord);
-        updateServicesSelect();
-        renderStatsAndHistory();
+        renderServicesGrid();
+        renderCart();
+        renderStatsHistory();
+    }
+    
+    // ========== ОТРИСОВКА КНОПОК УСЛУГ (с сортировкой и drag&drop) ==========
+    function renderServicesGrid() {
+        const grid = document.getElementById("servicesGrid");
+        if(!grid) return;
+        services.sort((a,b)=>a.order-b.order);
+        grid.innerHTML = "";
+        services.forEach(service => {
+            const btn = document.createElement("div");
+            btn.className = "service-btn";
+            btn.setAttribute("data-id", service.id);
+            btn.innerHTML = `
+                <div class="drag-handle">⋮⋮</div>
+                <div class="service-emoji">${service.emoji || "📄"}</div>
+                <div><strong>${service.name}</strong></div>
+                <div class="service-price">${service.price} ₽</div>
+            `;
+            btn.addEventListener("click", (e) => {
+                if(e.target.classList.contains("drag-handle")) return;
+                addToCart(service);
+            });
+            btn.draggable = true;
+            btn.addEventListener("dragstart", handleDragStart);
+            btn.addEventListener("dragover", handleDragOver);
+            btn.addEventListener("drop", handleDrop);
+            grid.appendChild(btn);
+        });
+    }
+    
+    let dragSrcId = null;
+    function handleDragStart(e) { dragSrcId = parseInt(e.target.closest(".service-btn").getAttribute("data-id")); e.dataTransfer.effectAllowed = "move"; }
+    function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }
+    function handleDrop(e) {
+        e.preventDefault();
+        const targetBtn = e.target.closest(".service-btn");
+        if(!targetBtn) return;
+        const targetId = parseInt(targetBtn.getAttribute("data-id"));
+        if(dragSrcId === targetId) return;
+        const srcIndex = services.findIndex(s => s.id === dragSrcId);
+        const targetIndex = services.findIndex(s => s.id === targetId);
+        if(srcIndex === -1 || targetIndex === -1) return;
+        const [moved] = services.splice(srcIndex, 1);
+        services.splice(targetIndex, 0, moved);
+        services.forEach((s, idx) => s.order = idx);
+        saveServices();
+        renderServicesGrid();
+    }
+    
+    function addToCart(service) {
+        let existing = cart.find(i => i.serviceId === service.id);
+        if(existing) existing.quantity++;
+        else cart.push({ serviceId: service.id, name: service.name, price: service.price, quantity: 1 });
         renderCart();
     }
-    function updateServicesSelect() {
-        let sel = document.getElementById("serviceType");
-        if(!sel) return;
-        sel.innerHTML = "";
-        services.forEach(s => {
-            let opt = document.createElement("option");
-            opt.value = s.name;
-            opt.innerText = `${s.name} — ${s.price}₽`;
-            sel.appendChild(opt);
-        });
-        if(services[0]) document.getElementById("unitPrice").value = services[0].price;
-    }
-
-    function getMyOrders() {
-        if(!currentUser) return [];
-        if(currentUser.role === "admin") return allOrders;
-        return allOrders.filter(o => o.operator === currentUser.name);
-    }
-
-    function renderStatsAndHistory() {
-        let my = getMyOrders();
-        let count = my.length;
-        let revenue = my.reduce((s,o) => s + o.finalTotal, 0);
-        document.getElementById("statOrders").innerText = count;
-        document.getElementById("statRevenue").innerHTML = revenue.toLocaleString() + " ₽";
-        document.getElementById("operatorInfo").innerHTML = `оператор: ${currentUser?.name || ""} ${currentUser?.role === "admin" ? "👑" : ""}`;
-
-        let historyDiv = document.getElementById("historyContainer");
-        if(my.length === 0) { historyDiv.innerHTML = "<div style='text-align:center; padding:20px;'>нет заказов</div>"; return; }
-        let html = "";
-        my.slice().reverse().forEach(order => {
-            let itemsShort = order.items.map(i => `${i.service} x${i.quantity}`).join(", ");
-            html += `<div style="border-bottom:1px dashed #aaa; padding:12px 0;">
-                        <div><strong>${order.client}</strong> | ${order.date.slice(0,10)}</div>
-                        <div style="font-size:12px;">${itemsShort}</div>
-                        <div>💵 ${order.finalTotal}₽ | ${order.paymentMethod === "cash" ? "нал" : "карта"} ${order.comment ? `✉️ ${order.comment}` : ""}</div>
-                        <div><button class="delete-order" data-id="${order.id}" style="background:#fee2e2; border:none; border-radius:30px; padding:4px 12px;">УДАЛИТЬ</button>
-                        <button class="print-order-history" data-id="${order.id}" style="background:#e2e8f0;">🧾 ЧЕК</button></div>
-                     </div>`;
-        });
-        historyDiv.innerHTML = html;
-        document.querySelectorAll(".delete-order").forEach(btn => {
-            btn.onclick = () => deleteOrderById(parseInt(btn.getAttribute("data-id")));
-        });
-        document.querySelectorAll(".print-order-history").forEach(btn => {
-            btn.onclick = () => {
-                let id = parseInt(btn.getAttribute("data-id"));
-                let ord = allOrders.find(o => o.id === id);
-                if(ord) showReceipt(ord);
-            };
-        });
-    }
-
-    function deleteOrderById(id) {
-        let order = allOrders.find(o => o.id === id);
-        if(!order) return;
-        if(currentUser.role !== "admin" && order.operator !== currentUser.name) { alert("Нельзя удалить чужой заказ"); return; }
-        allOrders = allOrders.filter(o => o.id !== id);
-        saveAll();
-        renderStatsAndHistory();
-        showStatus("Заказ удален");
-    }
-
+    
     function renderCart() {
-        let subtotal = cart.reduce((s,i) => s + (i.quantity * i.unitPrice), 0);
-        let discount = 0;
-        if(currentDiscountPercent > 0) discount = subtotal * currentDiscountPercent / 100;
-        else if(currentDiscountAmount > 0) discount = Math.min(currentDiscountAmount, subtotal);
-        let finalTotal = subtotal - discount;
-        document.getElementById("cartSubtotal").innerText = subtotal.toFixed(2) + " ₽";
-        if(discount > 0) {
-            document.getElementById("discountRow").style.display = "flex";
-            document.getElementById("cartDiscount").innerHTML = `-${discount.toFixed(2)} ₽`;
-        } else document.getElementById("discountRow").style.display = "none";
-        document.getElementById("cartTotal").innerHTML = finalTotal.toFixed(2) + " ₽";
-        document.getElementById("cartCount").innerText = cart.length + " поз.";
-
         let container = document.getElementById("cartItemsList");
-        if(cart.length === 0) { container.innerHTML = "<div style='padding:12px; text-align:center;'>корзина пуста</div>"; return; }
+        let subtotal = 0;
         let html = "";
         cart.forEach((item, idx) => {
-            html += `<div class="cart-item"><div><strong>${item.service}</strong>  x${item.quantity}</div><div>${item.unitPrice}₽ = ${item.quantity*item.unitPrice}₽ <button class="remove-cart-btn" data-idx="${idx}" style="background:#cbd5e1; border:none; border-radius:40px; padding:2px 12px;">✕</button></div></div>`;
+            let sum = item.price * item.quantity;
+            subtotal += sum;
+            html += `<div class="cart-item">
+                        <div><strong>${item.name}</strong> x${item.quantity}</div>
+                        <div>${sum} ₽ <button class="remove-item" data-idx="${idx}" style="background:#fee2e2; border:none; border-radius:40px; padding:4px 12px;">✕</button></div>
+                     </div>`;
         });
-        container.innerHTML = html;
-        document.querySelectorAll(".remove-cart-btn").forEach(btn => {
-            btn.onclick = () => {
-                let idx = parseInt(btn.getAttribute("data-idx"));
-                cart.splice(idx,1);
-                renderCart();
-                showStatus("товар удален");
-            };
+        container.innerHTML = html || "<div style='padding:20px;text-align:center;'>Корзина пуста</div>";
+        document.querySelectorAll(".remove-item").forEach(btn => {
+            btn.onclick = () => { let idx = parseInt(btn.getAttribute("data-idx")); cart.splice(idx,1); renderCart(); };
         });
+        
+        let discount = 0;
+        if(discountPct > 0) discount = subtotal * discountPct / 100;
+        else if(discountAmt > 0) discount = Math.min(discountAmt, subtotal);
+        let finalTotal = subtotal - discount;
+        document.getElementById("cartSubtotal").innerText = subtotal + " ₽";
+        if(discount > 0) {
+            document.getElementById("discountLine").style.display = "flex";
+            document.getElementById("cartDiscount").innerText = discount + " ₽";
+        } else document.getElementById("discountLine").style.display = "none";
+        document.getElementById("cartTotal").innerHTML = finalTotal + " ₽";
     }
-
-    function addToCart() {
-        let service = document.getElementById("serviceType").value;
-        let qty = parseInt(document.getElementById("quantity").value);
-        let price = parseFloat(document.getElementById("unitPrice").value);
-        if(!service || qty<1 || price<=0) { alert("заполните поля"); return; }
-        cart.push({ service, quantity:qty, unitPrice:price });
-        renderCart();
-        showStatus("добавлено");
-        document.getElementById("quantity").value = "1";
-        if(services[0]) document.getElementById("unitPrice").value = services[0].price;
-    }
+    
     function applyDiscount() {
-        let pct = parseFloat(document.getElementById("discountPercent").value) || 0;
-        let amt = parseFloat(document.getElementById("discountAmount").value) || 0;
-        if(pct>0 && amt>0) { alert("выберите один тип скидки"); return; }
-        currentDiscountPercent = pct;
-        currentDiscountAmount = amt;
+        discountPct = parseFloat(document.getElementById("discountPercent").value) || 0;
+        discountAmt = parseFloat(document.getElementById("discountAmount").value) || 0;
+        if(discountPct && discountAmt) { alert("Выберите один тип скидки"); return; }
         renderCart();
-        showStatus("скидка применена");
     }
+    
     function completeOrder() {
-        if(cart.length === 0) { alert("корзина пуста"); return; }
-        let client = document.getElementById("clientName").value.trim();
-        if(client === "") client = "Клиент";
+        if(cart.length === 0) { alert("Корзина пуста"); return; }
+        let client = document.getElementById("clientName").value.trim(); if(!client) client = "Клиент";
         let comment = document.getElementById("orderComment").value;
-        let payment = document.querySelector('input[name="paymentMethod"]:checked').value;
-        let subtotal = cart.reduce((s,i) => s + (i.quantity * i.unitPrice), 0);
+        let payment = document.querySelector('input[name="payment"]:checked').value;
+        let subtotal = cart.reduce((s,i)=> s + i.price*i.quantity, 0);
         let discount = 0, discPct = 0;
-        if(currentDiscountPercent > 0) { discount = subtotal * currentDiscountPercent / 100; discPct = currentDiscountPercent; }
-        else if(currentDiscountAmount > 0) discount = Math.min(currentDiscountAmount, subtotal);
+        if(discountPct>0) { discount = subtotal*discountPct/100; discPct=discountPct; }
+        else if(discountAmt>0) discount = Math.min(discountAmt, subtotal);
         let finalTotal = subtotal - discount;
         let newOrder = {
-            id: Date.now(),
-            client, items: [...cart], subtotal, discount, discountPercent: discPct,
+            id: Date.now(), client, items: [...cart], subtotal, discount, discountPercent: discPct,
             finalTotal, paymentMethod: payment, comment, date: new Date().toLocaleString(),
             operator: currentUser.name
         };
         allOrders.push(newOrder);
-        saveAll();
-        showReceipt(newOrder);
-        cart = []; currentDiscountPercent=0; currentDiscountAmount=0;
+        saveOrders();
+        cart = []; discountPct=0; discountAmt=0;
         document.getElementById("discountPercent").value = 0;
         document.getElementById("discountAmount").value = 0;
         document.getElementById("clientName").value = "";
         document.getElementById("orderComment").value = "";
         renderCart();
-        renderStatsAndHistory();
-        showStatus("заказ оформлен");
+        renderStatsHistory();
+        alert(`Заказ оформлен! Сумма: ${finalTotal} ₽`);
     }
-    function clearCart() { if(cart.length && confirm("очистить?")) { cart = []; currentDiscountPercent=0; currentDiscountAmount=0; renderCart(); showStatus("корзина очищена"); } }
-    function exportToExcel() {
+    
+    function getMyOrders() { return currentUser.role === "admin" ? allOrders : allOrders.filter(o => o.operator === currentUser.name); }
+    
+    function renderStatsHistory() {
+        let myOrders = getMyOrders();
+        let revenue = myOrders.reduce((s,o)=>s+o.finalTotal,0);
+        document.getElementById("currentOperatorName").innerHTML = `${currentUser.name} ${currentUser.role==="admin"?"👑":""}`;
+        let historyDiv = document.getElementById("historyList");
+        if(myOrders.length===0) { historyDiv.innerHTML = "<div style='padding:20px;text-align:center;'>Нет заказов</div>"; return; }
+        let html = "";
+        [...myOrders].reverse().forEach(o => {
+            let itemsShort = o.items.map(i=>`${i.name} x${i.quantity}`).join(", ");
+            html += `<div style="border-bottom:1px solid #e2e8f0; padding:12px;">
+                        <div><strong>${o.client}</strong> | ${o.date} | ${o.finalTotal} ₽ | ${o.paymentMethod==="cash"?"💵":"💳"}</div>
+                        <div style="font-size:12px;">${itemsShort}</div>
+                        <div>${o.comment ? `📝 ${o.comment}` : ""}</div>
+                        <button class="deleteOrderBtn" data-id="${o.id}" style="background:#fee2e2; border:none; border-radius:30px; padding:4px 16px; margin-top:6px;">Удалить</button>
+                     </div>`;
+        });
+        historyDiv.innerHTML = html;
+        document.querySelectorAll(".deleteOrderBtn").forEach(btn => {
+            btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); allOrders = allOrders.filter(o => o.id !== id); saveOrders(); renderStatsHistory(); };
+        });
+    }
+    
+    function exportExcel() {
         let my = getMyOrders();
-        if(!my.length) { alert("нет данных"); return; }
-        let data = [["ID","Клиент","Услуги","Сумма","Скидка","Итого","Оплата","Дата","Оператор","Комментарий"]];
+        if(!my.length) return alert("Нет данных");
+        let data = [["ID","Клиент","Услуги","Сумма","Скидка","Итого","Оплата","Дата","Комментарий"]];
         my.forEach(o => {
-            let serv = o.items.map(i=>`${i.service} x${i.quantity}`).join(";");
-            data.push([o.id, o.client, serv, o.subtotal, o.discount, o.finalTotal, o.paymentMethod==="cash"?"Наличные":"Карта", o.date, o.operator, o.comment||""]);
+            let serv = o.items.map(i=>`${i.name} x${i.quantity}`).join(";");
+            data.push([o.id, o.client, serv, o.subtotal, o.discount, o.finalTotal, o.paymentMethod==="cash"?"Наличные":"Карта", o.date, o.comment||""]);
         });
         let ws = XLSX.utils.aoa_to_sheet(data);
         let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, currentUser.name);
+        XLSX.utils.book_append_sheet(wb, ws, "A4_Принт");
         XLSX.writeFile(wb, `A4print_${currentUser.name}.xlsx`);
-        showStatus("Excel готов");
     }
-    function clearMyOrders() {
-        if(!confirm("Удалить ВСЕ свои заказы?")) return;
-        if(currentUser.role === "admin") allOrders = [];
-        else allOrders = allOrders.filter(o => o.operator !== currentUser.name);
-        saveAll();
-        renderStatsAndHistory();
-        showStatus("очищено");
-    }
-    function showReceipt(order) {
-        let itemsHtml = order.items.map(i => `${i.service} x${i.quantity} = ${i.quantity*i.unitPrice}₽`).join("<br>");
-        let modalDiv = document.getElementById("receiptContent");
-        modalDiv.innerHTML = `<div style="text-align:center;font-family:monospace;">
-            <strong>A4-ПРИНТ</strong><br>${order.date}<hr>
-            ${order.client}<br>${itemsHtml}<hr>
-            Подытог: ${order.subtotal}₽<br>${order.discount?`Скидка: -${order.discount}₽<br>`:""}
-            <strong>ИТОГО: ${order.finalTotal}₽</strong><br>
-            Оплата: ${order.paymentMethod === "cash" ? "НАЛИЧНЫЕ" : "КАРТА"}<br>
-            ${order.comment?`Комм: ${order.comment}`:""}<hr>СПАСИБО!
-        </div>`;
-        document.getElementById("receiptModal").style.display = "flex";
-        lastReceipt = order;
-    }
-    function printReceipt() {
-        let content = document.getElementById("receiptContent").innerHTML;
-        let w = window.open('','_blank');
-        w.document.write(`<html><head><title>ЧЕК A4</title><style>body{font-family:monospace;padding:20px;}</style></head><body>${content}</body></html>`);
-        w.document.close(); w.print();
-    }
-    function printLastReceipt() { if(lastReceipt) showReceipt(lastReceipt); else alert("нет чека"); }
-
-    function showStatus(msg) { let div=document.getElementById("syncStatus"); if(!div){ let s=document.createElement("div"); s.id="syncStatus"; s.style="position:fixed;bottom:20px;right:20px;background:#1e293b;color:white;padding:8px 16px;border-radius:40px;"; document.body.appendChild(s);} let d=document.getElementById("syncStatus"); d.innerText=msg; setTimeout(()=>{if(d.innerText===msg) d.innerText="💾";},1800); }
-
-    // админка статистика
-    function getOperatorsStats() {
-        let res = {};
-        for(let [login,data] of Object.entries(operators)) res[login] = { name:data.name, orders:0, revenue:0, avg:0 };
+    
+    // ========== АДМИНКА: РЕДАКТОР КНОПОК И ОПЕРАТОРОВ ==========
+    function renderAdminPanel() {
+        let stats = {};
+        for(let [login,data] of Object.entries(operators)) stats[login] = { name: data.name, orders:0, revenue:0 };
         allOrders.forEach(o => {
-            let opLogin = Object.keys(operators).find(l => operators[l].name === o.operator);
-            if(opLogin && res[opLogin]) { res[opLogin].orders++; res[opLogin].revenue += o.finalTotal; }
+            let op = Object.keys(operators).find(l => operators[l].name === o.operator);
+            if(op) { stats[op].orders++; stats[op].revenue += o.finalTotal; }
         });
-        for(let l in res) if(res[l].orders) res[l].avg = Math.round(res[l].revenue/res[l].orders);
-        return res;
-    }
-    function renderAdmin() {
-        let stats = getOperatorsStats();
-        let statsDiv = document.getElementById("operatorsStatsList");
-        statsDiv.innerHTML = "<h3>📊 ОПЕРАТОРЫ</h3>";
-        for(let [login,st] of Object.entries(stats)) {
-            statsDiv.innerHTML += `<div style="border-bottom:1px solid #ccc; padding:6px;"><strong>${st.name}</strong> | заказы:${st.orders} | выручка:${st.revenue}₽ | ср.чек:${st.avg}₽</div>`;
-        }
-        let servDiv = document.getElementById("servicesList");
-        servDiv.innerHTML = "";
+        let statsHtml = "";
+        for(let [login,st] of Object.entries(stats)) statsHtml += `<div><strong>${st.name}</strong> | заказов: ${st.orders} | выручка: ${st.revenue}₽</div>`;
+        document.getElementById("operatorsStats").innerHTML = statsHtml;
+        
+        let adminServicesDiv = document.getElementById("adminServicesList");
+        adminServicesDiv.innerHTML = "";
         services.forEach(s => {
-            servDiv.innerHTML += `<div style="display:flex; justify-content:space-between; padding:6px;"><span>${s.name}</span><span>${s.price}₽</span><button class="editServ" data-id="${s.id}" data-price="${s.price}">✏️</button><button class="delServ" data-id="${s.id}">🗑</button></div>`;
+            adminServicesDiv.innerHTML += `<div style="display:flex; gap:12px; align-items:center; margin:8px 0;">
+                <span style="flex:2;">${s.emoji || "📄"} ${s.name}</span>
+                <input type="number" id="price_${s.id}" value="${s.price}" style="width:80px;">
+                <input type="text" id="emoji_${s.id}" value="${s.emoji || "📄"}" style="width:60px;">
+                <button class="updateServiceBtn" data-id="${s.id}">💾</button>
+                <button class="deleteServiceBtn" data-id="${s.id}" style="background:#fee2e2;">🗑</button>
+            </div>`;
         });
-        document.querySelectorAll(".delServ").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); if(services.length<=1) {alert("нельзя удалить последнюю"); return;} services = services.filter(s => s.id !== id); saveAll(); renderAdmin(); updateServicesSelect(); showStatus("услуга удалена"); });
-        document.querySelectorAll(".editServ").forEach(btn => { btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); let newP = prompt("новая цена", btn.getAttribute("data-price")); if(newP && !isNaN(newP)) { let s = services.find(s => s.id === id); if(s) s.price = parseInt(newP); saveAll(); renderAdmin(); updateServicesSelect(); showStatus("цена обновлена"); } }; });
+        document.querySelectorAll(".updateServiceBtn").forEach(btn => {
+            btn.onclick = () => {
+                let id = parseInt(btn.getAttribute("data-id"));
+                let s = services.find(x=>x.id===id);
+                if(s) { s.price = parseInt(document.getElementById(`price_${id}`).value); s.emoji = document.getElementById(`emoji_${id}`).value; saveServices(); renderServicesGrid(); renderAdminPanel(); }
+            };
+        });
+        document.querySelectorAll(".deleteServiceBtn").forEach(btn => {
+            btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); if(services.length<=1) { alert("Нельзя удалить последнюю услугу"); return; } services = services.filter(x=>x.id!==id); saveServices(); renderServicesGrid(); renderAdminPanel(); };
+        });
+        
         let opDiv = document.getElementById("operatorsList");
         opDiv.innerHTML = "";
         for(let [login,data] of Object.entries(operators)) {
             if(login === "admin") continue;
-            opDiv.innerHTML += `<div style="display:flex; justify-content:space-between; padding:6px;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="новый пароль" style="width:100px;"><button class="chPass" data-login="${login}">🔑</button><button class="delOp" data-login="${login}">🗑</button></div>`;
+            opDiv.innerHTML += `<div style="display:flex; gap:12px; margin:8px 0;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="новый пароль"><button class="changePassBtn" data-login="${login}">🔑</button><button class="delOpBtn" data-login="${login}" style="background:#fee2e2;">🗑</button></div>`;
         }
-        document.querySelectorAll(".chPass").forEach(btn => { btn.onclick = () => { let log = btn.getAttribute("data-login"); let newP = document.getElementById(`pass_${log}`).value; if(newP) { operators[log].password = newP; saveAll(); showStatus("пароль изменен"); } else alert("введите пароль"); }; });
-        document.querySelectorAll(".delOp").forEach(btn => { btn.onclick = () => { let log = btn.getAttribute("data-login"); if(confirm(`удалить ${operators[log].name}?`)) { delete operators[log]; saveAll(); renderAdmin(); showStatus("оператор удален"); } }; });
+        document.querySelectorAll(".changePassBtn").forEach(btn => {
+            btn.onclick = () => { let log = btn.getAttribute("data-login"); let newP = document.getElementById(`pass_${log}`).value; if(newP) { operators[log].password = newP; saveOperators(); alert("Пароль изменен"); } };
+        });
+        document.querySelectorAll(".delOpBtn").forEach(btn => {
+            btn.onclick = () => { let log = btn.getAttribute("data-login"); if(confirm("Удалить?")) { delete operators[log]; saveOperators(); renderAdminPanel(); } };
+        });
     }
-
-    // вход
-    function login(login,pwd) {
+    
+    // ========== АВТОРИЗАЦИЯ ==========
+    function login(login, pwd) {
         let u = operators[login.toLowerCase()];
         if(u && u.password === pwd) {
-            currentUser = {...u, username:login.toLowerCase()};
+            currentUser = { ...u, username: login.toLowerCase() };
             localStorage.setItem("a4print_current_user", JSON.stringify(currentUser));
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("mainContent").style.display = "block";
             loadData();
             return true;
         }
-        document.getElementById("loginError").innerText = "неверные данные";
+        document.getElementById("loginError").innerText = "Неверный логин/пароль";
         return false;
     }
     function logout() { currentUser = null; localStorage.removeItem("a4print_current_user"); location.reload(); }
-
+    
     document.addEventListener("DOMContentLoaded", () => {
         let saved = localStorage.getItem("a4print_current_user");
         if(saved) {
             try {
                 currentUser = JSON.parse(saved);
-                if(operators[currentUser.username]) { document.getElementById("loginOverlay").style.display = "none"; document.getElementById("mainContent").style.display = "block"; loadData(); }
-                else logout();
+                if(operators[currentUser.username]) {
+                    document.getElementById("loginOverlay").style.display = "none";
+                    document.getElementById("mainContent").style.display = "block";
+                    loadData();
+                } else logout();
             } catch(e) { logout(); }
         }
         document.getElementById("loginBtn").onclick = () => login(document.getElementById("loginUsername").value, document.getElementById("loginPassword").value);
         document.getElementById("logoutBtn").onclick = logout;
-        document.getElementById("addToCartBtn").onclick = addToCart;
+        document.getElementById("addToCartBtn")?.addEventListener("click", () => { let s = services[0]; if(s) addToCart(s); });
         document.getElementById("completeOrderBtn").onclick = completeOrder;
-        document.getElementById("clearCartBtn").onclick = clearCart;
+        document.getElementById("clearCartBtn").onclick = () => { cart=[]; discountPct=0; discountAmt=0; renderCart(); };
         document.getElementById("applyDiscountBtn").onclick = applyDiscount;
-        document.getElementById("exportExcelBtn").onclick = exportToExcel;
-        document.getElementById("clearAllBtn").onclick = clearMyOrders;
+        document.getElementById("exportExcelBtn").onclick = exportExcel;
+        
         let adminModal = document.getElementById("adminModal");
-        document.getElementById("adminPanelBtn")?.addEventListener("click", () => { renderAdmin(); adminModal.style.display = "flex"; });
-        document.getElementById("closeModalBtn").onclick = () => adminModal.style.display = "none";
+        document.getElementById("adminPanelBtn").onclick = () => { renderAdminPanel(); adminModal.style.display = "flex"; };
+        document.getElementById("closeAdminModal").onclick = () => adminModal.style.display = "none";
         document.getElementById("addServiceBtn").onclick = () => {
             let name = document.getElementById("newServiceName").value.trim();
             let price = parseInt(document.getElementById("newServicePrice").value);
-            if(name && price>0) { services.push({ id:Date.now(), name, price }); saveAll(); renderAdmin(); updateServicesSelect(); showStatus("услуга добавлена"); }
-            else alert("название и цена");
+            let emoji = document.getElementById("newServiceEmoji").value.trim() || "📄";
+            if(name && price>0) {
+                let newId = Date.now();
+                services.push({ id: newId, name, price, emoji, order: services.length });
+                saveServices();
+                renderServicesGrid();
+                renderAdminPanel();
+                document.getElementById("newServiceName").value = "";
+                document.getElementById("newServicePrice").value = "";
+            } else alert("Введите название и цену");
         };
         document.getElementById("addOperatorBtn").onclick = () => {
-            let login = document.getElementById("newOperatorLogin").value.trim().toLowerCase();
-            let name = document.getElementById("newOperatorName").value.trim();
-            let pass = document.getElementById("newOperatorPass").value.trim();
-            if(login && name && pass) { if(operators[login]) alert("уже есть"); else { operators[login] = { password:pass, name, role:"operator" }; saveAll(); renderAdmin(); showStatus("оператор добавлен"); } }
-            else alert("все поля");
+            let login = document.getElementById("newOpLogin").value.trim().toLowerCase();
+            let name = document.getElementById("newOpName").value.trim();
+            let pass = document.getElementById("newOpPass").value.trim();
+            if(login && name && pass) {
+                if(operators[login]) { alert("Логин уже есть"); return; }
+                operators[login] = { password: pass, name, role: "operator" };
+                saveOperators();
+                renderAdminPanel();
+                document.getElementById("newOpLogin").value = "";
+                document.getElementById("newOpName").value = "";
+                document.getElementById("newOpPass").value = "";
+            } else alert("Заполните все поля");
         };
-        let receiptModal = document.getElementById("receiptModal");
-        document.getElementById("closeReceiptBtn")?.addEventListener("click", () => receiptModal.style.display = "none");
-        document.getElementById("printReceiptModalBtn").onclick = printReceipt;
-        document.getElementById("printReceiptBtn")?.addEventListener("click", printLastReceipt);
-        window.onclick = (e) => { if(e.target === adminModal) adminModal.style.display = "none"; if(e.target === receiptModal) receiptModal.style.display = "none"; };
-        document.getElementById("serviceType").onchange = () => {
-            let s = services.find(s => s.name === document.getElementById("serviceType").value);
-            if(s) document.getElementById("unitPrice").value = s.price;
-        };
+        window.onclick = (e) => { if(e.target === adminModal) adminModal.style.display = "none"; };
     });
 </script>
 </body>
