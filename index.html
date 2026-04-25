@@ -42,7 +42,8 @@
         body.dark .cart-panel,
         body.dark .history-section,
         body.dark .shift-bar,
-        body.dark .instruction-box {
+        body.dark .instruction-box,
+        body.dark .fast-service-card {
             background: #1E2A3A;
             border-color: #2D3A4A;
         }
@@ -66,7 +67,7 @@
             margin: 0 auto;
         }
 
-        /* ========== ШАПКА ========== */
+        /* ШАПКА */
         .header {
             display: flex;
             justify-content: space-between;
@@ -113,7 +114,6 @@
             color: var(--text-gray);
         }
 
-        /* ========== ДЕСКТОПНОЕ МЕНЮ ========== */
         .user-bar {
             display: flex;
             gap: 12px;
@@ -122,11 +122,9 @@
             padding: 6px 20px;
             border-radius: 60px;
         }
-        body.dark .user-bar {
-            background: #0F1722;
-        }
+        body.dark .user-bar { background: #0F1722; }
 
-        /* ========== БУРГЕР ========== */
+        /* БУРГЕР */
         .burger-btn {
             display: none;
             background: none;
@@ -137,9 +135,7 @@
             border-radius: 50%;
             color: var(--primary-black);
         }
-        body.dark .burger-btn {
-            color: white;
-        }
+        body.dark .burger-btn { color: white; }
 
         .burger-menu {
             position: absolute;
@@ -156,19 +152,9 @@
             z-index: 200;
             border: 1px solid var(--border-light);
         }
-        body.dark .burger-menu {
-            background: #1E2A3A;
-            border-color: #2D3A4A;
-        }
-        .burger-menu.show {
-            display: flex;
-        }
-        .burger-menu button {
-            width: 100%;
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-        }
+        body.dark .burger-menu { background: #1E2A3A; }
+        .burger-menu.show { display: flex; }
+        .burger-menu button { width: 100%; text-align: center; padding: 10px; font-size: 14px; }
 
         button {
             background: var(--primary-black);
@@ -183,16 +169,8 @@
         }
         button:hover { transform: translateY(-1px); filter: brightness(0.92); }
 
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid var(--border-light);
-            color: var(--text-dark);
-        }
-        body.dark .btn-outline {
-            border-color: #4A5A6E;
-            color: #E2E8F0;
-        }
-
+        .btn-outline { background: transparent; border: 1.5px solid var(--border-light); color: var(--text-dark); }
+        body.dark .btn-outline { border-color: #4A5A6E; color: #E2E8F0; }
         .btn-primary { background: var(--primary-blue); }
         .btn-success { background: #1F8A5C; }
         .btn-danger { background: #C2412C; }
@@ -212,7 +190,7 @@
             border-left: 4px solid var(--primary-blue);
         }
 
-        /* ========== СВОРАЧИВАЕМАЯ ИНСТРУКЦИЯ ========== */
+        /* ИНСТРУКЦИЯ СВОРАЧИВАЕМАЯ */
         .instruction-box {
             background: var(--card-white);
             border-radius: 24px;
@@ -228,46 +206,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            user-select: none;
         }
-        body.dark .instruction-header {
-            background: #0F1722;
-        }
-        .instruction-header h3 {
-            font-size: 15px;
-            color: var(--primary-blue);
-        }
-        .toggle-icon {
-            font-size: 20px;
-            transition: transform 0.2s;
-        }
+        body.dark .instruction-header { background: #0F1722; }
+        .instruction-header h3 { font-size: 15px; color: var(--primary-blue); }
+        .toggle-icon { font-size: 20px; }
         .instruction-content {
             padding: 0 24px;
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out;
         }
-        .instruction-content.open {
-            max-height: 500px;
-            padding: 18px 24px 24px;
-        }
-        .instruction-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            justify-content: space-between;
-        }
-        .instruction-col {
-            flex: 1;
-            min-width: 200px;
-        }
-        .instruction-col p {
-            margin: 8px 0;
-            line-height: 1.4;
-            font-size: 13px;
-        }
+        .instruction-content.open { max-height: 500px; padding: 18px 24px 24px; }
+        .instruction-grid { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; }
+        .instruction-col { flex: 1; min-width: 200px; }
+        .instruction-col p { margin: 8px 0; line-height: 1.4; font-size: 13px; }
 
-        /* ========== ОСНОВНАЯ СЕТКА ========== */
+        /* ОСНОВНАЯ СЕТКА */
         .dashboard {
             display: flex;
             gap: 24px;
@@ -309,6 +263,7 @@
             margin-bottom: 20px;
         }
 
+        /* СЕТКА УСЛУГ — мобильная версия 2 в ряд */
         .services-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -354,6 +309,28 @@
             font-size: 12px;
             font-weight: 600;
             color: white;
+        }
+
+        /* БЛОК БЫСТРОЙ УСЛУГИ */
+        .fast-service-card {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 12px;
+            margin-top: 16px;
+            border: 1px dashed var(--primary-blue);
+        }
+        .fast-service-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .fast-service-row input {
+            flex: 1;
+            min-width: 120px;
+        }
+        .fast-service-row button {
+            white-space: nowrap;
         }
 
         .cart-list {
@@ -415,11 +392,7 @@
             font-weight: 600;
             font-size: 14px;
         }
-        .grand-total {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--primary-blue);
-        }
+        .grand-total { font-size: 22px; font-weight: 800; color: var(--primary-blue); }
 
         .row-2 {
             display: flex;
@@ -428,17 +401,8 @@
             flex-wrap: wrap;
             align-items: flex-end;
         }
-        .discount-group {
-            flex: 1;
-            min-width: 100px;
-        }
-        .discount-group label {
-            font-size: 11px;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 4px;
-            color: var(--text-gray);
-        }
+        .discount-group { flex: 1; min-width: 100px; }
+        .discount-group label { font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px; color: var(--text-gray); }
 
         .history-list {
             display: flex;
@@ -504,20 +468,27 @@
             font-family: monospace;
         }
 
+        /* МОБИЛЬНАЯ АДАПТАЦИЯ — 2 УСЛУГИ В РЯД */
         @media (max-width: 850px) {
             body { padding: 12px; }
-            .user-bar {
-                display: none !important;
+            .user-bar { display: none !important; }
+            .burger-btn { display: block; }
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px;
             }
-            .burger-btn {
-                display: block;
-            }
+            .service-card { padding: 10px; }
+            .service-name { font-size: 12px; }
+            .service-price { font-size: 15px; }
         }
 
         @media (min-width: 851px) {
-            .burger-menu {
-                display: none !important;
-            }
+            .burger-menu { display: none !important; }
+        }
+
+        @media (max-width: 480px) {
+            .services-grid { gap: 8px; }
+            .service-card { padding: 8px; }
         }
     </style>
 </head>
@@ -580,29 +551,26 @@
             <div class="instruction-grid">
                 <div class="instruction-col">
                     <p><strong>🔹 Добавление заказа</strong><br>
-                    1. Выберите услугу → введите количество вручную → «Добавить»<br>
-                    2. При необходимости: скидка %, скидка ₽, комментарий<br>
-                    3. Выберите оплату (наличные / карта) → «Оформить»</p>
-                    <p><strong>🔹 Корзина</strong><br>
-                    • Можно удалить позицию кнопкой «Удалить»<br>
-                    • Применить скидку кнопкой «Применить»</p>
+                    1. Выберите услугу → введите количество → «Добавить»<br>
+                    2. Либо используйте «➕ Быстрая услуга» (любое название и цена)<br>
+                    3. При необходимости: скидка %, скидка ₽, комментарий<br>
+                    4. Выберите оплату → «Оформить»</p>
                 </div>
                 <div class="instruction-col">
                     <p><strong>🔹 Отчёты и печать</strong><br>
-                    • «Отчёт» — PDF со всеми заказами за смену<br>
-                    • «Бланк заказа» — фирменный бланк на А4 (2 экземпляра)<br>
+                    • «Отчёт» — PDF за смену<br>
+                    • «Бланк заказа» — А4 (2 экземпляра)<br>
                     • «Excel» — выгрузка в Excel</p>
                     <p><strong>🔹 Смена</strong><br>
-                    Перед началом работы → «Открыть смену»<br>
-                    После завершения → «Закрыть смену» (данные сохранятся)</p>
+                    Перед работой → «Открыть смену»<br>
+                    После завершения → «Закрыть смену»</p>
                 </div>
                 <div class="instruction-col">
                     <p><strong>🔹 Администрирование</strong><br>
                     • Управление услугами (цена, название)<br>
-                    • Управление операторами (логин/пароль)<br>
-                    • Просмотр статистики по операторам</p>
-                    <p><strong>💾 Все данные сохраняются в браузере.</strong><br>
-                    Регулярно экспортируйте отчёты и бланки для бухгалтерии.</p>
+                    • Управление операторами<br>
+                    • Статистика по операторам</p>
+                    <p><strong>💾 Все данные сохраняются в браузере.</strong></p>
                 </div>
             </div>
         </div>
@@ -612,6 +580,15 @@
         <div class="card">
             <div class="panel-title">📋 УСЛУГИ</div>
             <div id="servicesGrid" class="services-grid"></div>
+            
+            <!-- БЛОК БЫСТРОЙ УСЛУГИ (для любого оператора) -->
+            <div class="fast-service-card">
+                <div class="fast-service-row">
+                    <input type="text" id="fastServiceName" placeholder="Название услуги (любое)" style="flex:2;">
+                    <input type="number" id="fastServicePrice" placeholder="Цена ₽" style="flex:1;" value="0" step="10">
+                    <button id="addFastServiceBtn" class="btn-primary" style="white-space: nowrap;">➕ Быстрая услуга</button>
+                </div>
+            </div>
         </div>
 
         <div class="cart-panel">
@@ -665,6 +642,7 @@
 
 <div class="print-blank" id="printBlankContainer"></div>
 
+<!-- МОДАЛКИ АДМИНКИ И СТАТИСТИКИ (код тот же, сокращён) -->
 <div id="adminModal" class="modal">
     <div class="modal-card">
         <div style="display:flex; justify-content:space-between;">
@@ -790,6 +768,21 @@
         if(existing) existing.qty += qty;
         else cart.push({ id: serviceId, name: service.name, price: service.price, qty: qty });
         if(qtyInput) qtyInput.value = "0";
+        renderCart();
+    }
+
+    // Быстрая услуга (любой оператор)
+    function addFastService() {
+        let name = document.getElementById("fastServiceName").value.trim();
+        let price = parseFloat(document.getElementById("fastServicePrice").value);
+        if(!name) { alert("Введите название услуги"); return; }
+        if(isNaN(price) || price <= 0) { alert("Введите корректную цену"); return; }
+        let qty = 1;
+        let existing = cart.find(i => i.name === name && i.isFast === true);
+        if(existing) existing.qty += qty;
+        else cart.push({ id: Date.now(), name: name, price: price, qty: qty, isFast: true });
+        document.getElementById("fastServiceName").value = "";
+        document.getElementById("fastServicePrice").value = "";
         renderCart();
     }
 
@@ -1004,6 +997,7 @@
         document.getElementById("pdfReportBtn").onclick=generatePDFReport;
         document.getElementById("shiftToggleBtn").onclick=toggleShift;
         document.getElementById("printBlankBtn").onclick=printOrderBlank;
+        document.getElementById("addFastServiceBtn").onclick=addFastService;
         let admModal=document.getElementById("adminModal");
         document.getElementById("adminPanelBtn").onclick=()=>{ renderAdmin(); admModal.style.display="flex"; };
         document.getElementById("closeAdminModal").onclick=()=>admModal.style.display="none";
