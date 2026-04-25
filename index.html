@@ -26,7 +26,6 @@
             color: #e9edf2;
         }
 
-        /* Карточки и панели */
         .card, .cart-panel, .history-section {
             background: white;
             border-radius: 32px;
@@ -46,7 +45,6 @@
             margin: 0 auto;
         }
 
-        /* Шапка */
         .header {
             display: flex;
             justify-content: space-between;
@@ -141,8 +139,8 @@
         .btn-danger { background: #c2412c; }
         .btn-danger:hover { background: #9c2e1c; }
         .btn-warning { background: #d97706; }
+        .btn-info { background: #3b82f6; }
 
-        /* Строка статуса смены */
         .shift-bar {
             background: white;
             border-radius: 60px;
@@ -161,7 +159,6 @@
             background: #1e293b;
         }
 
-        /* Основная сетка */
         .dashboard {
             display: flex;
             gap: 28px;
@@ -194,7 +191,6 @@
             margin-bottom: 22px;
         }
 
-        /* Сетка услуг */
         .services-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -273,7 +269,6 @@
             font-size: 13px;
         }
 
-        /* КОРЗИНА — стильные карточки */
         .cart-list {
             display: flex;
             flex-direction: column;
@@ -301,11 +296,6 @@
         body.dark .cart-item {
             background: #0f172a;
             border-color: #334155;
-        }
-
-        .cart-item:hover {
-            transform: translateX(4px);
-            border-color: #cbd5e1;
         }
 
         .cart-item-info {
@@ -338,11 +328,6 @@
             font-weight: 600;
         }
 
-        body.dark .remove-btn {
-            background: #3b2a2a;
-        }
-
-        /* Поля ввода */
         input, select, textarea {
             width: 100%;
             padding: 14px 18px;
@@ -360,13 +345,6 @@
             box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.1);
         }
 
-        body.dark input, body.dark select, body.dark textarea {
-            background: #0f172a;
-            border-color: #334155;
-            color: #e9edf2;
-        }
-
-        /* Итоговые линии */
         .total-line {
             display: flex;
             justify-content: space-between;
@@ -374,10 +352,6 @@
             border-top: 1px solid #edf2f7;
             font-weight: 600;
             font-size: 15px;
-        }
-
-        body.dark .total-line {
-            border-top-color: #334155;
         }
 
         .grand-total {
@@ -393,20 +367,6 @@
             flex-wrap: wrap;
         }
 
-        fieldset {
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            padding: 14px 18px;
-            margin: 16px 0;
-        }
-
-        legend {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 0 10px;
-        }
-
-        /* История */
         .history-list {
             display: flex;
             flex-direction: column;
@@ -428,11 +388,6 @@
             border-color: #334155;
         }
 
-        .history-item:hover {
-            transform: translateX(4px);
-        }
-
-        /* Модалка */
         .modal {
             position: fixed;
             top: 0;
@@ -450,8 +405,10 @@
         .modal-card {
             background: white;
             border-radius: 48px;
-            max-width: 600px;
+            max-width: 700px;
             width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
             padding: 32px;
             box-shadow: 0 30px 50px rgba(0,0,0,0.2);
         }
@@ -460,7 +417,33 @@
             background: #1e293b;
         }
 
-        /* PDF */
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 14px;
+            transition: 0.15s;
+            border: 1px solid #eef2f8;
+        }
+
+        body.dark .stat-card {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-weight: 800;
+            font-size: 18px;
+            color: #2c5f8a;
+        }
+
         .pdf-report {
             padding: 24px;
             font-family: monospace;
@@ -472,7 +455,6 @@
         @media (max-width: 900px) {
             body { padding: 16px; }
             .dashboard { flex-direction: column; }
-            .services-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
         }
     </style>
 </head>
@@ -560,24 +542,26 @@
 </div>
 </div>
 
+<!-- АДМИН МОДАЛКА (с отдельной кнопкой статистики) -->
 <div id="adminModal" class="modal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>Администрирование</h2>
-            <button id="closeAdminModal" style="background:none; font-size: 26px;">✕</button>
+            <h2>⚙️ Администрирование</h2>
+            <button id="closeAdminModal" style="background:none; font-size: 28px;">✕</button>
         </div>
-        <h3 style="margin: 20px 0 10px;">Статистика операторов</h3>
-        <div id="operatorsStats"></div>
-        <hr style="margin: 16px 0;">
-        <h3>Услуги</h3>
+        
+        <!-- Новая кнопка для просмотра статистики операторов -->
+        <button id="viewOperatorsStatsBtn" class="btn-info" style="width:100%; margin: 10px 0 20px; background:#3b82f6;">📊 Полная статистика операторов</button>
+        
+        <h3>📋 Управление услугами</h3>
         <div id="adminServicesList"></div>
         <div style="display: flex; gap: 12px; margin-top: 16px;">
-            <input type="text" id="newServiceName" placeholder="Название">
+            <input type="text" id="newServiceName" placeholder="Название услуги">
             <input type="number" id="newServicePrice" placeholder="Цена">
             <button id="addServiceBtn" class="btn-success">Добавить</button>
         </div>
         <hr style="margin: 20px 0;">
-        <h3>Операторы</h3>
+        <h3>👥 Управление операторами</h3>
         <div id="operatorsList"></div>
         <div style="display: flex; gap: 12px; margin-top: 16px;">
             <input type="text" id="newOpLogin" placeholder="Логин">
@@ -585,6 +569,18 @@
             <input type="text" id="newOpPass" placeholder="Пароль">
             <button id="addOperatorBtn" class="btn-success">Добавить</button>
         </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА СТАТИСТИКИ ОПЕРАТОРОВ -->
+<div id="operatorsStatsModal" class="modal">
+    <div class="modal-card" style="max-width: 700px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2>📊 Статистика операторов</h2>
+            <button id="closeStatsModal" style="background:none; font-size: 28px;">✕</button>
+        </div>
+        <div id="operatorsStatsContent"></div>
+        <button id="exportStatsExcelBtn" class="btn-success" style="margin-top: 24px; width:100%;">📎 Экспорт статистики в Excel</button>
     </div>
 </div>
 
@@ -712,6 +708,7 @@
     }
 
     function applyDiscount() { discountPct = parseFloat(document.getElementById("discountPercent").value) || 0; discountAmt = parseFloat(document.getElementById("discountAmount").value) || 0; if (discountPct > 0 && discountAmt > 0) alert("Выберите один тип скидки"); renderCart(); }
+    
     function completeOrder() {
         if (cart.length === 0) { alert("Корзина пуста"); return; }
         if (!shiftOpen || shiftClose) { alert("Смена не открыта! Нажмите «Открыть смену»"); return; }
@@ -731,7 +728,9 @@
         renderCart(); renderHistory();
         alert(`Заказ №${newOrder.id} на ${finalTotal} ₽`);
     }
+    
     function getMyOrders() { return (currentUser.role === "admin") ? allOrders : allOrders.filter(o => o.operator === currentUser.name); }
+    
     function renderHistory() {
         let my = getMyOrders();
         let container = document.getElementById("historyList");
@@ -752,7 +751,72 @@
         container.innerHTML = html;
         document.querySelectorAll(".delete-order").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); allOrders = allOrders.filter(o => o.id !== id); saveOrders(); renderHistory(); });
     }
+    
     function clearMyOrders() { if (confirm("Очистить все свои заказы?")) { if (currentUser.role === "admin") allOrders = []; else allOrders = allOrders.filter(o => o.operator !== currentUser.name); saveOrders(); renderHistory(); } }
+    
+    // ========== ПОЛНАЯ СТАТИСТИКА ПО ОПЕРАТОРАМ ==========
+    function getFullOperatorsStats() {
+        let stats = [];
+        for (let [login, data] of Object.entries(operators)) {
+            let operatorOrders = allOrders.filter(o => o.operator === data.name);
+            let totalRevenue = operatorOrders.reduce((sum, o) => sum + o.finalTotal, 0);
+            let totalCash = operatorOrders.filter(o => o.paymentMethod === "cash").reduce((sum, o) => sum + o.finalTotal, 0);
+            let totalCard = operatorOrders.filter(o => o.paymentMethod === "card").reduce((sum, o) => sum + o.finalTotal, 0);
+            let avgCheck = operatorOrders.length > 0 ? Math.round(totalRevenue / operatorOrders.length) : 0;
+            stats.push({
+                login: login,
+                name: data.name,
+                role: data.role,
+                ordersCount: operatorOrders.length,
+                totalRevenue: totalRevenue,
+                totalCash: totalCash,
+                totalCard: totalCard,
+                avgCheck: avgCheck
+            });
+        }
+        return stats.sort((a,b) => b.totalRevenue - a.totalRevenue);
+    }
+    
+    function showOperatorsStats() {
+        let stats = getFullOperatorsStats();
+        let container = document.getElementById("operatorsStatsContent");
+        let html = `<div style="margin-bottom: 20px;"><strong>Общая статистика по всем операторам</strong></div>`;
+        stats.forEach(stat => {
+            html += `
+                <div class="stat-card">
+                    <div class="stat-row"><span><strong>${escapeHtml(stat.name)}</strong> ${stat.role === "admin" ? "👑" : "👤"}</span><span class="stat-value">${stat.ordersCount} заказов</span></div>
+                    <div class="stat-row"><span>💰 Общая выручка:</span><span class="stat-value">${stat.totalRevenue.toLocaleString()} ₽</span></div>
+                    <div class="stat-row"><span>💵 Наличные:</span><span>${stat.totalCash.toLocaleString()} ₽</span></div>
+                    <div class="stat-row"><span>💳 Карта:</span><span>${stat.totalCard.toLocaleString()} ₽</span></div>
+                    <div class="stat-row"><span>📊 Средний чек:</span><span class="stat-value">${stat.avgCheck.toLocaleString()} ₽</span></div>
+                </div>
+            `;
+        });
+        let totalRevenueAll = stats.reduce((sum, s) => sum + s.totalRevenue, 0);
+        let totalOrdersAll = stats.reduce((sum, s) => sum + s.ordersCount, 0);
+        html += `<div class="stat-card" style="background: #e8f0fe;">
+                    <div class="stat-row"><span><strong>📊 ИТОГО ПО ЦЕНТРУ</strong></span><span class="stat-value">${totalOrdersAll} заказов</span></div>
+                    <div class="stat-row"><span>💰 Общая выручка:</span><span class="stat-value">${totalRevenueAll.toLocaleString()} ₽</span></div>
+                </div>`;
+        container.innerHTML = html;
+        document.getElementById("operatorsStatsModal").style.display = "flex";
+    }
+    
+    function exportStatsToExcel() {
+        let stats = getFullOperatorsStats();
+        let data = [["Оператор", "Роль", "Кол-во заказов", "Выручка (₽)", "Наличные (₽)", "Карта (₽)", "Средний чек (₽)"]];
+        stats.forEach(stat => {
+            data.push([stat.name, stat.role === "admin" ? "Администратор" : "Оператор", stat.ordersCount, stat.totalRevenue, stat.totalCash, stat.totalCard, stat.avgCheck]);
+        });
+        let totalRevenueAll = stats.reduce((sum, s) => sum + s.totalRevenue, 0);
+        let totalOrdersAll = stats.reduce((sum, s) => sum + s.ordersCount, 0);
+        data.push(["ИТОГО", "", totalOrdersAll, totalRevenueAll, "", "", ""]);
+        let ws = XLSX.utils.aoa_to_sheet(data);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Статистика_операторов");
+        XLSX.writeFile(wb, `A4print_статистика_операторов_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+    
     function generatePDFReport() {
         let my = getMyOrders();
         let totalCash = my.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
@@ -762,6 +826,7 @@
         let el = document.createElement('div'); el.innerHTML = html; document.body.appendChild(el);
         html2pdf().set({ margin: 0.5, filename: `A4print_${currentUser.name}_${Date.now()}.pdf`, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
     }
+    
     function exportExcel() {
         let my = getMyOrders();
         if (!my.length) return alert("Нет данных");
@@ -771,12 +836,11 @@
     }
 
     function renderAdmin() {
-        let stats = {}; for (let [login, data] of Object.entries(operators)) stats[login] = { name: data.name, orders: 0, revenue: 0 };
-        allOrders.forEach(o => { let op = Object.keys(operators).find(l => operators[l].name === o.operator); if (op) { stats[op].orders++; stats[op].revenue += o.finalTotal; } });
-        document.getElementById("operatorsStats").innerHTML = Object.entries(stats).map(([_, st]) => `<div style="background:#f8fafc; border-radius:20px; padding:12px; margin-bottom:8px;"><strong>${st.name}</strong> | ${st.orders} зак. | ${st.revenue} ₽</div>`).join("");
         let adminServices = document.getElementById("adminServicesList");
         adminServices.innerHTML = "";
-        services.forEach(s => { adminServices.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:100px;"><button class="updateService" data-id="${s.id}" style="background:#2c5f8a;">💾</button><button class="deleteService" data-id="${s.id}" style="background:#c2412c;">🗑</button></div>`; });
+        services.forEach(s => {
+            adminServices.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:100px;"><button class="updateService" data-id="${s.id}" style="background:#2c5f8a;">💾</button><button class="deleteService" data-id="${s.id}" style="background:#c2412c;">🗑</button></div>`;
+        });
         document.querySelectorAll(".updateService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); let s = services.find(x => x.id === id); if (s) { s.price = parseInt(document.getElementById(`price_${id}`).value); saveServices(); renderServices(); renderAdmin(); } });
         document.querySelectorAll(".deleteService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); if (services.length <= 1) return alert("Нельзя удалить последнюю услугу"); services = services.filter(x => x.id !== id); saveServices(); renderServices(); renderAdmin(); });
         let opsDiv = document.getElementById("operatorsList");
@@ -788,6 +852,7 @@
 
     function initTheme() { if (localStorage.getItem("a4print_theme") === "dark") { document.body.classList.add("dark"); document.getElementById("themeToggleBtn").innerHTML = "☀️ Светлая"; } else document.getElementById("themeToggleBtn").innerHTML = "🌙 Тёмная"; }
     function toggleTheme() { if (document.body.classList.contains("dark")) { document.body.classList.remove("dark"); localStorage.setItem("a4print_theme", "light"); document.getElementById("themeToggleBtn").innerHTML = "🌙 Тёмная"; } else { document.body.classList.add("dark"); localStorage.setItem("a4print_theme", "dark"); document.getElementById("themeToggleBtn").innerHTML = "☀️ Светлая"; } }
+    
     function login(login, pwd) { let u = operators[login.toLowerCase()]; if (u && u.password === pwd) { currentUser = { ...u, username: login.toLowerCase() }; localStorage.setItem("a4print_current_user", JSON.stringify(currentUser)); document.getElementById("loginOverlay").style.display = "none"; document.getElementById("mainContent").style.display = "block"; document.getElementById("currentOperatorName").innerHTML = `${u.name} ${u.role === "admin" ? "👑" : ""}`; loadData(); return true; } document.getElementById("loginError").innerText = "Неверный логин/пароль"; return false; }
     function logout() { currentUser = null; localStorage.removeItem("a4print_current_user"); location.reload(); }
     function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ""; }
@@ -796,6 +861,7 @@
         initTheme();
         let saved = localStorage.getItem("a4print_current_user");
         if (saved) { try { currentUser = JSON.parse(saved); if (operators[currentUser.username]) { document.getElementById("loginOverlay").style.display = "none"; document.getElementById("mainContent").style.display = "block"; document.getElementById("currentOperatorName").innerHTML = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : ""}`; loadData(); } else logout(); } catch(e) { logout(); } }
+        
         document.getElementById("themeToggleBtn").onclick = toggleTheme;
         document.getElementById("loginBtn").onclick = () => login(document.getElementById("loginUsername").value, document.getElementById("loginPassword").value);
         document.getElementById("logoutBtn").onclick = logout;
@@ -806,12 +872,20 @@
         document.getElementById("clearHistoryBtn").onclick = clearMyOrders;
         document.getElementById("pdfReportBtn").onclick = generatePDFReport;
         document.getElementById("shiftToggleBtn").onclick = toggleShift;
+        
         let adminModal = document.getElementById("adminModal");
         document.getElementById("adminPanelBtn").onclick = () => { renderAdmin(); adminModal.style.display = "flex"; };
         document.getElementById("closeAdminModal").onclick = () => adminModal.style.display = "none";
+        
+        // Статистика операторов
+        document.getElementById("viewOperatorsStatsBtn").onclick = showOperatorsStats;
+        document.getElementById("closeStatsModal").onclick = () => document.getElementById("operatorsStatsModal").style.display = "none";
+        document.getElementById("exportStatsExcelBtn").onclick = exportStatsToExcel;
+        
         document.getElementById("addServiceBtn").onclick = () => { let name = document.getElementById("newServiceName").value.trim(); let price = parseInt(document.getElementById("newServicePrice").value); if (name && price > 0) { services.push({ id: Date.now(), name, price }); saveServices(); renderServices(); renderAdmin(); } else alert("Введите название и цену"); };
         document.getElementById("addOperatorBtn").onclick = () => { let login = document.getElementById("newOpLogin").value.trim().toLowerCase(); let name = document.getElementById("newOpName").value.trim(); let pass = document.getElementById("newOpPass").value.trim(); if (login && name && pass) { if (operators[login]) { alert("Логин уже есть"); return; } operators[login] = { password: pass, name, role: "operator" }; saveOperators(); renderAdmin(); } else alert("Заполните все поля"); };
-        window.onclick = (e) => { if (e.target === adminModal) adminModal.style.display = "none"; };
+        
+        window.onclick = (e) => { if (e.target === adminModal) adminModal.style.display = "none"; if (e.target === document.getElementById("operatorsStatsModal")) document.getElementById("operatorsStatsModal").style.display = "none"; };
     });
 </script>
 </body>
