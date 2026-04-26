@@ -107,6 +107,7 @@
         .report-choice-buttons { display: flex; gap: 16px; justify-content: center; margin: 20px 0; }
         .report-choice-buttons button { min-width: 120px; }
         .sync-status { position: fixed; bottom: 20px; right: 20px; background: #1a1a1a; color: white; padding: 8px 16px; border-radius: 40px; font-size: 12px; z-index: 999; }
+        .sync-progress { position: fixed; bottom: 80px; right: 20px; background: #1a1a1a; color: white; padding: 8px 16px; border-radius: 40px; font-size: 12px; z-index: 999; display: none; }
     </style>
 </head>
 <body>
@@ -213,6 +214,7 @@
     </div>
 
     <div id="syncStatus" class="sync-status">💾 Готово</div>
+    <div id="syncProgress" class="sync-progress">🔄 Синхронизация...</div>
 
     <!-- Модалка выбора типа отчёта -->
     <div id="reportChoiceModal" class="report-choice-modal">
@@ -264,7 +266,7 @@
                 <div class="instruction-step"><strong>Статистика за всё время</strong><br>«📊 Статистика операторов».</div>
                 <div class="instruction-step"><strong>Отчёт за любую дату</strong><br>В админ-панели выберите дату → «Показать отчёт» → PDF/Excel.</div>
                 <div class="instruction-step"><strong>Месячный отчёт</strong><br>Выберите месяц и год → экспорт в Excel.</div>
-                <div class="instruction-step"><strong>Google Sheets синхронизация</strong><br>Все заказы автоматически сохраняются в Google Таблицу. Администратор может просматривать их онлайн.</div>
+                <div class="instruction-step"><strong>Синхронизация всех заказов</strong><br>Нажмите «🔄 Синхронизировать все заказы» — все существующие заказы отправятся в Google Таблицу.</div>
             </div>
         </div>
     </div>
@@ -307,6 +309,7 @@
                     <input type="text" id="googleScriptUrl" placeholder="URL веб-приложения Apps Script" style="flex:3;">
                     <button id="saveGoogleSettingsBtn" class="btn-primary">Сохранить настройки</button>
                     <button id="testSyncBtn" class="btn-info">Тест синхронизации</button>
+                    <button id="syncAllOrdersBtn" class="btn-warning">🔄 Синхронизировать все заказы</button>
                 </div>
                 <div id="syncSettingsInfo" class="instruction-note" style="margin-top: 8px;">⚙️ Получите URL: Расширения → Apps Script → Развернуть → Веб-приложение → Скопировать URL</div>
             </div>
@@ -379,14 +382,12 @@
         function saveShift() { localStorage.setItem(SHIFT_KEY, JSON.stringify({ open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment, operator: currentUser?.name })); }
 
         // ========== СИНХРОНИЗАЦИЯ С GOOGLE SHEETS ==========
-        function syncToGoogleSheets(order) {
+        function syncOrderToGoogle(order) {
             return new Promise((resolve, reject) => {
                 if (!googleScriptUrl) {
-                    console.log("URL веб-приложения не настроен");
                     resolve({ success: false, error: "URL не настроен" });
                     return;
                 }
-                
                 const orderData = {
                     id: order.id,
                     date: order.date,
@@ -400,21 +401,38 @@
                     operator: order.operator,
                     comment: order.comment || ""
                 };
-                
                 fetch(googleScriptUrl, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderData)
-                }).then(() => {
-                    showSyncStatus("✅ Синхронизировано с Google Sheets");
-                    resolve({ success: true });
-                }).catch(error => {
-                    console.error("Ошибка синхронизации:", error);
-                    showSyncStatus("❌ Ошибка синхронизации");
-                    resolve({ success: false, error: error.toString() });
-                });
+                }).then(() => resolve({ success: true })).catch(error => resolve({ success: false, error: error.toString() }));
             });
+        }
+
+        async function syncAllOrdersToGoogle() {
+            if (!googleScriptUrl) {
+                alert("Сначала настройте URL веб-приложения в админ-панели");
+                return;
+            }
+            if (allOrders.length === 0) {
+                alert("Нет заказов для синхронизации");
+                return;
+            }
+            const progressDiv = document.getElementById("syncProgress");
+            progressDiv.style.display = "block";
+            let successCount = 0;
+            let failCount = 0;
+            for (let i = 0; i < allOrders.length; i++) {
+                progressDiv.textContent = `🔄 Синхронизация: ${i + 1} из ${allOrders.length}`;
+                const result = await syncOrderToGoogle(allOrders[i]);
+                if (result.success) successCount++;
+                else failCount++;
+                await new Promise(r => setTimeout(r, 200));
+            }
+            progressDiv.style.display = "none";
+            showSyncStatus(`✅ Синхронизация завершена: ${successCount} успешно, ${failCount} ошибок`);
+            alert(`Синхронизация завершена!\nУспешно: ${successCount}\nОшибок: ${failCount}`);
         }
 
         function testGoogleSync() {
@@ -445,7 +463,6 @@
                 showSyncStatus("✅ Тест успешен! Проверьте Google Таблицу");
                 alert("Тестовый заказ отправлен. Проверьте Google Таблицу через 1-2 минуты.");
             }).catch(error => {
-                console.error(error);
                 showSyncStatus("❌ Ошибка теста");
                 alert("Ошибка синхронизации. Проверьте URL и настройки доступа.");
             });
@@ -716,8 +733,7 @@
             let order = { id: Date.now(), client, phone, items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty })), subtotal, discount, discountPercent: discPct, finalTotal: subtotal - discount, paymentMethod: payment, comment, date: new Date().toLocaleString(), operator: currentUser.name };
             allOrders.push(order); saveOrders();
             
-            // Синхронизация с Google Sheets
-            await syncToGoogleSheets(order);
+            await syncOrderToGoogle(order);
             
             cart = []; discountPct = 0; discountAmt = 0;
             document.getElementById("discountPercent").value = 0; document.getElementById("discountAmount").value = 0;
@@ -787,6 +803,28 @@
             if (myOrders.length === 0) { alert("Нет заказов"); return; }
             generateReport(myOrders, "Полный отчёт (все заказы)");
             document.getElementById("reportChoiceModal").style.display = "none";
+        }
+
+        // ========== ЭКСПОРТ В EXCEL С ВЫРУЧКОЙ ЗА ТЕКУЩУЮ ДАТУ ==========
+        function exportExcel() {
+            let my = getMyOrders();
+            if (!my.length) return alert("Нет данных");
+            
+            let today = new Date().toLocaleDateString();
+            let todayOrders = my.filter(o => o.date.includes(today));
+            let todayRevenue = todayOrders.reduce((sum, o) => sum + o.finalTotal, 0);
+            
+            let data = [["ID", "Клиент", "Телефон", "Услуги", "Сумма", "Скидка", "Итого", "Оплата", "Дата", "Комментарий"]];
+            my.forEach(o => data.push([o.id, o.client, o.phone || "", o.items.map(i => `${i.name} x${i.qty}`).join("; "), o.subtotal, o.discount, o.finalTotal, o.paymentMethod === "cash" ? "Наличные" : "Карта", o.date, o.comment || ""]));
+            
+            data.push([], [`ВЫРУЧКА ЗА ${today}`, "", "", "", "", `${todayRevenue} ₽`, "", "", ""]);
+            data.push([`ВСЕГО ЗАКАЗОВ: ${my.length}`, "", "", "", "", `ОБЩАЯ ВЫРУЧКА: ${my.reduce((s,o)=>s+o.finalTotal,0)} ₽`, "", "", "", ""]);
+            
+            let ws = XLSX.utils.aoa_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "A4_Принт");
+            XLSX.writeFile(wb, `A4print_${currentUser.name}_${new Date().toISOString().slice(0,19)}.xlsx`);
+            showSyncStatus("📎 Excel скачан");
         }
 
         // Статистика за всё время (админ)
@@ -922,21 +960,11 @@
             let subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
             let discount = discountPct ? subtotal * discountPct / 100 : (discountAmt ? Math.min(discountAmt, subtotal) : 0);
             let final = subtotal - discount;
-            let itemsHtml = cart.map(i => `<td><td style="border:1px solid #000; padding:5px;">${escapeHtml(i.name)}</td><td style="border:1px solid #000; text-align:center">${i.qty}</td><td style="border:1px solid #000; text-align:center">${i.price} ₽</td><td style="border:1px solid #000; text-align:right">${i.price * i.qty} ₽</td>`).join('');
+            let itemsHtml = cart.map(i => `<tr><td style="border:1px solid #000; padding:5px;">${escapeHtml(i.name)}</td><td style="border:1px solid #000; text-align:center">${i.qty}</td><td style="border:1px solid #000; text-align:center">${i.price} ₽</td><td style="border:1px solid #000; text-align:right">${i.price * i.qty} ₽</td>`).join('');
             let phoneLine = phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : '';
             let html = `<div class="blank-page"><div style="text-align:center; margin-bottom:20px;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table style="width:100%; border-collapse:collapse; margin:15px 0;"><thead><tr style="background:#f0f0f0;"><th style="border:1px solid #000; padding:5px;">Услуга</th><th style="border:1px solid #000; padding:5px;">Кол-во</th><th style="border:1px solid #000; padding:5px;">Цена</th><th style="border:1px solid #000; padding:5px;">Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div style="text-align:center; margin-top:10px; font-size:10px;">──────── ОСНОВНОЙ ЭКЗЕМПЛЯР ────────</div></div><div class="blank-page"><div style="text-align:center; margin-bottom:20px;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table style="width:100%; border-collapse:collapse; margin:15px 0;"><thead><tr style="background:#f0f0f0;"><th style="border:1px solid #000; padding:5px;">Услуга</th><th style="border:1px solid #000; padding:5px;">Кол-во</th><th style="border:1px solid #000; padding:5px;">Цена</th><th style="border:1px solid #000; padding:5px;">Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div style="text-align:center; margin-top:10px; font-size:10px;">─────────── КОПИЯ КЛИЕНТА ───────────</div></div>`;
             let cont = document.getElementById("printBlankContainer"); cont.innerHTML = html;
             window.print(); setTimeout(() => cont.innerHTML = "", 1000);
-        }
-
-        function exportExcel() {
-            let my = getMyOrders();
-            if (!my.length) return alert("Нет данных");
-            let data = [["ID", "Клиент", "Телефон", "Услуги", "Сумма", "Скидка", "Итого", "Оплата", "Дата", "Комментарий"]];
-            my.forEach(o => data.push([o.id, o.client, o.phone || "", o.items.map(i => `${i.name} x${i.qty}`).join("; "), o.subtotal, o.discount, o.finalTotal, o.paymentMethod === "cash" ? "Наличные" : "Карта", o.date, o.comment || ""]));
-            let ws = XLSX.utils.aoa_to_sheet(data), wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "A4_Принт");
-            XLSX.writeFile(wb, `A4print_${currentUser.name}.xlsx`);
         }
 
         function renderAdmin() {
@@ -1068,6 +1096,7 @@
             // Настройки синхронизации
             document.getElementById("saveGoogleSettingsBtn").onclick = saveGoogleSettings;
             document.getElementById("testSyncBtn").onclick = testGoogleSync;
+            document.getElementById("syncAllOrdersBtn").onclick = syncAllOrdersToGoogle;
             
             document.getElementById("addServiceBtn").onclick = () => { let name = document.getElementById("newServiceName").value.trim(); let price = parseInt(document.getElementById("newServicePrice").value); if (name && price > 0) { services.push({ id: Date.now(), name, price }); saveServices(); renderServices(); renderAdmin(); } else alert("Введите название и цену"); };
             document.getElementById("addOperatorBtn").onclick = () => { let lgn = document.getElementById("newOpLogin").value.trim().toLowerCase(); let nm = document.getElementById("newOpName").value.trim(); let ps = document.getElementById("newOpPass").value.trim(); if (lgn && nm && ps) { if (operators[lgn]) alert("Логин уже есть"); else { operators[lgn] = { password: ps, name: nm, role: "operator" }; saveOperators(); renderAdmin(); } } else alert("Заполните все поля"); };
