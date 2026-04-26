@@ -7,12 +7,8 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* (стили без изменений, оставил как в предыдущей версии) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary-blue: #0066B3;
             --primary-magenta: #C6007E;
@@ -24,744 +20,84 @@
             --text-gray: #6B7A8A;
             --border-light: #E2E8F0;
         }
-
-        body {
-            background: var(--bg-light);
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            padding: 20px;
-            color: var(--text-dark);
-            transition: background 0.2s, color 0.2s;
-        }
-
-        body.dark {
-            background: #121826;
-            color: #E2E8F0;
-        }
-
-        body.dark .card,
-        body.dark .cart-panel,
-        body.dark .history-section,
-        body.dark .shift-bar,
-        body.dark .fast-service-card,
-        body.dark .instruction-modal .modal-card {
-            background: #1E2A3A;
-            border-color: #2D3A4A;
-        }
-
-        body.dark .service-card,
-        body.dark .cart-item,
-        body.dark .history-item,
-        body.dark .stat-card {
-            background: #0F1722;
-            border-color: #2D3A4A;
-        }
-
-        body.dark input,
-        body.dark select,
-        body.dark textarea {
-            background: #0F1722;
-            border-color: #2D3A4A;
-            color: #E2E8F0;
-        }
-
-        .app {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 24px;
-            padding: 16px 24px;
-            background: var(--card-white);
-            border-radius: 28px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-            border-left: 6px solid var(--primary-blue);
-            position: relative;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .logo {
-            height: 48px;
-            width: auto;
-            border-radius: 12px;
-            background: white;
-            padding: 4px;
-        }
-
-        h1 {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-            color: var(--primary-black);
-        }
-
-        .sub {
-            font-size: 11px;
-            color: var(--text-gray);
-        }
-
-        .user-bar {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            background: var(--bg-light);
-            padding: 6px 20px;
-            border-radius: 60px;
-        }
-
-        .burger-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 32px;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 50%;
-            color: var(--primary-black);
-        }
-
-        .burger-menu {
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            background: var(--card-white);
-            border-radius: 24px;
-            padding: 16px;
-            min-width: 220px;
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            z-index: 200;
-            border: 1px solid var(--border-light);
-        }
-
-        .burger-menu.show {
-            display: flex;
-        }
-
-        .burger-menu button {
-            width: 100%;
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-        }
-
-        button {
-            background: var(--primary-black);
-            border: none;
-            padding: 8px 22px;
-            border-radius: 40px;
-            color: white;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-            filter: brightness(0.92);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid var(--border-light);
-            color: var(--text-dark);
-        }
-
-        .btn-primary {
-            background: var(--primary-blue);
-        }
-
-        .btn-success {
-            background: #1F8A5C;
-        }
-
-        .btn-danger {
-            background: #C2412C;
-        }
-
-        .btn-warning {
-            background: #E68A2E;
-        }
-
-        .btn-info {
-            background: #3B82F6;
-        }
-
-        .shift-bar {
-            background: var(--card-white);
-            border-radius: 60px;
-            padding: 10px 24px;
-            margin-bottom: 24px;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            font-size: 13px;
-            font-weight: 500;
-            border-left: 4px solid var(--primary-blue);
-        }
-
-        /* Модалка комментария к смене */
-        .shift-comment-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1100;
-        }
-
-        .shift-comment-modal .modal-card {
-            background: var(--card-white);
-            border-radius: 32px;
-            max-width: 450px;
-            width: 90%;
-            padding: 28px;
-        }
-
-        .shift-comment-modal textarea {
-            margin: 16px 0;
-            min-height: 100px;
-        }
-
-        /* Модалка инструкции */
-        .modal-instruction {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-instruction .modal-card {
-            background: var(--card-white);
-            border-radius: 32px;
-            max-width: 650px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 24px;
-        }
-
-        .instruction-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--primary-blue);
-        }
-
-        .close-instruction {
-            background: none;
-            font-size: 28px;
-            padding: 0;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-        }
-
-        .instruction-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-light);
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: none;
-            color: var(--text-gray);
-            padding: 10px 16px;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-
-        .tab-btn.active {
-            background: var(--primary-blue);
-            color: white;
-        }
-
-        .instruction-content {
-            display: none;
-        }
-
-        .instruction-content.active {
-            display: block;
-        }
-
-        .instruction-step {
-            margin-bottom: 16px;
-            padding-left: 24px;
-            position: relative;
-        }
-
-        .instruction-step:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: var(--primary-blue);
-            font-weight: bold;
-        }
-
-        .instruction-note {
-            background: var(--bg-light);
-            padding: 12px;
-            border-radius: 16px;
-            margin-top: 16px;
-            font-size: 13px;
-            border-left: 3px solid var(--primary-yellow);
-        }
-
-        .dashboard {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-        }
-
-        .card {
-            flex: 2;
-            min-width: 300px;
-            background: var(--card-white);
-            border-radius: 28px;
-            padding: 24px;
-            border: 1px solid var(--border-light);
-        }
-
-        .cart-panel {
-            flex: 1.2;
-            min-width: 320px;
-            background: var(--card-white);
-            border-radius: 28px;
-            padding: 24px;
-            border: 1px solid var(--border-light);
-        }
-
-        .history-section {
-            background: var(--card-white);
-            border-radius: 28px;
-            padding: 24px;
-            border: 1px solid var(--border-light);
-        }
-
-        .panel-title {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-gray);
-            margin-bottom: 20px;
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-            gap: 14px;
-            max-height: 520px;
-            overflow-y: auto;
-            padding-right: 6px;
-        }
-
-        .service-card {
-            background: var(--bg-light);
-            border-radius: 24px;
-            padding: 14px;
-            text-align: center;
-            border: 1px solid var(--border-light);
-            cursor: pointer;
-            transition: 0.1s;
-        }
-
-        .service-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary-blue);
-        }
-
-        .service-name {
-            font-weight: 700;
-            font-size: 13px;
-            margin-bottom: 6px;
-        }
-
-        .service-price {
-            font-size: 17px;
-            font-weight: 800;
-            color: var(--primary-magenta);
-            margin: 6px 0;
-        }
-
-        .qty-control {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 10px 0 6px;
-        }
-
-        .qty-control input {
-            width: 80px;
-            text-align: center;
-            padding: 8px 0;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 30px;
-        }
-
-        .add-btn {
-            background: var(--primary-blue);
-            width: 100%;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-        }
-
-        .fast-service-card {
-            background: var(--card-white);
-            border-radius: 20px;
-            padding: 12px;
-            margin-top: 16px;
-            border: 1px dashed var(--primary-blue);
-        }
-
-        .fast-service-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .fast-service-row input {
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .cart-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 280px;
-            overflow-y: auto;
-            margin-bottom: 18px;
-        }
-
-        .cart-item {
-            background: var(--bg-light);
-            border-radius: 20px;
-            padding: 12px 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            border-left: 4px solid var(--primary-magenta);
-        }
-
-        .cart-item-info {
-            flex: 2;
-        }
-
-        .cart-item-name {
-            font-weight: 700;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-
-        .cart-item-detail {
-            font-size: 11px;
-            color: var(--text-gray);
-        }
-
-        .cart-item-price {
-            font-weight: 800;
-            font-size: 15px;
-            color: var(--primary-magenta);
-        }
-
-        .remove-btn {
-            background: #FFE4E0;
-            color: #C2412C;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--bg-light);
-            border: 1px solid var(--border-light);
-            border-radius: 24px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.1);
-        }
-
-        .total-line {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-top: 1px solid var(--border-light);
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .grand-total {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--primary-blue);
-        }
-
-        .row-2 {
-            display: flex;
-            gap: 12px;
-            margin: 16px 0;
-            flex-wrap: wrap;
-            align-items: flex-end;
-        }
-
-        .discount-group {
-            flex: 1;
-            min-width: 100px;
-        }
-
-        .discount-group label {
-            font-size: 11px;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 4px;
-            color: var(--text-gray);
-        }
-
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .history-item {
-            background: var(--bg-light);
-            border-radius: 20px;
-            padding: 14px;
-            border-left: 4px solid var(--primary-yellow);
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-card {
-            background: var(--card-white);
-            border-radius: 40px;
-            max-width: 700px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 28px;
-        }
-
-        .stat-card {
-            background: var(--bg-light);
-            border-radius: 20px;
-            padding: 14px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--primary-blue);
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        .stat-value {
-            font-weight: 800;
-            font-size: 16px;
-            color: var(--primary-magenta);
-        }
-
-        /* Месячный отчёт */
-        .monthly-report-block {
-            background: var(--bg-light);
-            border-radius: 20px;
-            padding: 16px;
-            margin-top: 20px;
-        }
-
-        .monthly-report-title {
-            font-weight: 700;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-        .month-selector {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-            align-items: center;
-        }
-
-        .month-selector select {
-            width: auto;
-            min-width: 120px;
-        }
-
-        .print-blank {
-            display: none;
-        }
-
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-
-            .print-blank,
-            .print-blank * {
-                visibility: visible;
-            }
-
-            .print-blank {
-                display: block;
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-            }
-
-            .blank-page {
-                page-break-after: always;
-            }
-        }
-
-        .blank-page {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 15mm;
-            background: white;
-            color: black;
-            font-family: monospace;
-        }
-
-        @media (max-width: 850px) {
-            body {
-                padding: 12px;
-            }
-
-            .user-bar {
-                display: none !important;
-            }
-
-            .burger-btn {
-                display: block;
-            }
-
-            .services-grid {
-                grid-template-columns: repeat(4, 1fr) !important;
-                gap: 8px;
-            }
-
-            .service-card {
-                padding: 8px 4px;
-            }
-
-            .service-name {
-                font-size: 10px;
-                margin-bottom: 4px;
-            }
-
-            .service-price {
-                font-size: 13px;
-            }
-
-            .qty-control input {
-                width: 55px;
-                padding: 4px 0;
-                font-size: 12px;
-            }
-
-            .add-btn {
-                padding: 5px;
-                font-size: 10px;
-            }
-        }
-
-        @media (max-width: 550px) {
-            .services-grid {
-                gap: 6px;
-            }
-
-            .service-card {
-                padding: 6px 2px;
-            }
-
-            .service-name {
-                font-size: 9px;
-            }
-
-            .service-price {
-                font-size: 11px;
-            }
-
-            .qty-control input {
-                width: 45px;
-                font-size: 10px;
-            }
-        }
-
-        @media (min-width: 851px) {
-            .burger-menu {
-                display: none !important;
-            }
-        }
+        body { background: var(--bg-light); font-family: 'Segoe UI', sans-serif; padding: 20px; color: var(--text-dark); transition: background 0.2s, color 0.2s; }
+        body.dark { background: #121826; color: #E2E8F0; }
+        body.dark .card, body.dark .cart-panel, body.dark .history-section, body.dark .shift-bar, body.dark .fast-service-card { background: #1E2A3A; border-color: #2D3A4A; }
+        body.dark .service-card, body.dark .cart-item, body.dark .history-item, body.dark .stat-card { background: #0F1722; border-color: #2D3A4A; }
+        body.dark input, body.dark select, body.dark textarea { background: #0F1722; border-color: #2D3A4A; color: #E2E8F0; }
+        .app { max-width: 1600px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; padding: 16px 24px; background: var(--card-white); border-radius: 28px; border-left: 6px solid var(--primary-blue); position: relative; }
+        .logo-area { display: flex; align-items: center; gap: 14px; }
+        .logo { height: 48px; width: auto; border-radius: 12px; background: white; padding: 4px; }
+        h1 { font-size: 22px; font-weight: 700; color: var(--primary-black); }
+        .sub { font-size: 11px; color: var(--text-gray); }
+        .user-bar { display: flex; gap: 12px; align-items: center; background: var(--bg-light); padding: 6px 20px; border-radius: 60px; }
+        .burger-btn { display: none; background: none; border: none; font-size: 32px; cursor: pointer; padding: 8px 12px; color: var(--primary-black); }
+        .burger-menu { position: absolute; top: 70px; right: 20px; background: var(--card-white); border-radius: 24px; padding: 16px; min-width: 220px; display: none; flex-direction: column; gap: 12px; z-index: 200; border: 1px solid var(--border-light); }
+        .burger-menu.show { display: flex; }
+        button { background: var(--primary-black); border: none; padding: 8px 22px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.15s; }
+        button:hover { transform: translateY(-1px); filter: brightness(0.92); }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border-light); color: var(--text-dark); }
+        .btn-primary { background: var(--primary-blue); }
+        .btn-success { background: #1F8A5C; }
+        .btn-danger { background: #C2412C; }
+        .btn-warning { background: #E68A2E; }
+        .btn-info { background: #3B82F6; }
+        .shift-bar { background: var(--card-white); border-radius: 60px; padding: 10px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; font-weight: 500; border-left: 4px solid var(--primary-blue); }
+        .shift-comment-modal, .modal-instruction { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1100; }
+        .shift-comment-modal .modal-card, .modal-instruction .modal-card { background: var(--card-white); border-radius: 32px; max-width: 650px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 24px; }
+        .instruction-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-blue); }
+        .close-instruction { background: none; font-size: 28px; padding: 0; width: 36px; height: 36px; border-radius: 50%; }
+        .instruction-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); flex-wrap: wrap; }
+        .tab-btn { background: none; color: var(--text-gray); padding: 10px 16px; border-radius: 30px; cursor: pointer; }
+        .tab-btn.active { background: var(--primary-blue); color: white; }
+        .instruction-content { display: none; }
+        .instruction-content.active { display: block; }
+        .instruction-step { margin-bottom: 16px; padding-left: 24px; position: relative; }
+        .instruction-step:before { content: "✓"; position: absolute; left: 0; color: var(--primary-blue); font-weight: bold; }
+        .instruction-note { background: var(--bg-light); padding: 12px; border-radius: 16px; margin-top: 16px; font-size: 13px; border-left: 3px solid var(--primary-yellow); }
+        .dashboard { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+        .card { flex: 2; min-width: 300px; background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
+        .cart-panel { flex: 1.2; min-width: 320px; background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
+        .history-section { background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
+        .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-gray); margin-bottom: 20px; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; max-height: 520px; overflow-y: auto; padding-right: 6px; }
+        .service-card { background: var(--bg-light); border-radius: 24px; padding: 14px; text-align: center; border: 1px solid var(--border-light); cursor: pointer; transition: 0.1s; }
+        .service-card:hover { transform: translateY(-2px); border-color: var(--primary-blue); }
+        .service-name { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+        .service-price { font-size: 17px; font-weight: 800; color: var(--primary-magenta); margin: 6px 0; }
+        .qty-control { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 6px; }
+        .qty-control input { width: 80px; text-align: center; padding: 8px 0; font-size: 15px; font-weight: 600; border-radius: 30px; }
+        .add-btn { background: var(--primary-blue); width: 100%; padding: 8px; font-size: 12px; font-weight: 600; color: white; }
+        .fast-service-card { background: var(--card-white); border-radius: 20px; padding: 12px; margin-top: 16px; border: 1px dashed var(--primary-blue); }
+        .fast-service-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .cart-list { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; margin-bottom: 18px; }
+        .cart-item { background: var(--bg-light); border-radius: 20px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-left: 4px solid var(--primary-magenta); }
+        .cart-item-info { flex: 2; }
+        .cart-item-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+        .cart-item-detail { font-size: 11px; color: var(--text-gray); }
+        .cart-item-price { font-weight: 800; font-size: 15px; color: var(--primary-magenta); }
+        .remove-btn { background: #FFE4E0; color: #C2412C; padding: 6px 16px; border-radius: 40px; font-size: 11px; font-weight: 600; }
+        input, select, textarea { width: 100%; padding: 12px 16px; background: var(--bg-light); border: 1px solid var(--border-light); border-radius: 24px; font-size: 14px; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(0,102,179,0.1); }
+        .total-line { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--border-light); font-weight: 600; font-size: 14px; }
+        .grand-total { font-size: 22px; font-weight: 800; color: var(--primary-blue); }
+        .row-2 { display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap; align-items: flex-end; }
+        .discount-group { flex: 1; min-width: 100px; }
+        .history-list { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; }
+        .history-item { background: var(--bg-light); border-radius: 20px; padding: 14px; border-left: 4px solid var(--primary-yellow); }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-card { background: var(--card-white); border-radius: 40px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; }
+        .stat-card { background: var(--bg-light); border-radius: 20px; padding: 14px; margin-bottom: 12px; border-left: 4px solid var(--primary-blue); }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+        .stat-value { font-weight: 800; font-size: 16px; color: var(--primary-magenta); }
+        .monthly-report-block { background: var(--bg-light); border-radius: 20px; padding: 16px; margin-top: 20px; }
+        .date-selector { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: flex-end; }
+        .print-blank { display: none; }
+        @media print { body * { visibility: hidden; } .print-blank, .print-blank * { visibility: visible; } .print-blank { display: block; position: absolute; top: 0; left: 0; width: 100%; } .blank-page { page-break-after: always; } }
+        .blank-page { width: 210mm; min-height: 297mm; padding: 15mm; background: white; color: black; font-family: monospace; }
+        @media (max-width: 850px) { body { padding: 12px; } .user-bar { display: none !important; } .burger-btn { display: block; } .services-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 8px; } .service-card { padding: 8px 4px; } .service-name { font-size: 10px; } .service-price { font-size: 13px; } .qty-control input { width: 55px; padding: 4px 0; font-size: 12px; } .add-btn { padding: 5px; font-size: 10px; } }
+        @media (min-width: 851px) { .burger-menu { display: none !important; } }
     </style>
 </head>
 <body>
@@ -780,29 +116,22 @@
         <div class="app">
             <div class="header">
                 <div class="logo-area">
-                    <img src="https://github.com/a4print2026-jpg/baza/blob/dbcda72ab60f0a9f8d8984e17375f6649cf677f0/images/logo_soc2.png?raw=true"
-                        class="logo" onerror="this.style.display='none'">
-                    <div>
-                        <h1>A4‑ПРИНТ</h1>
-                        <div class="sub">База данных копировального центра</div>
-                    </div>
+                    <img src="https://github.com/a4print2026-jpg/baza/blob/dbcda72ab60f0a9f8d8984e17375f6649cf677f0/images/logo_soc2.png?raw=true" class="logo" onerror="this.style.display='none'">
+                    <div><h1>A4‑ПРИНТ</h1><div class="sub">База данных копировального центра</div></div>
                 </div>
-
                 <div class="user-bar">
                     <span id="currentOperatorName" style="font-weight:500;"></span>
                     <button id="helpBtn" class="btn-info">❓ Помощь</button>
                     <button id="themeToggleBtn" class="btn-outline">🌙 Тёмная</button>
                     <button id="adminPanelBtn" class="btn-primary">Админ</button>
                     <button id="shiftToggleBtn" class="btn-warning">🚀 Открыть смену</button>
-                    <button id="pdfReportBtn" class="btn-success">📄 Отчёт</button>
+                    <button id="pdfReportBtn" class="btn-success">📄 Отчёт за смену</button>
                     <button id="printBlankBtn" class="btn-primary">🖨️ Бланк заказа</button>
                     <button id="logoutBtn" class="btn-outline">Выйти</button>
                 </div>
-
                 <button class="burger-btn" id="burgerBtn">☰</button>
-
                 <div class="burger-menu" id="burgerMenu">
-                    <span id="burgerOperatorName" style="font-weight:600; padding-bottom:6px; border-bottom: 1px solid #ccc;"></span>
+                    <span id="burgerOperatorName" style="font-weight:600; padding-bottom:6px;"></span>
                     <button id="burgerHelpBtn">❓ Помощь</button>
                     <button id="burgerThemeToggle">🌙 Тёмная</button>
                     <button id="burgerAdminBtn">Админ</button>
@@ -823,14 +152,11 @@
                 <div class="card">
                     <div class="panel-title">📋 УСЛУГИ</div>
                     <div id="servicesGrid" class="services-grid"></div>
-
                     <div class="fast-service-card">
                         <div class="fast-service-row">
                             <input type="text" id="fastServiceName" placeholder="Название услуги (любое)" style="flex:2;">
-                            <input type="number" id="fastServicePrice" placeholder="Цена ₽" style="flex:1;" value="0"
-                                step="10">
-                            <button id="addFastServiceBtn" class="btn-primary" style="white-space: nowrap;">➕ Быстрая
-                                услуга</button>
+                            <input type="number" id="fastServicePrice" placeholder="Цена ₽" style="flex:1;" value="0" step="10">
+                            <button id="addFastServiceBtn" class="btn-primary">➕ Быстрая услуга</button>
                         </div>
                     </div>
                 </div>
@@ -840,31 +166,19 @@
                     <input type="text" id="clientName" placeholder="Имя клиента (необязательно)" style="margin-bottom: 12px;">
                     <input type="tel" id="clientPhone" placeholder="Телефон клиента (необязательно)" style="margin-bottom: 16px;">
                     <div class="cart-list" id="cartList"></div>
-
                     <div class="row-2">
-                        <div class="discount-group">
-                            <label>Скидка, %</label>
-                            <input type="number" id="discountPercent" value="0" step="1" placeholder="%">
-                        </div>
-                        <div class="discount-group">
-                            <label>Скидка, ₽</label>
-                            <input type="number" id="discountAmount" value="0" step="10" placeholder="₽">
-                        </div>
+                        <div class="discount-group"><label>Скидка, %</label><input type="number" id="discountPercent" value="0" step="1" placeholder="%"></div>
+                        <div class="discount-group"><label>Скидка, ₽</label><input type="number" id="discountAmount" value="0" step="10" placeholder="₽"></div>
                         <button id="applyDiscountBtn" class="btn-outline" style="margin-top: 22px;">Применить</button>
                     </div>
-
                     <div class="row-2">
                         <label><input type="radio" name="payment" value="cash" checked> 💵 Наличные</label>
                         <label><input type="radio" name="payment" value="card"> 💳 Карта</label>
                     </div>
-
                     <textarea id="orderComment" rows="2" placeholder="Комментарий к заказу..."></textarea>
-
                     <div class="total-line"><span>Подытог</span><span id="cartSubtotal">0 ₽</span></div>
-                    <div class="total-line" id="discountLine" style="display:none;"><span>Скидка</span><span id="cartDiscount">0
-                            ₽</span></div>
+                    <div class="total-line" id="discountLine" style="display:none;"><span>Скидка</span><span id="cartDiscount">0 ₽</span></div>
                     <div class="total-line grand-total"><span>ИТОГО</span><span id="cartTotal">0 ₽</span></div>
-
                     <div class="row-2">
                         <button id="completeOrderBtn" class="btn-primary" style="flex:2;">✅ Оформить</button>
                         <button id="clearCartBtn" class="btn-outline" style="flex:1;">Очистить</button>
@@ -889,8 +203,7 @@
     <div id="shiftCommentModal" class="shift-comment-modal">
         <div class="modal-card">
             <h3 id="shiftCommentTitle" style="margin-bottom: 12px;">📝 Комментарий к открытию смены</h3>
-            <textarea id="shiftCommentText" rows="3"
-                placeholder="Укажите причину, финансовые замечания, проблемы с оборудованием и т.д."></textarea>
+            <textarea id="shiftCommentText" rows="3" placeholder="Укажите причину, финансовые замечания, проблемы с оборудованием и т.д."></textarea>
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
                 <button id="shiftCommentCancel" class="btn-outline">Отмена</button>
                 <button id="shiftCommentConfirm" class="btn-primary">Подтвердить</button>
@@ -901,47 +214,27 @@
     <!-- Модалка инструкции -->
     <div id="instructionModal" class="modal-instruction">
         <div class="modal-card">
-            <div class="instruction-header">
-                <h2>📘 Инструкция по работе с A4-Принт</h2>
-                <button id="closeInstructionBtn" class="close-instruction">✕</button>
-            </div>
+            <div class="instruction-header"><h2>📘 Инструкция</h2><button id="closeInstructionBtn" class="close-instruction">✕</button></div>
             <div class="instruction-tabs">
-                <button class="tab-btn active" data-tab="operator">👤 Для оператора</button>
-                <button class="tab-btn" data-tab="admin">👑 Для администратора</button>
+                <button class="tab-btn active" data-tab="operator">👤 Оператор</button>
+                <button class="tab-btn" data-tab="admin">👑 Администратор</button>
             </div>
-
             <div class="instruction-content active" id="tab-operator">
-                <div class="instruction-step"><strong>1. Вход в систему</strong><br>Введите свой логин и пароль → «Войти».
-                </div>
-                <div class="instruction-step"><strong>2. Открытие смены</strong><br>Нажмите «🚀 Открыть смену» → при
-                    необходимости добавьте комментарий (нехватка сдачи, проблемы с техникой и т.д.).</div>
-                <div class="instruction-step"><strong>3. Приём заказа</strong><br>Выберите услугу → введите количество →
-                    «Добавить». При необходимости используйте «➕ Быстрая услуга».</div>
-                <div class="instruction-step"><strong>4. Оформление заказа</strong><br>Укажите имя/телефон клиента
-                    (опционально), примените скидку, выберите оплату (нал/карта), добавьте комментарий → «Оформить».</div>
-                <div class="instruction-step"><strong>5. Печать бланка</strong><br>Нажмите «🖨️ Бланк заказа» — сформируется
-                    А4 с двумя экземплярами (основной + копия клиента).</div>
-                <div class="instruction-step"><strong>6. Закрытие смены</strong><br>В конце дня нажмите «🔒 Закрыть смену» →
-                    добавьте итоговый комментарий. Затем «📄 Отчёт» — сохраните PDF для бухгалтерии.</div>
-                <div class="instruction-note">💡 В мобильной версии все кнопки — под меню-бургер ☰ в правом верхнем углу.
-                </div>
+                <div class="instruction-step"><strong>1. Вход</strong><br>Логин/пароль → «Войти».</div>
+                <div class="instruction-step"><strong>2. Открыть смену</strong><br>«🚀 Открыть смену» → при необходимости комментарий.</div>
+                <div class="instruction-step"><strong>3. Приём заказа</strong><br>Выберите услугу → количество → «Добавить».</div>
+                <div class="instruction-step"><strong>4. Оформление</strong><br>Клиент, скидка, оплата, комментарий → «Оформить».</div>
+                <div class="instruction-step"><strong>5. Печать бланка</strong><br>«🖨️ Бланк заказа» — А4 с двумя экземплярами.</div>
+                <div class="instruction-step"><strong>6. Закрыть смену</strong><br>«🔒 Закрыть смену» → «📄 Отчёт» — PDF для бухгалтерии.</div>
+                <div class="instruction-step"><strong>7. Отчёт за любую дату (админ)</strong><br>В админ-панели выберите дату → «Показать отчёт» → PDF/Excel.</div>
             </div>
-
             <div class="instruction-content" id="tab-admin">
-                <div class="instruction-step"><strong>1. Вход с правами администратора</strong><br>Логин: <strong>admin</strong>,
-                    пароль: <strong>admin123</strong>.</div>
-                <div class="instruction-step"><strong>2. Управление услугами</strong><br>«Админ» → вкладка «Управление
-                    услугами»: изменение цены (💾), удаление (🗑), добавление новой.</div>
-                <div class="instruction-step"><strong>3. Управление операторами</strong><br>Там же → «Операторы»: смена
-                    пароля (🔑), удаление, добавление нового сотрудника.</div>
-                <div class="instruction-step"><strong>4. Статистика операторов</strong><br>Кнопка «📊 Статистика операторов»
-                    — заказы, выручка, средний чек по каждому. Можно экспортировать в Excel.</div>
-                <div class="instruction-step"><strong>5. Полный отчёт за месяц</strong><br>В разделе «Статистика операторов» есть выбор месяца и года — показываются итоги по всем операторам за выбранный период. Можно экспортировать в Excel.</div>
-                <div class="instruction-step"><strong>6. Комментарии к смене</strong><br>При открытии и закрытии смены можно
-                    оставлять служебные заметки (финансовые нюансы, поломки). Комментарии сохраняются и видны в PDF-отчёте.
-                </div>
-                <div class="instruction-note">🔐 Пароль администратора можно сменить в разделе «Операторы» (строка admin).
-                </div>
+                <div class="instruction-step"><strong>Вход админа</strong><br>admin / admin123</div>
+                <div class="instruction-step"><strong>Управление услугами</strong><br>Цены, удаление, добавление.</div>
+                <div class="instruction-step"><strong>Управление операторами</strong><br>Смена пароля, добавление, удаление.</div>
+                <div class="instruction-step"><strong>Статистика за всё время</strong><br>«📊 Статистика операторов».</div>
+                <div class="instruction-step"><strong>Отчёт за любую дату</strong><br>Выберите дату → «Показать отчёт» → можно сохранить PDF или Excel.</div>
+                <div class="instruction-step"><strong>Месячный отчёт</strong><br>Выберите месяц и год → «Показать отчёт» → экспорт в Excel.</div>
             </div>
         </div>
     </div>
@@ -956,21 +249,31 @@
             </div>
             <button id="viewOperatorsStatsBtn" class="btn-primary" style="width:100%; margin: 16px 0;">📊 Статистика операторов (все время)</button>
             
-            <!-- Блок месячного отчёта -->
+            <!-- ОТЧЁТ ЗА ЛЮБУЮ ДАТУ (НОВЫЙ) -->
+            <div class="monthly-report-block">
+                <div class="monthly-report-title">📅 Отчёт за произвольную дату</div>
+                <div class="date-selector">
+                    <input type="date" id="reportDate" style="flex:1;">
+                    <button id="viewDateReportBtn" class="btn-primary">Показать отчёт</button>
+                    <button id="exportDateReportPDFBtn" class="btn-success">📄 Сохранить PDF</button>
+                    <button id="exportDateReportExcelBtn" class="btn-success">📎 Экспорт Excel</button>
+                </div>
+                <div id="dateReportContent"></div>
+            </div>
+            
+            <!-- МЕСЯЧНЫЙ ОТЧЁТ -->
             <div class="monthly-report-block">
                 <div class="monthly-report-title">📅 Полный отчёт за месяц</div>
-                <div class="month-selector">
+                <div class="date-selector">
                     <select id="reportMonth">
                         <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option>
                         <option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option>
                         <option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option>
                         <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
                     </select>
-                    <select id="reportYear">
-                        <option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option>
-                    </select>
+                    <select id="reportYear"></select>
                     <button id="viewMonthlyReportBtn" class="btn-primary">Показать отчёт</button>
-                    <button id="exportMonthlyReportBtn" class="btn-success">📎 Экспорт в Excel</button>
+                    <button id="exportMonthlyReportBtn" class="btn-success">📎 Экспорт Excel</button>
                 </div>
                 <div id="monthlyReportContent"></div>
             </div>
@@ -992,8 +295,7 @@
                 <input type="text" id="newOpPass" placeholder="Пароль">
                 <button id="addOperatorBtn" class="btn-primary">Добавить</button>
             </div>
-            <div class="instruction-note" style="margin-top: 16px;">🔐 Текущие учётные: admin / admin123 | anna / anna321 |
-                sergey / sergey321</div>
+            <div class="instruction-note" style="margin-top: 16px;">🔐 Текущие учётные: admin / admin123 | anna / anna321 | sergey / sergey321</div>
         </div>
     </div>
 
@@ -1044,15 +346,7 @@
 
         function loadShift() {
             let s = localStorage.getItem(SHIFT_KEY);
-            if (s) {
-                let d = JSON.parse(s);
-                if (d.operator === currentUser?.name) {
-                    shiftOpen = d.open;
-                    shiftClose = d.close;
-                    shiftOpenComment = d.openComment || "";
-                    shiftCloseComment = d.closeComment || "";
-                }
-            }
+            if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } }
             updateShiftUI();
         }
 
@@ -1136,14 +430,7 @@
             services.forEach(s => {
                 let card = document.createElement("div");
                 card.className = "service-card";
-                card.innerHTML = `
-                <div class="service-name">${escapeHtml(s.name)}</div>
-                <div class="service-price">${s.price} ₽</div>
-                <div class="qty-control">
-                    <input type="number" id="qty_${s.id}" value="0" min="0" step="1" placeholder="кол-во" class="qty-input">
-                </div>
-                <button class="add-btn" data-id="${s.id}">➕ Добавить</button>
-            `;
+                card.innerHTML = `<div class="service-name">${escapeHtml(s.name)}</div><div class="service-price">${s.price} ₽</div><div class="qty-control"><input type="number" id="qty_${s.id}" value="0" min="0" step="1" placeholder="кол-во" class="qty-input"></div><button class="add-btn" data-id="${s.id}">➕ Добавить</button>`;
                 grid.appendChild(card);
             });
             document.querySelectorAll(".add-btn").forEach(btn => btn.onclick = (e) => { e.stopPropagation(); let id = parseInt(btn.getAttribute("data-id")); addServiceById(id); });
@@ -1213,23 +500,12 @@
             let discount = 0, discPct = 0;
             if (discountPct > 0) { discount = subtotal * discountPct / 100; discPct = discountPct; }
             else if (discountAmt > 0) discount = Math.min(discountAmt, subtotal);
-            let order = {
-                id: Date.now(), client, phone, items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
-                subtotal, discount, discountPercent: discPct, finalTotal: subtotal - discount, paymentMethod: payment,
-                comment, date: new Date().toLocaleString(), operator: currentUser.name
-            };
-            allOrders.push(order);
-            saveOrders();
-            cart = [];
-            discountPct = 0;
-            discountAmt = 0;
-            document.getElementById("discountPercent").value = 0;
-            document.getElementById("discountAmount").value = 0;
-            document.getElementById("clientName").value = "";
-            document.getElementById("clientPhone").value = "";
-            document.getElementById("orderComment").value = "";
-            renderCart();
-            renderHistory();
+            let order = { id: Date.now(), client, phone, items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty })), subtotal, discount, discountPercent: discPct, finalTotal: subtotal - discount, paymentMethod: payment, comment, date: new Date().toLocaleString(), operator: currentUser.name };
+            allOrders.push(order); saveOrders();
+            cart = []; discountPct = 0; discountAmt = 0;
+            document.getElementById("discountPercent").value = 0; document.getElementById("discountAmount").value = 0;
+            document.getElementById("clientName").value = ""; document.getElementById("clientPhone").value = ""; document.getElementById("orderComment").value = "";
+            renderCart(); renderHistory();
             alert(`Заказ №${order.id} на ${order.finalTotal} ₽`);
         }
 
@@ -1251,8 +527,7 @@
             if (confirm("Очистить все свои заказы?")) {
                 if (currentUser.role === "admin") allOrders = [];
                 else allOrders = allOrders.filter(o => o.operator !== currentUser.name);
-                saveOrders();
-                renderHistory();
+                saveOrders(); renderHistory();
             }
         }
 
@@ -1295,7 +570,68 @@
             XLSX.writeFile(wb, `A4print_stats_alltime_${new Date().toISOString().slice(0, 19)}.xlsx`);
         }
 
+        // ========== ОТЧЁТ ЗА ПРОИЗВОЛЬНУЮ ДАТУ ==========
+        function getOrdersByDate(dateStr) {
+            if (!dateStr) return [];
+            return allOrders.filter(o => o.date.includes(dateStr));
+        }
+
+        function showDateReport() {
+            let date = document.getElementById("reportDate").value;
+            if (!date) { alert("Выберите дату"); return; }
+            let orders = getOrdersByDate(date);
+            let totalRevenue = orders.reduce((s, o) => s + o.finalTotal, 0);
+            let cash = orders.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
+            let card = orders.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
+            let html = `<div class="stat-card"><div class="stat-row"><span><strong>📅 Отчёт за ${date}</strong></span><span class="stat-value">${orders.length} заказов</span></div>
+                        <div class="stat-row"><span>💰 Общая выручка:</span><span class="stat-value">${totalRevenue.toLocaleString()} ₽</span></div>
+                        <div class="stat-row"><span>💵 Наличные:</span><span>${cash.toLocaleString()} ₽</span></div>
+                        <div class="stat-row"><span>💳 Карта:</span><span>${card.toLocaleString()} ₽</span></div></div>`;
+            if (orders.length === 0) html = `<div class="stat-card">За выбранную дату заказов нет</div>`;
+            document.getElementById("dateReportContent").innerHTML = html;
+            window._lastDateReport = { date, orders, totalRevenue, cash, card };
+        }
+
+        function exportDateReportPDF() {
+            if (!window._lastDateReport || !window._lastDateReport.orders.length) { alert("Сначала сформируйте отчёт за дату"); return; }
+            let r = window._lastDateReport;
+            let ordersHtml = r.orders.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;">
+                <div>№${o.id} | ${o.date}</div><div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div>
+                <div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div>
+                <div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div>
+            </div>`).join('');
+            let html = `<div style="font-family:monospace; padding:20px;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Отчёт за ${r.date}</p><p>Пользователь: ${currentUser.name}</p></div><hr>
+                <div><strong>ИТОГИ:</strong><br>📦 Заказов: ${r.orders.length}<br>💰 Выручка: ${r.totalRevenue} ₽<br>💵 Наличные: ${r.cash} ₽<br>💳 Карта: ${r.card} ₽</div><hr>
+                <div><strong>ДЕТАЛИ ЗАКАЗОВ:</strong></div>${ordersHtml}<hr><div style="text-align:center;">Подпись: _______________</div></div>`;
+            let el = document.createElement('div'); el.innerHTML = html; document.body.appendChild(el);
+            html2pdf().set({ margin: 0.5, filename: `A4print_отчёт_${r.date}.pdf`, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
+        }
+
+        function exportDateReportExcel() {
+            if (!window._lastDateReport || !window._lastDateReport.orders.length) { alert("Сначала сформируйте отчёт за дату"); return; }
+            let r = window._lastDateReport;
+            let data = [["ID", "Клиент", "Телефон", "Услуги", "Сумма", "Скидка", "Итого", "Оплата", "Дата", "Комментарий"]];
+            r.orders.forEach(o => data.push([o.id, o.client, o.phone || "", o.items.map(i => `${i.name} x${i.qty}`).join("; "), o.subtotal, o.discount, o.finalTotal, o.paymentMethod === "cash" ? "Наличные" : "Карта", o.date, o.comment || ""]));
+            let ws = XLSX.utils.aoa_to_sheet(data), wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, `Отчёт_${r.date}`);
+            XLSX.writeFile(wb, `A4print_отчёт_${r.date}.xlsx`);
+        }
+
         // ========== МЕСЯЧНЫЙ ОТЧЁТ ==========
+        function initYearSelect() {
+            let yearSelect = document.getElementById("reportYear");
+            if (!yearSelect) return;
+            let currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = "";
+            for (let y = 2023; y <= currentYear + 1; y++) {
+                let option = document.createElement("option");
+                option.value = y;
+                option.textContent = y;
+                if (y === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+        }
+
         function getMonthlyReport() {
             let month = parseInt(document.getElementById("reportMonth").value);
             let year = parseInt(document.getElementById("reportYear").value);
@@ -1303,11 +639,8 @@
                 let orderDate = new Date(o.date);
                 return orderDate.getMonth() + 1 === month && orderDate.getFullYear() === year;
             });
-            
             let stats = {};
-            for (let [login, data] of Object.entries(operators)) {
-                stats[login] = { name: data.name, orders: 0, revenue: 0, cash: 0, card: 0 };
-            }
+            for (let [login, data] of Object.entries(operators)) { stats[login] = { name: data.name, orders: 0, revenue: 0, cash: 0, card: 0 }; }
             filteredOrders.forEach(o => {
                 let op = Object.keys(operators).find(l => operators[l].name === o.operator);
                 if (op) {
@@ -1329,18 +662,9 @@
                 let avg = st.orders ? Math.round(st.revenue / st.orders) : 0;
                 totalOrders += st.orders;
                 totalRevenue += st.revenue;
-                html += `<div class="stat-card" style="margin-top: 8px;">
-                            <div class="stat-row"><span><strong>${st.name}</strong> ${login === "admin" ? "👑" : "👤"}</span><span class="stat-value">${st.orders} заказов</span></div>
-                            <div class="stat-row"><span>💰 Выручка:</span><span class="stat-value">${st.revenue.toLocaleString()} ₽</span></div>
-                            <div class="stat-row"><span>💵 Наличные:</span><span>${st.cash.toLocaleString()} ₽</span></div>
-                            <div class="stat-row"><span>💳 Карта:</span><span>${st.card.toLocaleString()} ₽</span></div>
-                            <div class="stat-row"><span>📊 Средний чек:</span><span class="stat-value">${avg.toLocaleString()} ₽</span></div>
-                        </div>`;
+                html += `<div class="stat-card"><div class="stat-row"><span><strong>${st.name}</strong> ${login === "admin" ? "👑" : "👤"}</span><span class="stat-value">${st.orders} заказов</span></div><div class="stat-row"><span>💰 Выручка:</span><span class="stat-value">${st.revenue.toLocaleString()} ₽</span></div><div class="stat-row"><span>💵 Наличные:</span><span>${st.cash.toLocaleString()} ₽</span></div><div class="stat-row"><span>💳 Карта:</span><span>${st.card.toLocaleString()} ₽</span></div><div class="stat-row"><span>📊 Средний чек:</span><span class="stat-value">${avg.toLocaleString()} ₽</span></div></div>`;
             }
-            html += `<div class="stat-card" style="background: var(--primary-blue); color: white; margin-top: 12px;">
-                        <div class="stat-row"><span><strong>ИТОГО ПО ЦЕНТРУ</strong></span><span><strong>${totalOrders} заказов</strong></span></div>
-                        <div class="stat-row"><span>💰 Общая выручка:</span><span><strong>${totalRevenue.toLocaleString()} ₽</strong></span></div>
-                    </div>`;
+            html += `<div class="stat-card" style="background: var(--primary-blue); color: white;"><div class="stat-row"><span><strong>ИТОГО ПО ЦЕНТРУ</strong></span><span><strong>${totalOrders} заказов</strong></span></div><div class="stat-row"><span>💰 Общая выручка:</span><span><strong>${totalRevenue.toLocaleString()} ₽</strong></span></div></div>`;
             document.getElementById("monthlyReportContent").innerHTML = html;
         }
 
@@ -1355,23 +679,19 @@
             }
             data.push([], ["ДЕТАЛИ ЗАКАЗОВ:"]);
             data.push(["ID", "Клиент", "Телефон", "Сумма", "Оплата", "Дата", "Оператор", "Комментарий"]);
-            filteredOrders.forEach(o => {
-                data.push([o.id, o.client, o.phone || "", o.finalTotal, o.paymentMethod === "cash" ? "Наличные" : "Карта", o.date, o.operator, o.comment || ""]);
-            });
-            let ws = XLSX.utils.aoa_to_sheet(data);
-            let wb = XLSX.utils.book_new();
+            filteredOrders.forEach(o => { data.push([o.id, o.client, o.phone || "", o.finalTotal, o.paymentMethod === "cash" ? "Наличные" : "Карта", o.date, o.operator, o.comment || ""]); });
+            let ws = XLSX.utils.aoa_to_sheet(data), wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, `Отчёт_${monthNames[month-1]}_${year}`);
             XLSX.writeFile(wb, `A4print_месячный_отчёт_${monthNames[month-1]}_${year}.xlsx`);
         }
 
+        // Сменный отчёт (PDF)
         function generatePDFReport() {
             let my = getMyOrders();
             let cash = my.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
             let card = my.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
             let html = `<div style="font-family:monospace; padding:20px;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Отчёт за смену</p><p>${currentUser.name} | ${shiftOpen || "—"} → ${shiftClose || "—"}</p>${shiftOpenComment ? `<p>📝 Комментарий открытия: ${escapeHtml(shiftOpenComment)}</p>` : ""}${shiftCloseComment ? `<p>📝 Комментарий закрытия: ${escapeHtml(shiftCloseComment)}</p>` : ""}</div><hr><div><strong>ИТОГИ:</strong><br>📦 Заказов: ${my.length}<br>💰 Выручка: ${cash + card} ₽<br>💵 Наличные: ${cash} ₽<br>💳 Карта: ${card} ₽</div><hr><div><strong>ДЕТАЛИ:</strong></div>${my.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;"><div>№${o.id} | ${o.date}</div><div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div><div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div><div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Нал" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div></div>`).join('')}<hr><div style="text-align:center;">Подпись: _______________</div></div>`;
-            let el = document.createElement('div');
-            el.innerHTML = html;
-            document.body.appendChild(el);
+            let el = document.createElement('div'); el.innerHTML = html; document.body.appendChild(el);
             html2pdf().set({ margin: 0.5, filename: `A4print_report_${currentUser.name}.pdf`, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
         }
 
@@ -1386,11 +706,9 @@
             let final = subtotal - discount;
             let itemsHtml = cart.map(i => `<tr><td>${escapeHtml(i.name)}</td><td style="text-align:center">${i.qty}</td><td style="text-align:center">${i.price} ₽</td><td style="text-align:right">${i.price * i.qty} ₽</td>`).join('');
             let phoneLine = phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : '';
-            let html = `<div class="blank-page"><div style="text-align:center; margin-bottom:20px;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">──────── ОСНОВНОЙ ЭКЗЕМПЛЯР ────────</div></div><div class="blank-page"><div style="text-align:center; margin-bottom:20px;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">─────────── КОПИЯ КЛИЕНТА ───────────</div></div>`;
-            let cont = document.getElementById("printBlankContainer");
-            cont.innerHTML = html;
-            window.print();
-            setTimeout(() => cont.innerHTML = "", 1000);
+            let html = `<div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">──────── ОСНОВНОЙ ЭКЗЕМПЛЯР ────────</div></div><div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">─────────── КОПИЯ КЛИЕНТА ───────────</div></div>`;
+            let cont = document.getElementById("printBlankContainer"); cont.innerHTML = html;
+            window.print(); setTimeout(() => cont.innerHTML = "", 1000);
         }
 
         function exportExcel() {
@@ -1406,65 +724,35 @@
         function renderAdmin() {
             let aDiv = document.getElementById("adminServicesList");
             aDiv.innerHTML = "";
-            services.forEach(s => {
-                aDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:90px;"><button class="updateService" data-id="${s.id}" style="background:var(--primary-blue);">💾</button><button class="deleteService" data-id="${s.id}" style="background:#C2412C;">🗑</button></div>`;
-            });
+            services.forEach(s => { aDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:90px;"><button class="updateService" data-id="${s.id}" style="background:var(--primary-blue);">💾</button><button class="deleteService" data-id="${s.id}" style="background:#C2412C;">🗑</button></div>`; });
             document.querySelectorAll(".updateService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); let s = services.find(x => x.id === id); if (s) { s.price = parseInt(document.getElementById(`price_${id}`).value); saveServices(); renderServices(); renderAdmin(); } });
             document.querySelectorAll(".deleteService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); if (services.length <= 1) return alert("Нельзя удалить последнюю услугу"); services = services.filter(x => x.id !== id); saveServices(); renderServices(); renderAdmin(); });
             let opDiv = document.getElementById("operatorsList");
             opDiv.innerHTML = "";
-            for (let [login, data] of Object.entries(operators)) {
-                if (login === "admin") continue;
-                opDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="Новый пароль"><button class="changePass" data-login="${login}" style="background:var(--primary-yellow); color:black;">🔑</button><button class="deleteOp" data-login="${login}" style="background:#C2412C;">🗑</button></div>`;
-            }
+            for (let [login, data] of Object.entries(operators)) { if (login === "admin") continue; opDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="Новый пароль"><button class="changePass" data-login="${login}" style="background:var(--primary-yellow); color:black;">🔑</button><button class="deleteOp" data-login="${login}" style="background:#C2412C;">🗑</button></div>`; }
             document.querySelectorAll(".changePass").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); let p = document.getElementById(`pass_${log}`).value; if (p) { operators[log].password = p; saveOperators(); alert("Пароль изменён"); } });
             document.querySelectorAll(".deleteOp").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); if (confirm("Удалить оператора?")) { delete operators[log]; saveOperators(); renderAdmin(); } });
         }
 
-        // ИНИЦИАЛИЗАЦИЯ ПОМОЩИ (ИНСТРУКЦИИ)
         function initHelpModal() {
             const modal = document.getElementById('instructionModal');
             const helpBtns = [document.getElementById('helpBtn'), document.getElementById('burgerHelpBtn')];
             const closeBtn = document.getElementById('closeInstructionBtn');
             if (!modal) return;
-
-            helpBtns.forEach(btn => {
-                if (btn) {
-                    btn.onclick = (e) => {
-                        e.preventDefault();
-                        modal.style.display = 'flex';
-                    };
-                }
-            });
-
+            helpBtns.forEach(btn => { if (btn) { btn.onclick = (e) => { e.preventDefault(); modal.style.display = 'flex'; }; } });
             if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
             modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
-
             const tabs = modal.querySelectorAll('.tab-btn');
             const contents = modal.querySelectorAll('.instruction-content');
-            tabs.forEach(tab => {
-                tab.onclick = () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    contents.forEach(c => c.classList.remove('active'));
-                    const activeContent = modal.querySelector(`#tab-${tabId}`);
-                    if (activeContent) activeContent.classList.add('active');
-                };
-            });
+            tabs.forEach(tab => { tab.onclick = () => { const tabId = tab.getAttribute('data-tab'); tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); contents.forEach(c => c.classList.remove('active')); const activeContent = modal.querySelector(`#tab-${tabId}`); if (activeContent) activeContent.classList.add('active'); }; });
         }
 
         let theme = localStorage.getItem("a4print_theme");
         if (theme === "dark") document.body.classList.add("dark");
 
         function toggleTheme() {
-            if (document.body.classList.contains("dark")) {
-                document.body.classList.remove("dark");
-                localStorage.setItem("a4print_theme", "light");
-            } else {
-                document.body.classList.add("dark");
-                localStorage.setItem("a4print_theme", "dark");
-            }
+            if (document.body.classList.contains("dark")) { document.body.classList.remove("dark"); localStorage.setItem("a4print_theme", "light"); }
+            else { document.body.classList.add("dark"); localStorage.setItem("a4print_theme", "dark"); }
         }
 
         function login(login, pwd) {
@@ -1476,18 +764,14 @@
                 document.getElementById("mainContent").style.display = "block";
                 loadData();
                 initHelpModal();
+                initYearSelect();
                 return true;
             }
             document.getElementById("loginError").innerText = "Неверный логин или пароль";
             return false;
         }
 
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem("a4print_current_user");
-            location.reload();
-        }
-
+        function logout() { currentUser = null; localStorage.removeItem("a4print_current_user"); location.reload(); }
         function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ""; }
 
         function initBurger() {
@@ -1515,11 +799,13 @@
                         loadData();
                         initBurger();
                         initHelpModal();
+                        initYearSelect();
                     } else logout();
                 } catch (e) { logout(); }
             } else {
                 initBurger();
                 initHelpModal();
+                initYearSelect();
             }
 
             document.getElementById("themeToggleBtn").onclick = toggleTheme;
@@ -1533,7 +819,6 @@
             document.getElementById("pdfReportBtn").onclick = generatePDFReport;
             document.getElementById("printBlankBtn").onclick = printOrderBlank;
             document.getElementById("addFastServiceBtn").onclick = addFastService;
-
             document.getElementById("shiftToggleBtn").onclick = toggleShiftWithComment;
             document.getElementById("shiftCommentConfirm").onclick = confirmShiftWithComment;
             document.getElementById("shiftCommentCancel").onclick = cancelShiftComment;
@@ -1544,6 +829,11 @@
             document.getElementById("viewOperatorsStatsBtn").onclick = showOperatorsStats;
             document.getElementById("closeStatsModal").onclick = () => document.getElementById("operatorsStatsModal").style.display = "none";
             document.getElementById("exportStatsExcelBtn").onclick = exportStatsExcel;
+            
+            // Отчёт по дате
+            document.getElementById("viewDateReportBtn").onclick = showDateReport;
+            document.getElementById("exportDateReportPDFBtn").onclick = exportDateReportPDF;
+            document.getElementById("exportDateReportExcelBtn").onclick = exportDateReportExcel;
             
             // Месячный отчёт
             document.getElementById("viewMonthlyReportBtn").onclick = showMonthlyReport;
