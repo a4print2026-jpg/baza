@@ -60,8 +60,70 @@
         .cart-panel { flex: 1.2; min-width: 320px; background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
         .history-section { background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
         .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-gray); margin-bottom: 20px; }
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; max-height: 520px; overflow-y: auto; padding-right: 6px; }
-        .service-card { background: var(--bg-light); border-radius: 24px; padding: 14px; text-align: center; border: 1px solid var(--border-light); cursor: pointer; transition: 0.1s; }
+        
+        /* ПОИСК УСЛУГ */
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 15px;
+            border-radius: 30px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-light);
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card-white);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        body.dark .search-results {
+            background: #1E2A3A;
+        }
+        .search-result-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-result-item:hover {
+            background: var(--bg-light);
+        }
+        .search-result-price {
+            font-weight: 600;
+            color: var(--primary-magenta);
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 14px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+        .service-card {
+            background: var(--bg-light);
+            border-radius: 24px;
+            padding: 14px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: 0.1s;
+        }
         .service-card:hover { transform: translateY(-2px); border-color: var(--primary-blue); }
         .service-name { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
         .service-price { font-size: 17px; font-weight: 800; color: var(--primary-magenta); margin: 6px 0; }
@@ -152,7 +214,15 @@
             <div class="dashboard">
                 <div class="card">
                     <div class="panel-title">📋 УСЛУГИ</div>
+                    
+                    <!-- ПОИСК УСЛУГ -->
+                    <div class="search-container">
+                        <input type="text" id="searchService" class="search-input" placeholder="🔍 Поиск услуги (начните вводить название...)" autocomplete="off">
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                    
                     <div id="servicesGrid" class="services-grid"></div>
+                    
                     <div class="fast-service-card">
                         <div class="fast-service-row">
                             <input type="text" id="fastServiceName" placeholder="Название услуги (любое)" style="flex:2;">
@@ -235,11 +305,12 @@
             <div class="instruction-content active" id="tab-operator">
                 <div class="instruction-step"><strong>1. Вход</strong><br>Логин/пароль → «Войти».</div>
                 <div class="instruction-step"><strong>2. Открыть смену</strong><br>«🚀 Открыть смену» → при необходимости комментарий.</div>
-                <div class="instruction-step"><strong>3. Приём заказа</strong><br>Выберите услугу → количество → «Добавить».</div>
-                <div class="instruction-step"><strong>4. Оформление</strong><br>Клиент, скидка, оплата, комментарий → «Оформить».</div>
-                <div class="instruction-step"><strong>5. Печать бланка</strong><br>«🖨️ Бланк заказа» — А4 с двумя экземплярами.</div>
-                <div class="instruction-step"><strong>6. Отчёт</strong><br>«📄 Отчёт» → выберите «За сегодня» или «Полный». Сохранится PDF.</div>
-                <div class="instruction-step"><strong>7. Закрыть смену</strong><br>«🔒 Закрыть смену» → затем «Отчёт» для бухгалтерии.</div>
+                <div class="instruction-step"><strong>3. Поиск услуги</strong><br>Начните вводить название в поле поиска — появятся подходящие варианты.</div>
+                <div class="instruction-step"><strong>4. Приём заказа</strong><br>Выберите услугу → количество → «Добавить».</div>
+                <div class="instruction-step"><strong>5. Оформление</strong><br>Клиент, скидка, оплата, комментарий → «Оформить».</div>
+                <div class="instruction-step"><strong>6. Печать бланка</strong><br>«🖨️ Бланк заказа» — А4 с двумя экземплярами.</div>
+                <div class="instruction-step"><strong>7. Отчёт</strong><br>«📄 Отчёт» → выберите «За сегодня» или «Полный». Сохранится PDF.</div>
+                <div class="instruction-step"><strong>8. Закрыть смену</strong><br>«🔒 Закрыть смену» → затем «Отчёт» для бухгалтерии.</div>
             </div>
             <div class="instruction-content" id="tab-admin">
                 <div class="instruction-step"><strong>Вход админа</strong><br>admin / admin123</div>
@@ -429,14 +500,89 @@
             let burgerSpan = document.getElementById("burgerOperatorName");
             if (burgerSpan) burgerSpan.innerText = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : ""}`;
         }
+        
+        // ========== ПОИСК УСЛУГ ==========
+        let searchTimeout;
+        function initSearch() {
+            const searchInput = document.getElementById('searchService');
+            const searchResults = document.getElementById('searchResults');
+            if (!searchInput) return;
+            
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.toLowerCase().trim();
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    if (query.length === 0) {
+                        searchResults.style.display = 'none';
+                        renderServices(); // показать все услуги
+                        return;
+                    }
+                    const filtered = services.filter(s => s.name.toLowerCase().includes(query));
+                    if (filtered.length === 0) {
+                        searchResults.style.display = 'none';
+                        renderServices([]); // пустой список
+                        return;
+                    }
+                    // Показываем результаты поиска в выпадающем списке
+                    searchResults.innerHTML = filtered.map(s => `
+                        <div class="search-result-item" data-id="${s.id}">
+                            <span>${escapeHtml(s.name)}</span>
+                            <span class="search-result-price">${s.price} ₽</span>
+                        </div>
+                    `).join('');
+                    searchResults.style.display = 'block';
+                    // При клике на результат добавляем услугу с выбранным количеством
+                    document.querySelectorAll('.search-result-item').forEach(el => {
+                        el.addEventListener('click', (e) => {
+                            const id = parseInt(el.getAttribute('data-id'));
+                            const service = services.find(s => s.id === id);
+                            if (service) {
+                                // Получаем количество из поля рядом с услугой в сетке
+                                const qtyInput = document.getElementById(`qty_${id}`);
+                                let qty = qtyInput ? parseInt(qtyInput.value) : 1;
+                                if (!qty || qty <= 0) qty = 1;
+                                addToCartById(service, qty);
+                                if (qtyInput) qtyInput.value = 0;
+                                searchInput.value = '';
+                                searchResults.style.display = 'none';
+                                renderServices(); // обновить сетку
+                            }
+                        });
+                    });
+                }, 300);
+            });
+            
+            // Закрыть результаты при клике вне
+            document.addEventListener('click', function(e) {
+                if (!searchResults.contains(e.target) && e.target !== searchInput) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        }
+        
+        function addToCartById(service, qty) {
+            if (qty <= 0) return;
+            let existing = cart.find(i => i.id === service.id);
+            if (existing) existing.qty += qty;
+            else cart.push({ id: service.id, name: service.name, price: service.price, qty: qty });
+            renderCart();
+        }
 
-        function renderServices() {
+        function renderServices(filteredList = null) {
             const grid = document.getElementById("servicesGrid");
+            const servicesToShow = filteredList !== null ? filteredList : services;
             grid.innerHTML = "";
-            services.forEach(s => {
+            servicesToShow.forEach(s => {
                 let card = document.createElement("div");
                 card.className = "service-card";
-                card.innerHTML = `<div class="service-name">${escapeHtml(s.name)}</div><div class="service-price">${s.price} ₽</div><div class="qty-control"><input type="number" id="qty_${s.id}" value="0" min="0" step="1" placeholder="кол-во" class="qty-input"></div><button class="add-btn" data-id="${s.id}">➕ Добавить</button>`;
+                card.innerHTML = `
+                    <div class="service-name">${escapeHtml(s.name)}</div>
+                    <div class="service-price">${s.price} ₽</div>
+                    <div class="qty-control">
+                        <input type="number" id="qty_${s.id}" value="0" min="0" step="1" placeholder="кол-во" class="qty-input">
+                    </div>
+                    <button class="add-btn" data-id="${s.id}">➕ Добавить</button>
+                `;
                 grid.appendChild(card);
             });
             document.querySelectorAll(".add-btn").forEach(btn => btn.onclick = (e) => { e.stopPropagation(); let id = parseInt(btn.getAttribute("data-id")); addServiceById(id); });
@@ -537,62 +683,32 @@
             }
         }
 
-        // ========== ОТЧЁТЫ С ВЫБОРОМ (ИСПРАВЛЕНАЯ ВЕРСИЯ — ДОБАВЛЕНА ИНФОРМАЦИЯ О СМЕНЕ) ==========
+        // ========== ОТЧЁТЫ С ВЫБОРОМ ==========
         function generateReport(orders, title) {
             let cash = orders.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
             let card = orders.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
-            
-            // Блок информации о смене
             let shiftInfo = '';
             if (shiftOpen || shiftClose) {
                 shiftInfo = `<div style="margin: 10px 0; padding: 8px; background: #f5f5f5; border-left: 3px solid #0066B3;">
-                    <strong>🕐 Смена:</strong><br>
-                    📅 Открыта: ${shiftOpen || '—'}<br>
-                    🔒 Закрыта: ${shiftClose || '—'}<br>`;
+                    <strong>🕐 Смена:</strong><br>📅 Открыта: ${shiftOpen || '—'}<br>🔒 Закрыта: ${shiftClose || '—'}<br>`;
                 if (shiftOpenComment) shiftInfo += `📝 Комментарий открытия: ${escapeHtml(shiftOpenComment)}<br>`;
                 if (shiftCloseComment) shiftInfo += `📝 Комментарий закрытия: ${escapeHtml(shiftCloseComment)}<br>`;
                 shiftInfo += `</div>`;
             }
-            
             let ordersHtml = orders.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;">
                 <div>№${o.id} | ${o.date}</div>
                 <div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div>
                 <div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div>
                 <div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div>
             </div>`).join('');
-            
-            let html = `<div style="font-family: monospace; padding: 20px;">
-                <div style="text-align: center;">
-                    <h2>A4-ПРИНТ</h2>
-                    <p>${title}</p>
-                    <p>Оператор: ${currentUser.name}</p>
-                    <p>Дата формирования: ${new Date().toLocaleString()}</p>
-                </div>
-                ${shiftInfo}
-                <hr>
-                <div><strong>ИТОГИ:</strong><br>
-                📦 Заказов: ${orders.length}<br>
-                💰 Выручка: ${cash + card} ₽<br>
-                💵 Наличные: ${cash} ₽<br>
-                💳 Карта: ${card} ₽</div>
-                <hr>
-                <div><strong>ДЕТАЛИ ЗАКАЗОВ:</strong></div>
-                ${ordersHtml || '<div>Нет заказов за выбранный период</div>'}
-                <hr>
-                <div style="text-align: center;">Подпись: _______________</div>
-            </div>`;
-            
-            let el = document.createElement('div');
-            el.innerHTML = html;
-            document.body.appendChild(el);
+            let html = `<div style="font-family: monospace; padding: 20px;"><div style="text-align: center;"><h2>A4-ПРИНТ</h2><p>${title}</p><p>Оператор: ${currentUser.name}</p><p>Дата формирования: ${new Date().toLocaleString()}</p></div>${shiftInfo}<hr><div><strong>ИТОГИ:</strong><br>📦 Заказов: ${orders.length}<br>💰 Выручка: ${cash + card} ₽<br>💵 Наличные: ${cash} ₽<br>💳 Карта: ${card} ₽</div><hr><div><strong>ДЕТАЛИ ЗАКАЗОВ:</strong></div>${ordersHtml || '<div>Нет заказов за выбранный период</div>'}
+            <hr><div style="text-align: center;">Подпись: _______________</div></div>`;
+            let el = document.createElement('div'); el.innerHTML = html; document.body.appendChild(el);
             let filename = `A4print_${currentUser.name}_${title.replace(/\s/g, '_')}.pdf`;
             html2pdf().set({ margin: 0.5, filename: filename, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
         }
 
-        function showReportChoice() {
-            document.getElementById("reportChoiceModal").style.display = "flex";
-        }
-
+        function showReportChoice() { document.getElementById("reportChoiceModal").style.display = "flex"; }
         function reportToday() {
             let today = new Date().toLocaleDateString();
             let myOrders = getMyOrders();
@@ -601,7 +717,6 @@
             generateReport(todayOrders, `Отчёт за ${today}`);
             document.getElementById("reportChoiceModal").style.display = "none";
         }
-
         function reportFull() {
             let myOrders = getMyOrders();
             if (myOrders.length === 0) { alert("Нет заказов"); return; }
@@ -649,11 +764,7 @@
         }
 
         // Отчёт за произвольную дату (админ)
-        function getOrdersByDate(dateStr) {
-            if (!dateStr) return [];
-            return allOrders.filter(o => o.date.includes(dateStr));
-        }
-
+        function getOrdersByDate(dateStr) { if (!dateStr) return []; return allOrders.filter(o => o.date.includes(dateStr)); }
         function showDateReport() {
             let date = document.getElementById("reportDate").value;
             if (!date) { alert("Выберите дату"); return; }
@@ -669,23 +780,14 @@
             document.getElementById("dateReportContent").innerHTML = html;
             window._lastDateReport = { date, orders, totalRevenue, cash, card };
         }
-
         function exportDateReportPDF() {
             if (!window._lastDateReport || !window._lastDateReport.orders.length) { alert("Сначала сформируйте отчёт за дату"); return; }
             let r = window._lastDateReport;
-            let ordersHtml = r.orders.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;">
-                <div>№${o.id} | ${o.date}</div>
-                <div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div>
-                <div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div>
-                <div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div>
-            </div>`).join('');
-            let html = `<div style="font-family:monospace; padding:20px;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Отчёт за ${r.date}</p><p>Пользователь: ${currentUser.name}</p></div><hr>
-                <div><strong>ИТОГИ:</strong><br>📦 Заказов: ${r.orders.length}<br>💰 Выручка: ${r.totalRevenue} ₽<br>💵 Наличные: ${r.cash} ₽<br>💳 Карта: ${r.card} ₽</div><hr>
-                <div><strong>ДЕТАЛИ ЗАКАЗОВ:</strong></div>${ordersHtml}<hr><div style="text-align:center;">Подпись: _______________</div></div>`;
+            let ordersHtml = r.orders.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;"><div>№${o.id} | ${o.date}</div><div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div><div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div><div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div></div>`).join('');
+            let html = `<div style="font-family:monospace; padding:20px;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Отчёт за ${r.date}</p><p>Пользователь: ${currentUser.name}</p></div><hr><div><strong>ИТОГИ:</strong><br>📦 Заказов: ${r.orders.length}<br>💰 Выручка: ${r.totalRevenue} ₽<br>💵 Наличные: ${r.cash} ₽<br>💳 Карта: ${r.card} ₽</div><hr><div><strong>ДЕТАЛИ ЗАКАЗОВ:</strong></div>${ordersHtml}<hr><div style="text-align:center;">Подпись: _______________</div></div>`;
             let el = document.createElement('div'); el.innerHTML = html; document.body.appendChild(el);
             html2pdf().set({ margin: 0.5, filename: `A4print_отчёт_${r.date}.pdf`, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
         }
-
         function exportDateReportExcel() {
             if (!window._lastDateReport || !window._lastDateReport.orders.length) { alert("Сначала сформируйте отчёт за дату"); return; }
             let r = window._lastDateReport;
@@ -710,28 +812,15 @@
                 yearSelect.appendChild(option);
             }
         }
-
         function getMonthlyReport() {
             let month = parseInt(document.getElementById("reportMonth").value);
             let year = parseInt(document.getElementById("reportYear").value);
-            let filteredOrders = allOrders.filter(o => {
-                let orderDate = new Date(o.date);
-                return orderDate.getMonth() + 1 === month && orderDate.getFullYear() === year;
-            });
+            let filteredOrders = allOrders.filter(o => { let orderDate = new Date(o.date); return orderDate.getMonth() + 1 === month && orderDate.getFullYear() === year; });
             let stats = {};
             for (let [login, data] of Object.entries(operators)) { stats[login] = { name: data.name, orders: 0, revenue: 0, cash: 0, card: 0 }; }
-            filteredOrders.forEach(o => {
-                let op = Object.keys(operators).find(l => operators[l].name === o.operator);
-                if (op) {
-                    stats[op].orders++;
-                    stats[op].revenue += o.finalTotal;
-                    if (o.paymentMethod === "cash") stats[op].cash += o.finalTotal;
-                    else stats[op].card += o.finalTotal;
-                }
-            });
+            filteredOrders.forEach(o => { let op = Object.keys(operators).find(l => operators[l].name === o.operator); if (op) { stats[op].orders++; stats[op].revenue += o.finalTotal; if (o.paymentMethod === "cash") stats[op].cash += o.finalTotal; else stats[op].card += o.finalTotal; } });
             return { stats, filteredOrders, month, year };
         }
-
         function showMonthlyReport() {
             let { stats, filteredOrders, month, year } = getMonthlyReport();
             let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
@@ -739,23 +828,18 @@
             let totalOrders = 0, totalRevenue = 0;
             for (let [login, st] of Object.entries(stats)) {
                 let avg = st.orders ? Math.round(st.revenue / st.orders) : 0;
-                totalOrders += st.orders;
-                totalRevenue += st.revenue;
+                totalOrders += st.orders; totalRevenue += st.revenue;
                 html += `<div class="stat-card"><div class="stat-row"><span><strong>${st.name}</strong> ${login === "admin" ? "👑" : "👤"}</span><span class="stat-value">${st.orders} заказов</span></div><div class="stat-row"><span>💰 Выручка:</span><span class="stat-value">${st.revenue.toLocaleString()} ₽</span></div><div class="stat-row"><span>💵 Наличные:</span><span>${st.cash.toLocaleString()} ₽</span></div><div class="stat-row"><span>💳 Карта:</span><span>${st.card.toLocaleString()} ₽</span></div><div class="stat-row"><span>📊 Средний чек:</span><span class="stat-value">${avg.toLocaleString()} ₽</span></div></div>`;
             }
             html += `<div class="stat-card" style="background: var(--primary-blue); color: white;"><div class="stat-row"><span><strong>ИТОГО ПО ЦЕНТРУ</strong></span><span><strong>${totalOrders} заказов</strong></span></div><div class="stat-row"><span>💰 Общая выручка:</span><span><strong>${totalRevenue.toLocaleString()} ₽</strong></span></div></div>`;
             document.getElementById("monthlyReportContent").innerHTML = html;
         }
-
         function exportMonthlyReport() {
             let { stats, filteredOrders, month, year } = getMonthlyReport();
             let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
             let data = [[`Отчёт за ${monthNames[month-1]} ${year}`], []];
             data.push(["Оператор", "Заказов", "Выручка (₽)", "Наличные", "Карта", "Средний чек"]);
-            for (let [login, st] of Object.entries(stats)) {
-                let avg = st.orders ? Math.round(st.revenue / st.orders) : 0;
-                data.push([st.name, st.orders, st.revenue, st.cash, st.card, avg]);
-            }
+            for (let [login, st] of Object.entries(stats)) { let avg = st.orders ? Math.round(st.revenue / st.orders) : 0; data.push([st.name, st.orders, st.revenue, st.cash, st.card, avg]); }
             data.push([], ["ДЕТАЛИ ЗАКАЗОВ:"]);
             data.push(["ID", "Клиент", "Телефон", "Сумма", "Оплата", "Дата", "Оператор", "Комментарий"]);
             filteredOrders.forEach(o => { data.push([o.id, o.client, o.phone || "", o.finalTotal, o.paymentMethod === "cash" ? "Наличные" : "Карта", o.date, o.operator, o.comment || ""]); });
@@ -834,6 +918,7 @@
                 loadData();
                 initHelpModal();
                 initYearSelect();
+                initSearch();
                 return true;
             }
             document.getElementById("loginError").innerText = "Неверный логин или пароль";
@@ -869,12 +954,14 @@
                         initBurger();
                         initHelpModal();
                         initYearSelect();
+                        initSearch();
                     } else logout();
                 } catch (e) { logout(); }
             } else {
                 initBurger();
                 initHelpModal();
                 initYearSelect();
+                initSearch();
             }
 
             document.getElementById("themeToggleBtn").onclick = toggleTheme;
