@@ -7,7 +7,6 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* (стили без изменений, оставлены как в предыдущей версии) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary-blue: #0066B3;
@@ -538,18 +537,60 @@
             }
         }
 
-        // ========== ОТЧЁТЫ С ВЫБОРОМ ==========
-        function showReportChoice() {
-            document.getElementById("reportChoiceModal").style.display = "flex";
-        }
-
+        // ========== ОТЧЁТЫ С ВЫБОРОМ (ИСПРАВЛЕНАЯ ВЕРСИЯ — ДОБАВЛЕНА ИНФОРМАЦИЯ О СМЕНЕ) ==========
         function generateReport(orders, title) {
             let cash = orders.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
             let card = orders.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
-            let html = `<div style="font-family:monospace; padding:20px;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>${title}</p><p>Оператор: ${currentUser.name}</p><p>Дата формирования: ${new Date().toLocaleString()}</p></div><hr><div><strong>ИТОГИ:</strong><br>📦 Заказов: ${orders.length}<br>💰 Выручка: ${cash + card} ₽<br>💵 Наличные: ${cash} ₽<br>💳 Карта: ${card} ₽</div><hr><div><strong>ДЕТАЛИ ЗАКАЗОВ:</strong></div>${orders.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;"><div>№${o.id} | ${o.date}</div><div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div><div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div><div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div></div>`).join('')}<hr><div style="text-align:center;">Подпись: _______________</div></div>`;
-            let el = document.createElement('div'); el.innerHTML = html; document.body.appendChild(el);
+            
+            // Блок информации о смене
+            let shiftInfo = '';
+            if (shiftOpen || shiftClose) {
+                shiftInfo = `<div style="margin: 10px 0; padding: 8px; background: #f5f5f5; border-left: 3px solid #0066B3;">
+                    <strong>🕐 Смена:</strong><br>
+                    📅 Открыта: ${shiftOpen || '—'}<br>
+                    🔒 Закрыта: ${shiftClose || '—'}<br>`;
+                if (shiftOpenComment) shiftInfo += `📝 Комментарий открытия: ${escapeHtml(shiftOpenComment)}<br>`;
+                if (shiftCloseComment) shiftInfo += `📝 Комментарий закрытия: ${escapeHtml(shiftCloseComment)}<br>`;
+                shiftInfo += `</div>`;
+            }
+            
+            let ordersHtml = orders.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;">
+                <div>№${o.id} | ${o.date}</div>
+                <div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div>
+                <div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div>
+                <div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div>
+            </div>`).join('');
+            
+            let html = `<div style="font-family: monospace; padding: 20px;">
+                <div style="text-align: center;">
+                    <h2>A4-ПРИНТ</h2>
+                    <p>${title}</p>
+                    <p>Оператор: ${currentUser.name}</p>
+                    <p>Дата формирования: ${new Date().toLocaleString()}</p>
+                </div>
+                ${shiftInfo}
+                <hr>
+                <div><strong>ИТОГИ:</strong><br>
+                📦 Заказов: ${orders.length}<br>
+                💰 Выручка: ${cash + card} ₽<br>
+                💵 Наличные: ${cash} ₽<br>
+                💳 Карта: ${card} ₽</div>
+                <hr>
+                <div><strong>ДЕТАЛИ ЗАКАЗОВ:</strong></div>
+                ${ordersHtml || '<div>Нет заказов за выбранный период</div>'}
+                <hr>
+                <div style="text-align: center;">Подпись: _______________</div>
+            </div>`;
+            
+            let el = document.createElement('div');
+            el.innerHTML = html;
+            document.body.appendChild(el);
             let filename = `A4print_${currentUser.name}_${title.replace(/\s/g, '_')}.pdf`;
             html2pdf().set({ margin: 0.5, filename: filename, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
+        }
+
+        function showReportChoice() {
+            document.getElementById("reportChoiceModal").style.display = "flex";
         }
 
         function reportToday() {
@@ -633,7 +674,8 @@
             if (!window._lastDateReport || !window._lastDateReport.orders.length) { alert("Сначала сформируйте отчёт за дату"); return; }
             let r = window._lastDateReport;
             let ordersHtml = r.orders.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;">
-                <div>№${o.id} | ${o.date}</div><div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div>
+                <div>№${o.id} | ${o.date}</div>
+                <div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div>
                 <div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div>
                 <div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div>
             </div>`).join('');
@@ -733,7 +775,7 @@
             let final = subtotal - discount;
             let itemsHtml = cart.map(i => `<tr><td>${escapeHtml(i.name)}</td><td style="text-align:center">${i.qty}</td><td style="text-align:center">${i.price} ₽</td><td style="text-align:right">${i.price * i.qty} ₽</td>`).join('');
             let phoneLine = phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : '';
-            let html = `<div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">──────── ОСНОВНОЙ ЭКЗЕМПЛЯР ────────</div></div><div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody><td><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">─────────── КОПИЯ КЛИЕНТА ───────────</div></div>`;
+            let html = `<div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">──────── ОСНОВНОЙ ЭКЗЕМПЛЯР ────────</div></div><div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">─────────── КОПИЯ КЛИЕНТА ───────────</div></div>`;
             let cont = document.getElementById("printBlankContainer"); cont.innerHTML = html;
             window.print(); setTimeout(() => cont.innerHTML = "", 1000);
         }
@@ -850,7 +892,6 @@
             document.getElementById("shiftCommentConfirm").onclick = confirmShiftWithComment;
             document.getElementById("shiftCommentCancel").onclick = cancelShiftComment;
             
-            // Кнопки выбора отчёта
             document.getElementById("reportTodayBtn").onclick = reportToday;
             document.getElementById("reportFullBtn").onclick = reportFull;
             document.getElementById("cancelReportBtn").onclick = () => document.getElementById("reportChoiceModal").style.display = "none";
