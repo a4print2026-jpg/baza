@@ -254,7 +254,7 @@
                 <div class="instruction-step"><strong>3. Поиск услуги</strong><br>Начните вводить название в поле поиска — появятся подходящие варианты.</div>
                 <div class="instruction-step"><strong>4. Приём заказа</strong><br>Выберите услугу → количество → «Добавить».</div>
                 <div class="instruction-step"><strong>5. Оформление</strong><br>Клиент, скидка, оплата, комментарий → «Оформить».</div>
-                <div class="instruction-step"><strong>6. Синхронизация</strong><br>После оформления заказ автоматически отправляется в Google Таблицу.</div>
+                <div class="instruction-step"><strong>6. Автосинхронизация</strong><br>Каждые 2 минуты система автоматически сохраняет заказы в Google Таблицу.</div>
                 <div class="instruction-step"><strong>7. Печать бланка</strong><br>«🖨️ Бланк заказа» — А4 с двумя экземплярами.</div>
                 <div class="instruction-step"><strong>8. Отчёт</strong><br>«📄 Отчёт» → выберите «За сегодня» или «Полный».</div>
                 <div class="instruction-step"><strong>9. Закрыть смену</strong><br>«🔒 Закрыть смену» → затем «Отчёт» для бухгалтерии.</div>
@@ -266,7 +266,7 @@
                 <div class="instruction-step"><strong>Статистика за всё время</strong><br>«📊 Статистика операторов».</div>
                 <div class="instruction-step"><strong>Отчёт за любую дату</strong><br>В админ-панели выберите дату → «Показать отчёт» → PDF/Excel.</div>
                 <div class="instruction-step"><strong>Месячный отчёт</strong><br>Выберите месяц и год → экспорт в Excel.</div>
-                <div class="instruction-step"><strong>Синхронизация всех заказов</strong><br>Нажмите «🔄 Синхронизировать все заказы» — все существующие заказы отправятся в Google Таблицу.</div>
+                <div class="instruction-step"><strong>Автосинхронизация</strong><br>Система автоматически отправляет несинхронизированные заказы каждые 2 минуты.</div>
             </div>
         </div>
     </div>
@@ -311,7 +311,7 @@
                     <button id="testSyncBtn" class="btn-info">Тест синхронизации</button>
                     <button id="syncAllOrdersBtn" class="btn-warning">🔄 Синхронизировать все заказы</button>
                 </div>
-                <div id="syncSettingsInfo" class="instruction-note" style="margin-top: 8px;">⚙️ Получите URL: Расширения → Apps Script → Развернуть → Веб-приложение → Скопировать URL</div>
+                <div id="syncSettingsInfo" class="instruction-note" style="margin-top: 8px;">⚙️ Автоматическая синхронизация каждые 2 минуты. Получите URL: Расширения → Apps Script → Развернуть → Веб-приложение → Скопировать URL</div>
             </div>
             
             <hr>
@@ -373,6 +373,8 @@
         let allOrders = [], currentUser = null, cart = [], discountPct = 0, discountAmt = 0;
         let shiftOpen = null, shiftClose = null, shiftOpenComment = "", shiftCloseComment = "";
         let googleScriptUrl = localStorage.getItem("googleScriptUrl") || "";
+        let syncedOrders = new Set(JSON.parse(localStorage.getItem("syncedOrders") || "[]"));
+        let autoSyncInterval = null;
 
         const SERVICES_KEY = "a4print_services", OPERATORS_KEY = "a4print_operators", ORDERS_KEY = "a4print_orders", SHIFT_KEY = "a4print_shift";
 
@@ -380,59 +382,76 @@
         function saveOperators() { localStorage.setItem(OPERATORS_KEY, JSON.stringify(operators)); }
         function saveOrders() { localStorage.setItem(ORDERS_KEY, JSON.stringify(allOrders)); }
         function saveShift() { localStorage.setItem(SHIFT_KEY, JSON.stringify({ open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment, operator: currentUser?.name })); }
+        function saveSyncedOrders() { localStorage.setItem("syncedOrders", JSON.stringify([...syncedOrders])); }
 
         // ========== СИНХРОНИЗАЦИЯ С GOOGLE SHEETS ==========
-        function syncOrderToGoogle(order) {
-            return new Promise((resolve, reject) => {
-                if (!googleScriptUrl) {
-                    resolve({ success: false, error: "URL не настроен" });
-                    return;
-                }
-                const orderData = {
-                    id: order.id,
-                    date: order.date,
-                    client: order.client,
-                    phone: order.phone || "",
-                    items: order.items.map(i => `${i.name} x${i.qty}`).join(", "),
-                    subtotal: order.subtotal,
-                    discount: order.discount,
-                    finalTotal: order.finalTotal,
-                    paymentMethod: order.paymentMethod,
-                    operator: order.operator,
-                    comment: order.comment || ""
-                };
-                fetch(googleScriptUrl, {
+        async function syncOrderToGoogle(order) {
+            if (!googleScriptUrl) return false;
+            if (syncedOrders.has(order.id)) return true;
+            
+            const orderData = {
+                id: order.id,
+                date: order.date,
+                client: order.client,
+                phone: order.phone || "",
+                items: order.items.map(i => `${i.name} x${i.qty}`).join(", "),
+                subtotal: order.subtotal,
+                discount: order.discount,
+                finalTotal: order.finalTotal,
+                paymentMethod: order.paymentMethod,
+                operator: order.operator,
+                comment: order.comment || ""
+            };
+            
+            try {
+                await fetch(googleScriptUrl, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderData)
-                }).then(() => resolve({ success: true })).catch(error => resolve({ success: false, error: error.toString() }));
-            });
+                });
+                syncedOrders.add(order.id);
+                saveSyncedOrders();
+                return true;
+            } catch(e) {
+                console.error("Ошибка синхронизации:", e);
+                return false;
+            }
         }
 
-        async function syncAllOrdersToGoogle() {
-            if (!googleScriptUrl) {
-                alert("Сначала настройте URL веб-приложения в админ-панели");
-                return;
-            }
-            if (allOrders.length === 0) {
-                alert("Нет заказов для синхронизации");
-                return;
-            }
+        // Автоматическая синхронизация всех несинхронизированных заказов
+        async function autoSyncAllOrders() {
+            if (!googleScriptUrl || !currentUser) return;
+            
+            const unsyncedOrders = allOrders.filter(o => !syncedOrders.has(o.id));
+            if (unsyncedOrders.length === 0) return;
+            
             const progressDiv = document.getElementById("syncProgress");
             progressDiv.style.display = "block";
+            showSyncStatus(`🔄 Автосинхронизация: ${unsyncedOrders.length} заказов`);
+            
             let successCount = 0;
-            let failCount = 0;
-            for (let i = 0; i < allOrders.length; i++) {
-                progressDiv.textContent = `🔄 Синхронизация: ${i + 1} из ${allOrders.length}`;
-                const result = await syncOrderToGoogle(allOrders[i]);
-                if (result.success) successCount++;
-                else failCount++;
-                await new Promise(r => setTimeout(r, 200));
+            for (let i = 0; i < unsyncedOrders.length; i++) {
+                progressDiv.textContent = `🔄 Автосинхронизация: ${i + 1} из ${unsyncedOrders.length}`;
+                const result = await syncOrderToGoogle(unsyncedOrders[i]);
+                if (result) successCount++;
+                await new Promise(r => setTimeout(r, 300));
             }
+            
             progressDiv.style.display = "none";
-            showSyncStatus(`✅ Синхронизация завершена: ${successCount} успешно, ${failCount} ошибок`);
-            alert(`Синхронизация завершена!\nУспешно: ${successCount}\nОшибок: ${failCount}`);
+            if (successCount > 0) {
+                showSyncStatus(`✅ Автосинхронизация: ${successCount} заказов отправлено`);
+            }
+        }
+
+        // Запуск автоматической синхронизации (каждые 2 минуты)
+        function startAutoSync() {
+            if (autoSyncInterval) clearInterval(autoSyncInterval);
+            autoSyncInterval = setInterval(() => {
+                if (currentUser && googleScriptUrl) {
+                    autoSyncAllOrders();
+                }
+            }, 120000); // 2 минуты = 120000 мс
         }
 
         function testGoogleSync() {
@@ -468,6 +487,31 @@
             });
         }
 
+        async function syncAllOrdersToGoogle() {
+            if (!googleScriptUrl) {
+                alert("Сначала настройте URL веб-приложения в админ-панели");
+                return;
+            }
+            if (allOrders.length === 0) {
+                alert("Нет заказов для синхронизации");
+                return;
+            }
+            const progressDiv = document.getElementById("syncProgress");
+            progressDiv.style.display = "block";
+            let successCount = 0;
+            let failCount = 0;
+            for (let i = 0; i < allOrders.length; i++) {
+                progressDiv.textContent = `🔄 Синхронизация: ${i + 1} из ${allOrders.length}`;
+                const result = await syncOrderToGoogle(allOrders[i]);
+                if (result) successCount++;
+                else failCount++;
+                await new Promise(r => setTimeout(r, 200));
+            }
+            progressDiv.style.display = "none";
+            showSyncStatus(`✅ Синхронизация завершена: ${successCount} успешно, ${failCount} ошибок`);
+            alert(`Синхронизация завершена!\nУспешно: ${successCount}\nОшибок: ${failCount}`);
+        }
+
         function saveGoogleSettings() {
             const url = document.getElementById("googleScriptUrl").value.trim();
             if (url) {
@@ -475,6 +519,8 @@
                 localStorage.setItem("googleScriptUrl", url);
                 showSyncStatus("✅ Настройки сохранены");
                 alert("URL веб-приложения сохранён");
+                startAutoSync();
+                autoSyncAllOrders();
             } else {
                 alert("Введите URL веб-приложения");
             }
@@ -486,6 +532,7 @@
                 googleScriptUrl = saved;
                 const urlInput = document.getElementById("googleScriptUrl");
                 if (urlInput) urlInput.value = saved;
+                startAutoSync();
             }
         }
 
@@ -572,6 +619,8 @@
             let s = localStorage.getItem(SERVICES_KEY); if (s) services = JSON.parse(s);
             let o = localStorage.getItem(OPERATORS_KEY); if (o) operators = JSON.parse(o);
             let ord = localStorage.getItem(ORDERS_KEY); if (ord) allOrders = JSON.parse(ord);
+            let savedSynced = localStorage.getItem("syncedOrders");
+            if (savedSynced) syncedOrders = new Set(JSON.parse(savedSynced));
             renderServices();
             renderCart();
             renderHistory();
@@ -805,7 +854,7 @@
             document.getElementById("reportChoiceModal").style.display = "none";
         }
 
-        // ========== ЭКСПОРТ В EXCEL С ВЫРУЧКОЙ ЗА ТЕКУЩУЮ ДАТУ ==========
+        // ========== ЭКСПОРТ В EXCEL ==========
         function exportExcel() {
             let my = getMyOrders();
             if (!my.length) return alert("Нет данных");
@@ -978,7 +1027,6 @@
             for (let [login, data] of Object.entries(operators)) { if (login === "admin") continue; opDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="Новый пароль"><button class="changePass" data-login="${login}" style="background:var(--primary-yellow); color:black;">🔑</button><button class="deleteOp" data-login="${login}" style="background:#C2412C;">🗑</button></div>`; }
             document.querySelectorAll(".changePass").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); let p = document.getElementById(`pass_${log}`).value; if (p) { operators[log].password = p; saveOperators(); alert("Пароль изменён"); } });
             document.querySelectorAll(".deleteOp").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); if (confirm("Удалить оператора?")) { delete operators[log]; saveOperators(); renderAdmin(); } });
-            // Загружаем настройки синхронизации в поля админки
             const urlInput = document.getElementById("googleScriptUrl");
             if (urlInput && googleScriptUrl) urlInput.value = googleScriptUrl;
         }
@@ -1093,7 +1141,6 @@
             document.getElementById("viewMonthlyReportBtn").onclick = showMonthlyReport;
             document.getElementById("exportMonthlyReportBtn").onclick = exportMonthlyReport;
             
-            // Настройки синхронизации
             document.getElementById("saveGoogleSettingsBtn").onclick = saveGoogleSettings;
             document.getElementById("testSyncBtn").onclick = testGoogleSync;
             document.getElementById("syncAllOrdersBtn").onclick = syncAllOrdersToGoogle;
