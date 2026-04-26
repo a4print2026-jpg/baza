@@ -60,70 +60,15 @@
         .cart-panel { flex: 1.2; min-width: 320px; background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
         .history-section { background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
         .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-gray); margin-bottom: 20px; }
-        
-        /* ПОИСК УСЛУГ */
-        .search-container {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .search-input {
-            width: 100%;
-            padding: 14px 18px;
-            font-size: 15px;
-            border-radius: 30px;
-            background: var(--bg-light);
-            border: 1px solid var(--border-light);
-        }
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--card-white);
-            border: 1px solid var(--border-light);
-            border-radius: 20px;
-            max-height: 250px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        body.dark .search-results {
-            background: #1E2A3A;
-        }
-        .search-result-item {
-            padding: 10px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .search-result-item:hover {
-            background: var(--bg-light);
-        }
-        .search-result-price {
-            font-weight: 600;
-            color: var(--primary-magenta);
-        }
-        
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-            gap: 14px;
-            max-height: 450px;
-            overflow-y: auto;
-            padding-right: 6px;
-        }
-        .service-card {
-            background: var(--bg-light);
-            border-radius: 24px;
-            padding: 14px;
-            text-align: center;
-            border: 1px solid var(--border-light);
-            cursor: pointer;
-            transition: 0.1s;
-        }
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-input { width: 100%; padding: 14px 18px; font-size: 15px; border-radius: 30px; background: var(--bg-light); border: 1px solid var(--border-light); }
+        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-white); border: 1px solid var(--border-light); border-radius: 20px; max-height: 250px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        body.dark .search-results { background: #1E2A3A; }
+        .search-result-item { padding: 10px 16px; cursor: pointer; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
+        .search-result-item:hover { background: var(--bg-light); }
+        .search-result-price { font-weight: 600; color: var(--primary-magenta); }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; max-height: 450px; overflow-y: auto; padding-right: 6px; }
+        .service-card { background: var(--bg-light); border-radius: 24px; padding: 14px; text-align: center; border: 1px solid var(--border-light); cursor: pointer; transition: 0.1s; }
         .service-card:hover { transform: translateY(-2px); border-color: var(--primary-blue); }
         .service-name { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
         .service-price { font-size: 17px; font-weight: 800; color: var(--primary-magenta); margin: 6px 0; }
@@ -161,6 +106,7 @@
         @media (min-width: 851px) { .burger-menu { display: none !important; } }
         .report-choice-buttons { display: flex; gap: 16px; justify-content: center; margin: 20px 0; }
         .report-choice-buttons button { min-width: 120px; }
+        .sync-status { position: fixed; bottom: 20px; right: 20px; background: #1a1a1a; color: white; padding: 8px 16px; border-radius: 40px; font-size: 12px; z-index: 999; }
     </style>
 </head>
 <body>
@@ -214,15 +160,11 @@
             <div class="dashboard">
                 <div class="card">
                     <div class="panel-title">📋 УСЛУГИ</div>
-                    
-                    <!-- ПОИСК УСЛУГ -->
                     <div class="search-container">
                         <input type="text" id="searchService" class="search-input" placeholder="🔍 Поиск услуги (начните вводить название...)" autocomplete="off">
                         <div id="searchResults" class="search-results"></div>
                     </div>
-                    
                     <div id="servicesGrid" class="services-grid"></div>
-                    
                     <div class="fast-service-card">
                         <div class="fast-service-row">
                             <input type="text" id="fastServiceName" placeholder="Название услуги (любое)" style="flex:2;">
@@ -270,6 +212,8 @@
         </div>
     </div>
 
+    <div id="syncStatus" class="sync-status">💾 Готово</div>
+
     <!-- Модалка выбора типа отчёта -->
     <div id="reportChoiceModal" class="report-choice-modal">
         <div class="modal-card">
@@ -308,9 +252,10 @@
                 <div class="instruction-step"><strong>3. Поиск услуги</strong><br>Начните вводить название в поле поиска — появятся подходящие варианты.</div>
                 <div class="instruction-step"><strong>4. Приём заказа</strong><br>Выберите услугу → количество → «Добавить».</div>
                 <div class="instruction-step"><strong>5. Оформление</strong><br>Клиент, скидка, оплата, комментарий → «Оформить».</div>
-                <div class="instruction-step"><strong>6. Печать бланка</strong><br>«🖨️ Бланк заказа» — А4 с двумя экземплярами.</div>
-                <div class="instruction-step"><strong>7. Отчёт</strong><br>«📄 Отчёт» → выберите «За сегодня» или «Полный». Сохранится PDF.</div>
-                <div class="instruction-step"><strong>8. Закрыть смену</strong><br>«🔒 Закрыть смену» → затем «Отчёт» для бухгалтерии.</div>
+                <div class="instruction-step"><strong>6. Синхронизация</strong><br>После оформления заказ автоматически отправляется в Google Таблицу.</div>
+                <div class="instruction-step"><strong>7. Печать бланка</strong><br>«🖨️ Бланк заказа» — А4 с двумя экземплярами.</div>
+                <div class="instruction-step"><strong>8. Отчёт</strong><br>«📄 Отчёт» → выберите «За сегодня» или «Полный».</div>
+                <div class="instruction-step"><strong>9. Закрыть смену</strong><br>«🔒 Закрыть смену» → затем «Отчёт» для бухгалтерии.</div>
             </div>
             <div class="instruction-content" id="tab-admin">
                 <div class="instruction-step"><strong>Вход админа</strong><br>admin / admin123</div>
@@ -319,6 +264,7 @@
                 <div class="instruction-step"><strong>Статистика за всё время</strong><br>«📊 Статистика операторов».</div>
                 <div class="instruction-step"><strong>Отчёт за любую дату</strong><br>В админ-панели выберите дату → «Показать отчёт» → PDF/Excel.</div>
                 <div class="instruction-step"><strong>Месячный отчёт</strong><br>Выберите месяц и год → экспорт в Excel.</div>
+                <div class="instruction-step"><strong>Google Sheets синхронизация</strong><br>Все заказы автоматически сохраняются в Google Таблицу. Администратор может просматривать их онлайн.</div>
             </div>
         </div>
     </div>
@@ -355,6 +301,16 @@
                 <div id="monthlyReportContent"></div>
             </div>
             
+            <div class="monthly-report-block">
+                <div class="monthly-report-title">☁️ Настройки синхронизации</div>
+                <div class="date-selector">
+                    <input type="text" id="googleScriptUrl" placeholder="URL веб-приложения Apps Script" style="flex:3;">
+                    <button id="saveGoogleSettingsBtn" class="btn-primary">Сохранить настройки</button>
+                    <button id="testSyncBtn" class="btn-info">Тест синхронизации</button>
+                </div>
+                <div id="syncSettingsInfo" class="instruction-note" style="margin-top: 8px;">⚙️ Получите URL: Расширения → Apps Script → Развернуть → Веб-приложение → Скопировать URL</div>
+            </div>
+            
             <hr>
             <h3>Управление услугами</h3>
             <div id="adminServicesList"></div>
@@ -388,7 +344,7 @@
     </div>
 
     <script>
-        // ---------- ПОЛНЫЙ СПИСОК УСЛУГ ----------
+        // ========== ПОЛНЫЙ СПИСОК УСЛУГ ==========
         let services = [
             { id: 1, name: "Копирование ч/б A4 (1-20)", price: 25 }, { id: 2, name: "Копирование цветное A4 (1-20)", price: 35 },
             { id: 3, name: "Сканирование A4", price: 25 }, { id: 4, name: "Ламинирование A6", price: 50 },
@@ -413,6 +369,7 @@
 
         let allOrders = [], currentUser = null, cart = [], discountPct = 0, discountAmt = 0;
         let shiftOpen = null, shiftClose = null, shiftOpenComment = "", shiftCloseComment = "";
+        let googleScriptUrl = localStorage.getItem("googleScriptUrl") || "";
 
         const SERVICES_KEY = "a4print_services", OPERATORS_KEY = "a4print_operators", ORDERS_KEY = "a4print_orders", SHIFT_KEY = "a4print_shift";
 
@@ -421,6 +378,113 @@
         function saveOrders() { localStorage.setItem(ORDERS_KEY, JSON.stringify(allOrders)); }
         function saveShift() { localStorage.setItem(SHIFT_KEY, JSON.stringify({ open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment, operator: currentUser?.name })); }
 
+        // ========== СИНХРОНИЗАЦИЯ С GOOGLE SHEETS ==========
+        function syncToGoogleSheets(order) {
+            return new Promise((resolve, reject) => {
+                if (!googleScriptUrl) {
+                    console.log("URL веб-приложения не настроен");
+                    resolve({ success: false, error: "URL не настроен" });
+                    return;
+                }
+                
+                const orderData = {
+                    id: order.id,
+                    date: order.date,
+                    client: order.client,
+                    phone: order.phone || "",
+                    items: order.items.map(i => `${i.name} x${i.qty}`).join(", "),
+                    subtotal: order.subtotal,
+                    discount: order.discount,
+                    finalTotal: order.finalTotal,
+                    paymentMethod: order.paymentMethod,
+                    operator: order.operator,
+                    comment: order.comment || ""
+                };
+                
+                fetch(googleScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                }).then(() => {
+                    showSyncStatus("✅ Синхронизировано с Google Sheets");
+                    resolve({ success: true });
+                }).catch(error => {
+                    console.error("Ошибка синхронизации:", error);
+                    showSyncStatus("❌ Ошибка синхронизации");
+                    resolve({ success: false, error: error.toString() });
+                });
+            });
+        }
+
+        function testGoogleSync() {
+            if (!googleScriptUrl) {
+                alert("Сначала настройте URL веб-приложения в админ-панели");
+                return;
+            }
+            showSyncStatus("🔄 Тест синхронизации...");
+            const testOrder = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                client: "ТЕСТ",
+                phone: "Тестовый заказ",
+                items: "Тестовая услуга x1",
+                subtotal: 100,
+                discount: 0,
+                finalTotal: 100,
+                paymentMethod: "cash",
+                operator: currentUser?.name || "Система",
+                comment: "Тест синхронизации"
+            };
+            fetch(googleScriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(testOrder)
+            }).then(() => {
+                showSyncStatus("✅ Тест успешен! Проверьте Google Таблицу");
+                alert("Тестовый заказ отправлен. Проверьте Google Таблицу через 1-2 минуты.");
+            }).catch(error => {
+                console.error(error);
+                showSyncStatus("❌ Ошибка теста");
+                alert("Ошибка синхронизации. Проверьте URL и настройки доступа.");
+            });
+        }
+
+        function saveGoogleSettings() {
+            const url = document.getElementById("googleScriptUrl").value.trim();
+            if (url) {
+                googleScriptUrl = url;
+                localStorage.setItem("googleScriptUrl", url);
+                showSyncStatus("✅ Настройки сохранены");
+                alert("URL веб-приложения сохранён");
+            } else {
+                alert("Введите URL веб-приложения");
+            }
+        }
+
+        function loadGoogleSettings() {
+            const saved = localStorage.getItem("googleScriptUrl");
+            if (saved) {
+                googleScriptUrl = saved;
+                const urlInput = document.getElementById("googleScriptUrl");
+                if (urlInput) urlInput.value = saved;
+            }
+        }
+
+        function showSyncStatus(msg) {
+            const statusDiv = document.getElementById("syncStatus");
+            if (statusDiv) {
+                statusDiv.textContent = msg;
+                setTimeout(() => {
+                    if (document.getElementById("syncStatus")?.textContent === msg) {
+                        document.getElementById("syncStatus").textContent = "💾 Готово";
+                    }
+                }, 3000);
+            }
+        }
+
+        // Загрузка данных
         function loadShift() {
             let s = localStorage.getItem(SHIFT_KEY);
             if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } }
@@ -499,6 +563,7 @@
             if (nameSpan) nameSpan.innerHTML = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : ""}`;
             let burgerSpan = document.getElementById("burgerOperatorName");
             if (burgerSpan) burgerSpan.innerText = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : ""}`;
+            loadGoogleSettings();
         }
         
         // ========== ПОИСК УСЛУГ ==========
@@ -514,16 +579,15 @@
                 searchTimeout = setTimeout(() => {
                     if (query.length === 0) {
                         searchResults.style.display = 'none';
-                        renderServices(); // показать все услуги
+                        renderServices();
                         return;
                     }
                     const filtered = services.filter(s => s.name.toLowerCase().includes(query));
                     if (filtered.length === 0) {
                         searchResults.style.display = 'none';
-                        renderServices([]); // пустой список
+                        renderServices([]);
                         return;
                     }
-                    // Показываем результаты поиска в выпадающем списке
                     searchResults.innerHTML = filtered.map(s => `
                         <div class="search-result-item" data-id="${s.id}">
                             <span>${escapeHtml(s.name)}</span>
@@ -531,13 +595,11 @@
                         </div>
                     `).join('');
                     searchResults.style.display = 'block';
-                    // При клике на результат добавляем услугу с выбранным количеством
                     document.querySelectorAll('.search-result-item').forEach(el => {
                         el.addEventListener('click', (e) => {
                             const id = parseInt(el.getAttribute('data-id'));
                             const service = services.find(s => s.id === id);
                             if (service) {
-                                // Получаем количество из поля рядом с услугой в сетке
                                 const qtyInput = document.getElementById(`qty_${id}`);
                                 let qty = qtyInput ? parseInt(qtyInput.value) : 1;
                                 if (!qty || qty <= 0) qty = 1;
@@ -545,16 +607,15 @@
                                 if (qtyInput) qtyInput.value = 0;
                                 searchInput.value = '';
                                 searchResults.style.display = 'none';
-                                renderServices(); // обновить сетку
+                                renderServices();
                             }
                         });
                     });
                 }, 300);
             });
             
-            // Закрыть результаты при клике вне
             document.addEventListener('click', function(e) {
-                if (!searchResults.contains(e.target) && e.target !== searchInput) {
+                if (searchResults && !searchResults.contains(e.target) && e.target !== searchInput) {
                     searchResults.style.display = 'none';
                 }
             });
@@ -641,7 +702,7 @@
             renderCart();
         }
 
-        function completeOrder() {
+        async function completeOrder() {
             if (cart.length === 0) { alert("Корзина пуста"); return; }
             if (!shiftOpen || shiftClose) { alert("Смена не открыта! Нажмите «Открыть смену»"); return; }
             let client = document.getElementById("clientName").value.trim() || "Клиент";
@@ -654,6 +715,10 @@
             else if (discountAmt > 0) discount = Math.min(discountAmt, subtotal);
             let order = { id: Date.now(), client, phone, items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty })), subtotal, discount, discountPercent: discPct, finalTotal: subtotal - discount, paymentMethod: payment, comment, date: new Date().toLocaleString(), operator: currentUser.name };
             allOrders.push(order); saveOrders();
+            
+            // Синхронизация с Google Sheets
+            await syncToGoogleSheets(order);
+            
             cart = []; discountPct = 0; discountAmt = 0;
             document.getElementById("discountPercent").value = 0; document.getElementById("discountAmount").value = 0;
             document.getElementById("clientName").value = ""; document.getElementById("clientPhone").value = ""; document.getElementById("orderComment").value = "";
@@ -857,9 +922,9 @@
             let subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
             let discount = discountPct ? subtotal * discountPct / 100 : (discountAmt ? Math.min(discountAmt, subtotal) : 0);
             let final = subtotal - discount;
-            let itemsHtml = cart.map(i => `<tr><td>${escapeHtml(i.name)}</td><td style="text-align:center">${i.qty}</td><td style="text-align:center">${i.price} ₽</td><td style="text-align:right">${i.price * i.qty} ₽</td>`).join('');
+            let itemsHtml = cart.map(i => `<td><td style="border:1px solid #000; padding:5px;">${escapeHtml(i.name)}</td><td style="border:1px solid #000; text-align:center">${i.qty}</td><td style="border:1px solid #000; text-align:center">${i.price} ₽</td><td style="border:1px solid #000; text-align:right">${i.price * i.qty} ₽</td>`).join('');
             let phoneLine = phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : '';
-            let html = `<div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">──────── ОСНОВНОЙ ЭКЗЕМПЛЯР ────────</div></div><div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div class="copy-label">─────────── КОПИЯ КЛИЕНТА ───────────</div></div>`;
+            let html = `<div class="blank-page"><div style="text-align:center; margin-bottom:20px;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table style="width:100%; border-collapse:collapse; margin:15px 0;"><thead><tr style="background:#f0f0f0;"><th style="border:1px solid #000; padding:5px;">Услуга</th><th style="border:1px solid #000; padding:5px;">Кол-во</th><th style="border:1px solid #000; padding:5px;">Цена</th><th style="border:1px solid #000; padding:5px;">Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div style="text-align:center; margin-top:10px; font-size:10px;">──────── ОСНОВНОЙ ЭКЗЕМПЛЯР ────────</div></div><div class="blank-page"><div style="text-align:center; margin-bottom:20px;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table style="width:100%; border-collapse:collapse; margin:15px 0;"><thead><tr style="background:#f0f0f0;"><th style="border:1px solid #000; padding:5px;">Услуга</th><th style="border:1px solid #000; padding:5px;">Кол-во</th><th style="border:1px solid #000; padding:5px;">Цена</th><th style="border:1px solid #000; padding:5px;">Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div style="text-align:center; margin-top:10px; font-size:10px;">─────────── КОПИЯ КЛИЕНТА ───────────</div></div>`;
             let cont = document.getElementById("printBlankContainer"); cont.innerHTML = html;
             window.print(); setTimeout(() => cont.innerHTML = "", 1000);
         }
@@ -885,6 +950,9 @@
             for (let [login, data] of Object.entries(operators)) { if (login === "admin") continue; opDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="Новый пароль"><button class="changePass" data-login="${login}" style="background:var(--primary-yellow); color:black;">🔑</button><button class="deleteOp" data-login="${login}" style="background:#C2412C;">🗑</button></div>`; }
             document.querySelectorAll(".changePass").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); let p = document.getElementById(`pass_${log}`).value; if (p) { operators[log].password = p; saveOperators(); alert("Пароль изменён"); } });
             document.querySelectorAll(".deleteOp").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); if (confirm("Удалить оператора?")) { delete operators[log]; saveOperators(); renderAdmin(); } });
+            // Загружаем настройки синхронизации в поля админки
+            const urlInput = document.getElementById("googleScriptUrl");
+            if (urlInput && googleScriptUrl) urlInput.value = googleScriptUrl;
         }
 
         function initHelpModal() {
@@ -996,6 +1064,10 @@
             
             document.getElementById("viewMonthlyReportBtn").onclick = showMonthlyReport;
             document.getElementById("exportMonthlyReportBtn").onclick = exportMonthlyReport;
+            
+            // Настройки синхронизации
+            document.getElementById("saveGoogleSettingsBtn").onclick = saveGoogleSettings;
+            document.getElementById("testSyncBtn").onclick = testGoogleSync;
             
             document.getElementById("addServiceBtn").onclick = () => { let name = document.getElementById("newServiceName").value.trim(); let price = parseInt(document.getElementById("newServicePrice").value); if (name && price > 0) { services.push({ id: Date.now(), name, price }); saveServices(); renderServices(); renderAdmin(); } else alert("Введите название и цену"); };
             document.getElementById("addOperatorBtn").onclick = () => { let lgn = document.getElementById("newOpLogin").value.trim().toLowerCase(); let nm = document.getElementById("newOpName").value.trim(); let ps = document.getElementById("newOpPass").value.trim(); if (lgn && nm && ps) { if (operators[lgn]) alert("Логин уже есть"); else { operators[lgn] = { password: ps, name: nm, role: "operator" }; saveOperators(); renderAdmin(); } } else alert("Заполните все поля"); };
