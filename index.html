@@ -67,10 +67,7 @@
             color: #e2e8f0;
         }
         
-        .app {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
+        .app { max-width: 1600px; margin: 0 auto; }
         
         .header {
             display: flex;
@@ -86,28 +83,10 @@
             border: 1px solid var(--gray-200);
         }
         
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .logo {
-            height: 44px;
-            width: auto;
-            border-radius: 8px;
-        }
-        
-        h1 {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--gray-800);
-        }
-        
-        .sub {
-            font-size: 12px;
-            color: var(--gray-500);
-        }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo { height: 44px; width: auto; border-radius: 8px; }
+        h1 { font-size: 20px; font-weight: 700; color: var(--gray-800); }
+        .sub { font-size: 12px; color: var(--gray-500); }
         
         .user-bar {
             display: flex;
@@ -129,23 +108,10 @@
             cursor: pointer;
             transition: all 0.15s;
         }
+        button:hover { background: var(--blue-dark); transform: translateY(-1px); }
         
-        button:hover {
-            background: var(--blue-dark);
-            transform: translateY(-1px);
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--gray-300);
-            color: var(--gray-700);
-        }
-        
-        .btn-outline:hover {
-            background: var(--gray-100);
-            transform: none;
-        }
-        
+        .btn-outline { background: transparent; border: 1px solid var(--gray-300); color: var(--gray-700); }
+        .btn-outline:hover { background: var(--gray-100); transform: none; }
         .btn-primary { background: var(--blue); }
         .btn-success { background: var(--green); }
         .btn-danger { background: var(--red); }
@@ -166,72 +132,17 @@
             box-shadow: var(--shadow);
         }
         
-        .shift-stats {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
+        .shift-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+        .shift-stat-item { background: var(--gray-100); padding: 6px 14px; border-radius: 20px; }
+        .shift-stat-label { font-size: 11px; color: var(--gray-500); }
+        .shift-stat-value { font-weight: 700; font-size: 16px; color: var(--blue); }
         
-        .shift-stat-item {
-            background: var(--gray-100);
-            padding: 6px 14px;
-            border-radius: 20px;
-        }
+        .dashboard { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+        .left-panel { flex: 2; min-width: 300px; background: var(--white); border-radius: 12px; padding: 24px; border: 1px solid var(--gray-200); box-shadow: var(--shadow); }
+        .cart-panel { flex: 1.2; min-width: 320px; background: var(--white); border-radius: 12px; padding: 24px; border: 1px solid var(--gray-200); box-shadow: var(--shadow); }
+        .history-section { background: var(--white); border-radius: 12px; padding: 24px; border: 1px solid var(--gray-200); box-shadow: var(--shadow); }
         
-        .shift-stat-label {
-            font-size: 11px;
-            color: var(--gray-500);
-        }
-        
-        .shift-stat-value {
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--blue);
-        }
-        
-        .dashboard {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-        }
-        
-        .left-panel {
-            flex: 2;
-            min-width: 300px;
-            background: var(--white);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow);
-        }
-        
-        .cart-panel {
-            flex: 1.2;
-            min-width: 320px;
-            background: var(--white);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow);
-        }
-        
-        .history-section {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow);
-        }
-        
-        .panel-title {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--gray-500);
-            margin-bottom: 20px;
-        }
+        .panel-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); margin-bottom: 20px; }
         
         .category-tabs {
             display: flex;
@@ -240,7 +151,6 @@
             border-bottom: 1px solid var(--gray-200);
             padding-bottom: 4px;
         }
-        
         .category-tab {
             background: transparent;
             color: var(--gray-600);
@@ -248,16 +158,8 @@
             border-radius: 8px;
             font-weight: 500;
         }
-        
-        .category-tab:hover {
-            background: var(--gray-100);
-            transform: none;
-        }
-        
-        .category-tab.active {
-            background: var(--blue);
-            color: white;
-        }
+        .category-tab:hover { background: var(--gray-100); transform: none; }
+        .category-tab.active { background: var(--blue); color: white; }
         
         .search-input {
             width: 100%;
@@ -268,12 +170,7 @@
             border: 1px solid var(--gray-200);
             margin-bottom: 20px;
         }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--blue);
-            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
-        }
+        .search-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
         
         .services-grid, .goods-grid {
             display: grid;
@@ -293,85 +190,20 @@
             transition: all 0.15s;
             border: 1px solid var(--gray-200);
         }
+        .service-card:hover, .goods-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--blue); }
         
-        .service-card:hover, .goods-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--blue);
-        }
+        .item-name { font-weight: 600; font-size: 14px; margin-bottom: 8px; color: var(--gray-800); }
+        .item-price { font-size: 18px; font-weight: 700; color: var(--blue); margin: 8px 0; }
+        .item-stock { font-size: 12px; color: var(--gray-500); margin-bottom: 10px; }
+        .item-stock.low { color: var(--orange); }
+        .stock-warning { background: var(--orange); color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 6px; }
         
-        .item-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: var(--gray-800);
-        }
+        .qty-control input { width: 80px; text-align: center; padding: 8px 0; font-size: 14px; font-weight: 600; border-radius: 8px; border: 1px solid var(--gray-300); background: white; }
+        .add-btn { background: var(--blue); width: 100%; padding: 8px; font-size: 12px; font-weight: 500; margin-top: 8px; border-radius: 8px; }
         
-        .item-price {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--blue);
-            margin: 8px 0;
-        }
-        
-        .item-stock {
-            font-size: 12px;
-            color: var(--gray-500);
-            margin-bottom: 10px;
-        }
-        
-        .item-stock.low {
-            color: var(--orange);
-        }
-        
-        .stock-warning {
-            background: var(--orange);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 10px;
-            margin-left: 6px;
-        }
-        
-        .qty-control input {
-            width: 80px;
-            text-align: center;
-            padding: 8px 0;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 8px;
-            border: 1px solid var(--gray-300);
-            background: white;
-        }
-        
-        .add-btn {
-            background: var(--blue);
-            width: 100%;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            margin-top: 8px;
-            border-radius: 8px;
-        }
-        
-        .fast-service-card {
-            background: var(--gray-50);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 20px;
-            border: 1px solid var(--gray-200);
-        }
-        
-        .fast-service-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .fast-service-row input {
-            flex: 1;
-            min-width: 120px;
-        }
+        .fast-service-card { background: var(--gray-50); border-radius: 12px; padding: 16px; margin-top: 20px; border: 1px solid var(--gray-200); }
+        .fast-service-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .fast-service-row input { flex: 1; min-width: 120px; }
         
         .cart-list {
             display: flex;
@@ -381,7 +213,6 @@
             overflow-y: auto;
             margin-bottom: 20px;
         }
-        
         .cart-item {
             background: var(--gray-50);
             border-radius: 10px;
@@ -393,37 +224,11 @@
             gap: 10px;
             border-left: 3px solid var(--blue);
         }
-        
-        .cart-item-name {
-            font-weight: 600;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        
-        .cart-item-detail {
-            font-size: 11px;
-            color: var(--gray-500);
-        }
-        
-        .cart-item-price {
-            font-weight: 700;
-            font-size: 15px;
-            color: var(--blue);
-        }
-        
-        .remove-btn {
-            background: var(--gray-200);
-            color: var(--gray-700);
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 500;
-        }
-        
-        .remove-btn:hover {
-            background: var(--gray-300);
-            transform: none;
-        }
+        .cart-item-name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+        .cart-item-detail { font-size: 11px; color: var(--gray-500); }
+        .cart-item-price { font-weight: 700; font-size: 15px; color: var(--blue); }
+        .remove-btn { background: var(--gray-200); color: var(--gray-700); padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 500; }
+        .remove-btn:hover { background: var(--gray-300); transform: none; }
         
         input, select, textarea {
             width: 100%;
@@ -434,63 +239,17 @@
             font-size: 14px;
             font-family: inherit;
         }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
         
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--blue);
-            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
-        }
+        .total-line { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--gray-200); font-weight: 500; font-size: 14px; }
+        .grand-total { font-size: 20px; font-weight: 700; color: var(--green); }
         
-        .total-line {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-top: 1px solid var(--gray-200);
-            font-weight: 500;
-            font-size: 14px;
-        }
+        .row-2 { display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap; align-items: flex-end; }
+        .discount-group { flex: 1; min-width: 100px; }
+        .discount-group label { font-size: 11px; font-weight: 500; display: block; margin-bottom: 4px; color: var(--gray-500); }
         
-        .grand-total {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--green);
-        }
-        
-        .row-2 {
-            display: flex;
-            gap: 12px;
-            margin: 16px 0;
-            flex-wrap: wrap;
-            align-items: flex-end;
-        }
-        
-        .discount-group {
-            flex: 1;
-            min-width: 100px;
-        }
-        
-        .discount-group label {
-            font-size: 11px;
-            font-weight: 500;
-            display: block;
-            margin-bottom: 4px;
-            color: var(--gray-500);
-        }
-        
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-height: 320px;
-            overflow-y: auto;
-        }
-        
-        .history-item {
-            background: var(--gray-50);
-            border-radius: 10px;
-            padding: 14px;
-            border-left: 3px solid var(--orange);
-        }
+        .history-list { display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto; }
+        .history-item { background: var(--gray-50); border-radius: 10px; padding: 14px; border-left: 3px solid var(--orange); }
         
         .modal {
             position: fixed;
@@ -504,7 +263,6 @@
             justify-content: center;
             z-index: 1000;
         }
-        
         .modal-card {
             background: white;
             border-radius: 16px;
@@ -516,14 +274,7 @@
             box-shadow: var(--shadow-md);
         }
         
-        .burger-btn {
-            display: none;
-            background: transparent;
-            font-size: 24px;
-            color: var(--gray-700);
-            padding: 8px;
-        }
-        
+        .burger-btn { display: none; background: transparent; font-size: 24px; color: var(--gray-700); padding: 8px; }
         .burger-menu {
             position: absolute;
             top: 70px;
@@ -539,15 +290,8 @@
             z-index: 200;
             border: 1px solid var(--gray-200);
         }
-        
-        .burger-menu.show {
-            display: flex;
-        }
-        
-        .burger-menu button {
-            width: 100%;
-            text-align: center;
-        }
+        .burger-menu.show { display: flex; }
+        .burger-menu button { width: 100%; text-align: center; }
         
         .sync-status {
             position: fixed;
@@ -562,47 +306,15 @@
             box-shadow: var(--shadow);
         }
         
-        .instruction-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+        .instruction-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: transparent; color: var(--gray-600); padding: 8px 16px; border-radius: 8px; }
+        .tab-btn.active { background: var(--blue); color: white; }
+        .instruction-content { display: none; }
+        .instruction-content.active { display: block; }
         
-        .tab-btn {
-            background: transparent;
-            color: var(--gray-600);
-            padding: 8px 16px;
-            border-radius: 8px;
-        }
+        .stats-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--gray-200); }
+        .stats-header { font-weight: 700; background: var(--gray-100); border-radius: 8px; }
         
-        .tab-btn.active {
-            background: var(--blue);
-            color: white;
-        }
-        
-        .instruction-content {
-            display: none;
-        }
-        
-        .instruction-content.active {
-            display: block;
-        }
-        
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px;
-            border-bottom: 1px solid var(--gray-200);
-        }
-        
-        .stats-header {
-            font-weight: 700;
-            background: var(--gray-100);
-            border-radius: 8px;
-        }
-        
-        /* Стили для формы входа с выбором оператора */
         .login-select {
             width: 100%;
             padding: 14px;
@@ -613,21 +325,22 @@
             background: var(--white);
         }
         
+        .salary-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .salary-table th, .salary-table td { border: 1px solid var(--gray-200); padding: 10px; text-align: left; }
+        .salary-table th { background: var(--gray-100); font-weight: 600; }
+        
         @media (max-width: 850px) {
             body { padding: 16px; }
             .user-bar { display: none !important; }
             .burger-btn { display: block; }
             .services-grid, .goods-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
         }
-        
-        @media (min-width: 851px) {
-            .burger-menu { display: none !important; }
-        }
+        @media (min-width: 851px) { .burger-menu { display: none !important; } }
     </style>
 </head>
 <body>
 
-    <!-- НОВАЯ ФОРМА ВХОДА С ВЫБОРОМ ОПЕРАТОРА -->
+    <!-- Форма входа -->
     <div id="loginOverlay" class="modal" style="display: flex;">
         <div class="modal-card" style="max-width: 380px;">
             <div style="text-align:center; margin-bottom: 20px;">
@@ -674,7 +387,7 @@
                 </div>
             </div>
 
-            <!-- Полоса смены с финансовой информацией -->
+            <!-- Полоса смены -->
             <div class="shift-bar">
                 <div>
                     <span>🕒 Смена: <strong id="shiftStatus">Закрыта</strong></span>
@@ -744,7 +457,7 @@
                         <label><input type="radio" name="payment" value="cash" checked> 💵 Наличные</label>
                         <label><input type="radio" name="payment" value="card"> 💳 Карта</label>
                     </div>
-                    <textarea id="orderComment" rows="2" placeholder="Комментарий к заказу..."></textarea>
+                    <textarea id="orderComment" rows="2" placeholder="Комментарий..."></textarea>
                     <div class="total-line"><span>Подытог</span><span id="cartSubtotal">0 ₽</span></div>
                     <div class="total-line" id="discountLine" style="display:none;"><span>Скидка</span><span id="cartDiscount">0 ₽</span></div>
                     <div class="total-line grand-total"><span>ИТОГО</span><span id="cartTotal">0 ₽</span></div>
@@ -789,6 +502,7 @@
         </div>
     </div>
 
+    <!-- Админ-панель -->
     <div id="adminModal" class="modal">
         <div class="modal-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
@@ -797,16 +511,40 @@
             </div>
             <div class="instruction-tabs">
                 <button class="tab-btn active" data-tab="admin-stats">📊 Статистика</button>
+                <button class="tab-btn" data-tab="admin-salary">💰 Зарплата</button>
                 <button class="tab-btn" data-tab="admin-services">📋 Услуги</button>
                 <button class="tab-btn" data-tab="admin-goods">🛍️ Товары</button>
             </div>
             
+            <!-- Вкладка статистики -->
             <div id="admin-stats" class="instruction-content active">
                 <h3 style="margin-bottom: 16px;">Статистика операторов</h3>
                 <div id="operatorsStatsContent"></div>
                 <button id="exportStatsExcelBtn" class="btn-success" style="margin-top: 20px;">📎 Экспорт статистики в Excel</button>
             </div>
             
+            <!-- Вкладка зарплаты -->
+            <div id="admin-salary" class="instruction-content">
+                <h3 style="margin-bottom: 16px;">Расчёт заработной платы</h3>
+                <div class="row-2" style="margin-bottom: 16px;">
+                    <select id="salaryMonth" style="flex:1;">
+                        <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option>
+                        <option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option>
+                        <option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option>
+                        <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
+                    </select>
+                    <select id="salaryYear" style="flex:1;"></select>
+                    <button id="calculateSalaryBtn" class="btn-primary">Рассчитать зарплату</button>
+                    <button id="exportSalaryBtn" class="btn-success">📎 Ведомость на выплату</button>
+                </div>
+                <div id="salaryReportContent"></div>
+                <div class="instruction-note" style="margin-top: 16px; background: var(--gray-100); padding: 12px; border-radius: 8px;">
+                    💰 Ставки: Оператор — 2000 ₽/смена (8 часов), Администратор — 2500 ₽/смена.<br>
+                    При неполной смене зарплата рассчитывается пропорционально отработанному времени.
+                </div>
+            </div>
+            
+            <!-- Вкладка услуг -->
             <div id="admin-services" class="instruction-content">
                 <h3 style="margin: 16px 0;">Управление услугами</h3>
                 <div id="adminServicesList"></div>
@@ -817,11 +555,12 @@
                 </div>
             </div>
             
+            <!-- Вкладка товаров -->
             <div id="admin-goods" class="instruction-content">
                 <h3 style="margin: 16px 0;">Товары (склад)</h3>
                 <div id="adminGoodsList"></div>
                 <div style="display:flex; gap:12px; margin:20px 0; flex-wrap:wrap;">
-                    <input type="text" id="adminNewGoodsName" placeholder="Название товара" style="flex:2;">
+                    <input type="text" id="adminNewGoodsName" placeholder="Название" style="flex:2;">
                     <input type="number" id="adminNewGoodsPrice" placeholder="Цена" style="flex:1;">
                     <input type="number" id="adminNewGoodsStock" placeholder="Кол-во" style="flex:1;">
                     <button id="adminAddGoodsBtn" class="btn-primary">Добавить</button>
@@ -833,11 +572,11 @@
     <div id="printBlankContainer" style="display: none;"></div>
 
     <script>
-        // ========== ТОЛЬКО ТРИ ПОЛЬЗОВАТЕЛЯ ==========
+        // ========== ПОЛЬЗОВАТЕЛИ ==========
         let operators = { 
-            "pavel": { password: "pavel123", name: "Павел", role: "admin" }, 
-            "ksenia": { password: "ksenia123", name: "Ксения", role: "operator" }, 
-            "natalia": { password: "natalia123", name: "Наталья", role: "operator" } 
+            "pavel": { password: "pavel123", name: "Павел", role: "admin", rate: 2500 }, 
+            "ksenia": { password: "ksenia123", name: "Ксения", role: "operator", rate: 2000 }, 
+            "natalia": { password: "natalia123", name: "Наталья", role: "operator", rate: 2000 } 
         };
         
         // ========== УСЛУГИ ==========
@@ -869,14 +608,165 @@
 
         let allOrders = [], currentUser = null, cart = [], discountPct = 0, discountAmt = 0;
         let shiftOpen = null, shiftClose = null, shiftOpenComment = "", shiftCloseComment = "";
+        let allShifts = []; // массив для хранения всех смен
 
-        const SERVICES_KEY = "a4print_services_v5", GOODS_KEY = "a4print_goods_v5", OPERATORS_KEY = "a4print_operators", ORDERS_KEY = "a4print_orders", SHIFT_KEY = "a4print_shift";
+        const SERVICES_KEY = "a4print_services_v5", GOODS_KEY = "a4print_goods_v5", OPERATORS_KEY = "a4print_operators", ORDERS_KEY = "a4print_orders", SHIFT_KEY = "a4print_shift", SHIFTS_LIST_KEY = "a4print_shifts_list";
 
         function saveServices() { localStorage.setItem(SERVICES_KEY, JSON.stringify(services)); }
         function saveGoods() { localStorage.setItem(GOODS_KEY, JSON.stringify(goods)); }
         function saveOperators() { localStorage.setItem(OPERATORS_KEY, JSON.stringify(operators)); }
         function saveOrders() { localStorage.setItem(ORDERS_KEY, JSON.stringify(allOrders)); }
         function saveShift() { localStorage.setItem(SHIFT_KEY, JSON.stringify({ open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment, operator: currentUser?.name })); }
+        
+        function loadAllShifts() {
+            let saved = localStorage.getItem(SHIFTS_LIST_KEY);
+            if (saved) allShifts = JSON.parse(saved);
+        }
+        
+        function saveAllShifts() {
+            localStorage.setItem(SHIFTS_LIST_KEY, JSON.stringify(allShifts));
+        }
+        
+        function addShiftToHistory(shiftData) {
+            allShifts.push(shiftData);
+            saveAllShifts();
+        }
+
+        // ========== РАСЧЁТ ЗАРПЛАТЫ ==========
+        function calculateSalaryForShift(shift) {
+            if (!shift.open || !shift.close) return 0;
+            const FULL_SHIFT_HOURS = 8;
+            const openDate = new Date(shift.open);
+            const closeDate = new Date(shift.close);
+            let hoursWorked = (closeDate - openDate) / (1000 * 60 * 60);
+            hoursWorked = Math.min(hoursWorked, FULL_SHIFT_HOURS);
+            if (hoursWorked < 0) hoursWorked = 0;
+            let rate = shift.role === "admin" ? 2500 : 2000;
+            let salary = (rate / FULL_SHIFT_HOURS) * hoursWorked;
+            return Math.round(salary);
+        }
+        
+        function calculateSalaryForMonth(month, year) {
+            let salaryMap = new Map();
+            for (let shift of allShifts) {
+                if (!shift.open || !shift.close) continue;
+                let openDate = new Date(shift.open);
+                if (openDate.getMonth() + 1 === month && openDate.getFullYear() === year) {
+                    let salary = calculateSalaryForShift(shift);
+                    let key = shift.login;
+                    let current = salaryMap.get(key) || { name: shift.name, total: 0, count: 0, role: shift.role, hours: 0 };
+                    current.total += salary;
+                    current.count++;
+                    let hours = (new Date(shift.close) - new Date(shift.open)) / (1000 * 60 * 60);
+                    hours = Math.min(hours, 8);
+                    current.hours += Math.round(hours * 10) / 10;
+                    salaryMap.set(key, current);
+                }
+            }
+            return salaryMap;
+        }
+        
+        function showSalaryReport() {
+            let month = parseInt(document.getElementById("salaryMonth").value);
+            let year = parseInt(document.getElementById("salaryYear").value);
+            let salaryMap = calculateSalaryForMonth(month, year);
+            let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+            
+            let html = `<table class="salary-table">
+                        <thead>
+                            <tr>
+                                <th>Оператор</th><th>Роль</th><th>Кол-во смен</th><th>Отработано часов</th><th>Ставка за смену</th><th>Итого к выплате (₽)</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            let totalSalary = 0;
+            for (let [login, data] of salaryMap) {
+                let rate = data.role === "admin" ? 2500 : 2000;
+                html += `<tr>
+                            <td><strong>${escapeHtml(data.name)}</strong></td>
+                            <td>${data.role === "admin" ? "Администратор" : "Оператор"}</td>
+                            <td>${data.count}</td>
+                            <td>${data.hours}</td>
+                            <td>${rate} ₽</td>
+                            <td style="font-weight:bold;">${data.total.toLocaleString()} ₽</td>
+                         </tr>`;
+                totalSalary += data.total;
+            }
+            html += `<tr style="background: var(--blue); color: white;">
+                        <td colspan="5"><strong>ИТОГО:</strong></td>
+                        <td><strong>${totalSalary.toLocaleString()} ₽</strong></td>
+                     </tr>`;
+            html += `</tbody></table>`;
+            document.getElementById("salaryReportContent").innerHTML = html;
+            window._currentSalaryData = { month, year, salaryMap, totalSalary };
+        }
+        
+        function exportSalaryPayslip() {
+            if (!window._currentSalaryData) {
+                alert("Сначала рассчитайте зарплату за месяц");
+                return;
+            }
+            let { month, year, salaryMap, totalSalary } = window._currentSalaryData;
+            let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+            let date = new Date().toLocaleString();
+            
+            let tableRows = "";
+            for (let [login, data] of salaryMap) {
+                let rate = data.role === "admin" ? 2500 : 2000;
+                tableRows += `<tr>
+                                <td style="border:1px solid #000; padding:8px;">${escapeHtml(data.name)}</td>
+                                <td style="border:1px solid #000; padding:8px;">${data.role === "admin" ? "Администратор" : "Оператор"}</td>
+                                <td style="border:1px solid #000; padding:8px;">${data.count}</td>
+                                <td style="border:1px solid #000; padding:8px;">${rate} ₽</td>
+                                <td style="border:1px solid #000; padding:8px;">${data.total.toLocaleString()} ₽</td>
+                                <td style="border:1px solid #000; padding:8px;">_________________</td>
+                              </tr>`;
+            }
+            
+            let html = `<div style="font-family: monospace; padding: 20px; max-width: 800px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2>A4-ПРИНТ</h2>
+                    <p>Копировальный центр</p>
+                    <h3>ВЕДОМОСТЬ НА ВЫПЛАТУ ЗАРАБОТНОЙ ПЛАТЫ</h3>
+                    <p>за ${monthNames[month-1]} ${year} года</p>
+                    <p>Дата формирования: ${date}</p>
+                </div>
+                <table style="width:100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f0f0f0;">
+                            <th style="border:1px solid #000; padding:8px;">ФИО</th>
+                            <th style="border:1px solid #000; padding:8px;">Должность</th>
+                            <th style="border:1px solid #000; padding:8px;">Смен</th>
+                            <th style="border:1px solid #000; padding:8px;">Ставка</th>
+                            <th style="border:1px solid #000; padding:8px;">Сумма (₽)</th>
+                            <th style="border:1px solid #000; padding:8px;">Подпись</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                        <tr style="background: #e8f0fe;">
+                            <td colspan="4" style="border:1px solid #000; padding:8px;"><strong>ИТОГО К ВЫПЛАТЕ:</strong></td>
+                            <td colspan="2" style="border:1px solid #000; padding:8px;"><strong>${totalSalary.toLocaleString()} ₽</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>Главный бухгалтер: _______________</div>
+                        <div>Руководитель: _______________</div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <div>Деньги получил(а):</div>
+                        <div style="margin-top: 20px;">_________________ / _________________ /</div>
+                    </div>
+                </div>
+            </div>`;
+            
+            let el = document.createElement('div');
+            el.innerHTML = html;
+            document.body.appendChild(el);
+            html2pdf().set({ margin: 0.5, filename: `A4print_зарплата_${monthNames[month-1]}_${year}.pdf`, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
+        }
 
         // ========== ФИНАНСЫ ЗА СМЕНУ ==========
         function getShiftFinance() {
@@ -903,6 +793,7 @@
             let g = localStorage.getItem(GOODS_KEY); if (g) goods = JSON.parse(g);
             let o = localStorage.getItem(OPERATORS_KEY); if (o) operators = JSON.parse(o);
             let ord = localStorage.getItem(ORDERS_KEY); if (ord) allOrders = JSON.parse(ord);
+            loadAllShifts();
             renderServices(); renderGoods(); renderCart(); renderHistory(); loadShift();
             updateShiftFinanceDisplay();
             document.getElementById("currentOperatorName").innerHTML = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
@@ -1194,7 +1085,18 @@
                 let finance = getShiftFinance();
                 shiftClose = new Date().toLocaleString(); 
                 shiftCloseComment = comment; 
-                saveShift(); 
+                saveShift();
+                // Сохраняем смену в историю для расчёта зарплаты
+                let shiftRecord = {
+                    login: currentUser.username,
+                    name: currentUser.name,
+                    role: currentUser.role,
+                    open: shiftOpen,
+                    close: shiftClose,
+                    openComment: shiftOpenComment,
+                    closeComment: shiftCloseComment
+                };
+                addShiftToHistory(shiftRecord);
                 updateShiftUI(); 
                 alert(`Смена закрыта: ${shiftClose}\nВыручка за смену: ${finance.revenue} ₽\nНаличные в кассе: ${finance.cash} ₽\nКарта: ${finance.card} ₽`); 
             } 
@@ -1315,8 +1217,21 @@
         }
 
         function initTabs() { const tabs = document.querySelectorAll('.category-tab'); const panels = { services: document.getElementById('servicesPanel'), goods: document.getElementById('goodsPanel') }; tabs.forEach(tab => { tab.onclick = () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); Object.values(panels).forEach(p => p.classList.remove('active')); panels[tab.getAttribute('data-cat')].classList.add('active'); }; }); }
-        function initAdminTabs() { const tabs = document.querySelectorAll('#adminModal .tab-btn'); const contents = { 'admin-stats': document.getElementById('admin-stats'), 'admin-services': document.getElementById('admin-services'), 'admin-goods': document.getElementById('admin-goods') }; tabs.forEach(tab => { tab.onclick = () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); Object.values(contents).forEach(c => c.classList.remove('active')); contents[tab.getAttribute('data-tab')].classList.add('active'); }; }); }
+        function initAdminTabs() { const tabs = document.querySelectorAll('#adminModal .tab-btn'); const contents = { 'admin-stats': document.getElementById('admin-stats'), 'admin-salary': document.getElementById('admin-salary'), 'admin-services': document.getElementById('admin-services'), 'admin-goods': document.getElementById('admin-goods') }; tabs.forEach(tab => { tab.onclick = () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); Object.values(contents).forEach(c => c.classList.remove('active')); contents[tab.getAttribute('data-tab')].classList.add('active'); }; }); }
         function initSearch() { let searchService = document.getElementById('searchService'); let searchGoods = document.getElementById('searchGoods'); if (searchService) { searchService.oninput = () => { let q = searchService.value.toLowerCase(); renderServices(services.filter(s => s.name.toLowerCase().includes(q))); }; } if (searchGoods) { searchGoods.oninput = () => { let q = searchGoods.value.toLowerCase(); renderGoods(goods.filter(g => g.name.toLowerCase().includes(q))); }; } }
+        function initYearSelect() {
+            let yearSelect = document.getElementById("salaryYear");
+            if (!yearSelect) return;
+            let currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = "";
+            for (let y = 2023; y <= currentYear + 1; y++) {
+                let opt = document.createElement("option");
+                opt.value = y;
+                opt.textContent = y;
+                if (y === currentYear) opt.selected = true;
+                yearSelect.appendChild(opt);
+            }
+        }
         function showSyncStatus(msg) { let d = document.getElementById("syncStatus"); if (d) { d.textContent = msg; setTimeout(() => { if (d.textContent === msg) d.textContent = "💾 Готово"; }, 2000); } }
         function toggleTheme() { document.body.classList.toggle("dark"); localStorage.setItem("a4print_theme", document.body.classList.contains("dark") ? "dark" : "light"); }
         
@@ -1361,6 +1276,7 @@
             let saved = localStorage.getItem("a4print_current_user");
             let theme = localStorage.getItem("a4print_theme");
             if (theme === "dark") document.body.classList.add("dark");
+            initYearSelect();
             if (saved) { 
                 try { 
                     currentUser = JSON.parse(saved); 
@@ -1395,7 +1311,6 @@
             document.getElementById("shiftCommentConfirm").onclick = confirmShiftWithComment;
             document.getElementById("shiftCommentCancel").onclick = cancelShiftComment;
             
-            // Кнопка отчёта в шапке
             document.getElementById("pdfReportBtn").onclick = showReportChoice;
             document.getElementById("reportTodayBtn").onclick = reportToday;
             document.getElementById("reportFullBtn").onclick = reportFull;
@@ -1405,6 +1320,8 @@
             document.getElementById("adminPanelBtn").onclick = () => { renderAdmin(); admModal.style.display = "flex"; };
             document.getElementById("closeAdminModal").onclick = () => admModal.style.display = "none";
             document.getElementById("exportStatsExcelBtn").onclick = exportStatsExcel;
+            document.getElementById("calculateSalaryBtn").onclick = showSalaryReport;
+            document.getElementById("exportSalaryBtn").onclick = exportSalaryPayslip;
             document.getElementById("addServiceBtn").onclick = () => { let name = document.getElementById("newServiceName").value.trim(); let price = parseInt(document.getElementById("newServicePrice").value); if (name && price > 0) { services.push({ id: Date.now(), name, price }); saveServices(); renderServices(); renderAdmin(); } else alert("Введите название и цену"); };
             document.getElementById("adminAddGoodsBtn").onclick = () => { let name = document.getElementById("adminNewGoodsName").value.trim(); let price = parseFloat(document.getElementById("adminNewGoodsPrice").value); let stock = parseInt(document.getElementById("adminNewGoodsStock").value); if (name && price > 0 && !isNaN(stock)) { goods.push({ id: Date.now(), name: name, price: price, stock: stock, unit: "шт" }); saveGoods(); renderGoods(); renderAdmin(); showSyncStatus("✅ Товар добавлен"); document.getElementById("adminNewGoodsName").value = ""; document.getElementById("adminNewGoodsPrice").value = ""; document.getElementById("adminNewGoodsStock").value = ""; } else alert("Заполните все поля"); };
             window.onclick = (e) => { if (e.target === admModal) admModal.style.display = "none"; if (e.target === document.getElementById("reportChoiceModal")) document.getElementById("reportChoiceModal").style.display = "none"; };
