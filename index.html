@@ -151,7 +151,6 @@
         .btn-danger { background: var(--red); }
         .btn-warning { background: var(--orange); }
         
-        /* Улучшенная полоса статуса смены с финансовой информацией */
         .shift-bar {
             background: var(--white);
             border-radius: 12px;
@@ -603,6 +602,17 @@
             border-radius: 8px;
         }
         
+        /* Стили для формы входа с выбором оператора */
+        .login-select {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--gray-300);
+            margin-bottom: 14px;
+            background: var(--white);
+        }
+        
         @media (max-width: 850px) {
             body { padding: 16px; }
             .user-bar { display: none !important; }
@@ -617,10 +627,19 @@
 </head>
 <body>
 
+    <!-- НОВАЯ ФОРМА ВХОДА С ВЫБОРОМ ОПЕРАТОРА -->
     <div id="loginOverlay" class="modal" style="display: flex;">
         <div class="modal-card" style="max-width: 380px;">
-            <h2 style="text-align:center; margin-bottom: 20px;">A4-Принт</h2>
-            <input type="text" id="loginUsername" placeholder="Логин" style="margin-bottom: 14px;">
+            <div style="text-align:center; margin-bottom: 20px;">
+                <img src="https://github.com/a4print2026-jpg/baza/blob/dbcda72ab60f0a9f8d8984e17375f6649cf677f0/images/logo_soc2.png?raw=true" style="height: 60px; margin-bottom: 10px;" onerror="this.style.display='none'">
+                <h2>A4-Принт</h2>
+            </div>
+            <select id="loginSelect" class="login-select">
+                <option value="">— Выберите оператора —</option>
+                <option value="pavel">Павел (Администратор)</option>
+                <option value="ksenia">Ксения (Оператор)</option>
+                <option value="natalia">Наталья (Оператор)</option>
+            </select>
             <input type="password" id="loginPassword" placeholder="Пароль">
             <button id="loginBtn" style="width:100%; margin-top: 20px;">Войти</button>
             <div id="loginError" style="color:var(--red); margin-top: 16px; text-align:center;"></div>
@@ -639,6 +658,7 @@
                     <button id="themeToggleBtn" class="btn-outline">🌙 Тёмная</button>
                     <button id="adminPanelBtn" class="btn-primary">Админ</button>
                     <button id="shiftToggleBtn" class="btn-warning">🚀 Открыть смену</button>
+                    <button id="pdfReportBtn" class="btn-success">📄 Отчёт</button>
                     <button id="printBlankBtn" class="btn-primary">🖨️ Бланк заказа</button>
                     <button id="logoutBtn" class="btn-outline">Выйти</button>
                 </div>
@@ -648,6 +668,7 @@
                     <button id="burgerThemeToggle">🌙 Тёмная</button>
                     <button id="burgerAdminBtn">Админ</button>
                     <button id="burgerShiftBtn">🚀 Смена</button>
+                    <button id="burgerPdfBtn">📄 Отчёт</button>
                     <button id="burgerPrintBtn">🖨️ Бланк</button>
                     <button id="burgerLogoutBtn">Выйти</button>
                 </div>
@@ -746,6 +767,7 @@
 
     <div id="syncStatus" class="sync-status">💾 Готово</div>
 
+    <!-- Модалка комментария к смене -->
     <div id="shiftCommentModal" class="modal">
         <div class="modal-card">
             <h3 style="margin-bottom: 16px;">📝 Комментарий к смене</h3>
@@ -754,6 +776,16 @@
                 <button id="shiftCommentCancel" class="btn-outline">Отмена</button>
                 <button id="shiftCommentConfirm" class="btn-primary">Подтвердить</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Модалка выбора отчёта -->
+    <div id="reportChoiceModal" class="modal">
+        <div class="modal-card" style="max-width: 380px;">
+            <h3 style="margin-bottom: 20px;">📄 Выберите тип отчёта</h3>
+            <button id="reportTodayBtn" class="btn-primary" style="width:100%; margin-bottom: 10px;">📅 За сегодня</button>
+            <button id="reportFullBtn" class="btn-success" style="width:100%;">📊 Полный (все заказы)</button>
+            <button id="cancelReportBtn" class="btn-outline" style="width:100%; margin-top: 10px;">Отмена</button>
         </div>
     </div>
 
@@ -849,7 +881,7 @@
         // ========== ФИНАНСЫ ЗА СМЕНУ ==========
         function getShiftFinance() {
             if (!shiftOpen) return { revenue: 0, cash: 0, card: 0 };
-            const shiftOrders = allOrders.filter(o => o.date >= shiftOpen && o.shiftOpen === shiftOpen);
+            const shiftOrders = allOrders.filter(o => o.operator === currentUser.name && o.date >= shiftOpen && (!shiftClose || o.date <= shiftClose));
             let revenue = 0, cash = 0, card = 0;
             shiftOrders.forEach(o => {
                 revenue += o.finalTotal;
@@ -1105,7 +1137,7 @@
             XLSX.writeFile(wb, `A4print_${currentUser.name}_${new Date().toISOString().slice(0,19)}.xlsx`);
         }
 
-        // Смена
+        // ========== СМЕНА ==========
         function loadShift() { 
             let s = localStorage.getItem(SHIFT_KEY); 
             if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } } 
@@ -1116,9 +1148,19 @@
         function updateShiftUI() { 
             let st = document.getElementById("shiftStatus"), op = document.getElementById("shiftOpenTime"), cl = document.getElementById("shiftCloseTime"), btn = document.getElementById("shiftToggleBtn"); 
             if (shiftOpen && !shiftClose) { 
-                st.innerText = "🟢 Открыта"; op.innerText = shiftOpen; cl.innerText = "—"; btn.innerText = "🔒 Закрыть смену"; btn.classList.add("btn-danger"); btn.classList.remove("btn-warning"); 
+                st.innerText = "🟢 Открыта"; 
+                op.innerText = shiftOpen + (shiftOpenComment ? " 📝" : ""); 
+                cl.innerText = "—"; 
+                btn.innerText = "🔒 Закрыть смену"; 
+                btn.classList.add("btn-danger"); 
+                btn.classList.remove("btn-warning"); 
             } else { 
-                st.innerText = shiftOpen ? "🔴 Закрыта" : "⚫ Не открыта"; op.innerText = shiftOpen || "—"; cl.innerText = shiftClose || "—"; btn.innerText = "🚀 Открыть смену"; btn.classList.remove("btn-danger"); btn.classList.add("btn-warning"); 
+                st.innerText = shiftOpen ? "🔴 Закрыта" : "⚫ Не открыта"; 
+                op.innerText = shiftOpen || "—"; 
+                cl.innerText = (shiftClose || "—") + (shiftCloseComment ? " 📝" : ""); 
+                btn.innerText = "🚀 Открыть смену"; 
+                btn.classList.remove("btn-danger"); 
+                btn.classList.add("btn-warning"); 
             } 
         }
         
@@ -1161,19 +1203,21 @@
         
         function cancelShiftComment() { document.getElementById("shiftCommentModal").style.display = "none"; }
 
-        // ========== ОТЧЁТ ОПЕРАТОРА (с финансами за смену) ==========
+        // ========== ОТЧЁТ ОПЕРАТОРА ==========
         function generateReport(orders, title) {
             let cash = orders.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
             let card = orders.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
             let totalRevenue = cash + card;
             let shiftInfo = '';
-            if (shiftOpen) {
-                let shiftOrders = allOrders.filter(o => o.operator === currentUser.name && o.date >= shiftOpen);
+            if (shiftOpen || shiftClose) {
+                let shiftOrders = allOrders.filter(o => o.operator === currentUser.name && 
+                    ((shiftOpen && o.date >= shiftOpen) && (!shiftClose || o.date <= shiftClose)));
                 let shiftCash = shiftOrders.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
                 let shiftCard = shiftOrders.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
                 let shiftTotal = shiftCash + shiftCard;
                 shiftInfo = `<div style="margin: 15px 0; padding: 12px; background: var(--gray-100); border-radius: 8px;">
-                                <strong>📊 ФИНАНСЫ ЗА ТЕКУЩУЮ СМЕНУ:</strong><br>
+                                <strong>📊 ФИНАНСЫ ЗА ${shiftOpen && !shiftClose ? 'ТЕКУЩУЮ' : 'ПРОШЛУЮ'} СМЕНУ:</strong><br>
+                                🕐 Смена: ${shiftOpen || '—'} → ${shiftClose || '—'}<br>
                                 💰 Выручка: ${shiftTotal} ₽<br>
                                 💵 Наличные в кассе: ${shiftCash} ₽<br>
                                 💳 Оплата картой: ${shiftCard} ₽
@@ -1246,7 +1290,7 @@
             let final = subtotal - discount;
             let itemsHtml = cart.map(i => `<tr><td style="border:1px solid #d1d5db; padding:8px;">${escapeHtml(i.name)}</td><td style="border:1px solid #d1d5db; text-align:center">${i.qty}</td><td style="border:1px solid #d1d5db; text-align:center">${i.price} ₽</td><td style="border:1px solid #d1d5db; text-align:right">${i.price * i.qty} ₽</td>`).join('');
             let cont = document.getElementById("printBlankContainer"); 
-            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th><tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
+            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
             window.print(); setTimeout(() => cont.innerHTML = "", 1000);
         }
 
@@ -1276,20 +1320,23 @@
         function showSyncStatus(msg) { let d = document.getElementById("syncStatus"); if (d) { d.textContent = msg; setTimeout(() => { if (d.textContent === msg) d.textContent = "💾 Готово"; }, 2000); } }
         function toggleTheme() { document.body.classList.toggle("dark"); localStorage.setItem("a4print_theme", document.body.classList.contains("dark") ? "dark" : "light"); }
         
-        function login(login, pwd) {
-            let u = operators[login.toLowerCase()];
-            if (u && u.password === pwd) {
-                currentUser = { ...u, username: login.toLowerCase() };
+        function login() {
+            let selectedLogin = document.getElementById("loginSelect").value;
+            let password = document.getElementById("loginPassword").value;
+            if (!selectedLogin) {
+                document.getElementById("loginError").innerText = "Выберите оператора";
+                return false;
+            }
+            let u = operators[selectedLogin];
+            if (u && u.password === password) {
+                currentUser = { ...u, username: selectedLogin };
                 localStorage.setItem("a4print_current_user", JSON.stringify(currentUser));
                 document.getElementById("loginOverlay").style.display = "none";
                 document.getElementById("mainContent").style.display = "block";
                 loadData();
-                initTabs();
-                initSearch();
-                initAdminTabs();
                 return true;
             }
-            document.getElementById("loginError").innerText = "Неверный логин или пароль";
+            document.getElementById("loginError").innerText = "Неверный пароль";
             return false;
         }
         
@@ -1305,22 +1352,11 @@
             document.getElementById("burgerThemeToggle").onclick = () => { toggleTheme(); if (menu) menu.classList.remove("show"); }; 
             document.getElementById("burgerAdminBtn").onclick = () => { if (currentUser?.role === "admin") { renderAdmin(); document.getElementById("adminModal").style.display = "flex"; } else alert("Доступно только администратору"); if (menu) menu.classList.remove("show"); }; 
             document.getElementById("burgerShiftBtn").onclick = () => { toggleShiftWithComment(); if (menu) menu.classList.remove("show"); }; 
+            document.getElementById("burgerPdfBtn").onclick = () => { showReportChoice(); if (menu) menu.classList.remove("show"); }; 
             document.getElementById("burgerPrintBtn").onclick = () => { printOrderBlank(); if (menu) menu.classList.remove("show"); }; 
             document.getElementById("burgerLogoutBtn").onclick = () => { logout(); if (menu) menu.classList.remove("show"); }; 
         }
 
-        // Модалка выбора отчёта
-        let reportChoiceModal = document.createElement('div');
-        reportChoiceModal.id = "reportChoiceModal";
-        reportChoiceModal.className = "modal";
-        reportChoiceModal.innerHTML = `<div class="modal-card" style="max-width: 380px;">
-            <h3 style="margin-bottom: 20px;">📄 Выберите тип отчёта</h3>
-            <button id="reportTodayBtn" class="btn-primary" style="width:100%; margin-bottom: 10px;">📅 За сегодня</button>
-            <button id="reportFullBtn" class="btn-success" style="width:100%;">📊 Полный (все заказы)</button>
-            <button id="cancelReportBtn" class="btn-outline" style="width:100%; margin-top: 10px;">Отмена</button>
-        </div>`;
-        document.body.appendChild(reportChoiceModal);
-        
         document.addEventListener("DOMContentLoaded", () => {
             let saved = localStorage.getItem("a4print_current_user");
             let theme = localStorage.getItem("a4print_theme");
@@ -1346,7 +1382,7 @@
             }
             
             document.getElementById("themeToggleBtn").onclick = toggleTheme;
-            document.getElementById("loginBtn").onclick = () => login(document.getElementById("loginUsername").value, document.getElementById("loginPassword").value);
+            document.getElementById("loginBtn").onclick = login;
             document.getElementById("logoutBtn").onclick = logout;
             document.getElementById("applyDiscountBtn").onclick = applyDiscount;
             document.getElementById("completeOrderBtn").onclick = completeOrder;
@@ -1359,7 +1395,7 @@
             document.getElementById("shiftCommentConfirm").onclick = confirmShiftWithComment;
             document.getElementById("shiftCommentCancel").onclick = cancelShiftComment;
             
-            // Отчёты
+            // Кнопка отчёта в шапке
             document.getElementById("pdfReportBtn").onclick = showReportChoice;
             document.getElementById("reportTodayBtn").onclick = reportToday;
             document.getElementById("reportFullBtn").onclick = reportFull;
@@ -1371,7 +1407,7 @@
             document.getElementById("exportStatsExcelBtn").onclick = exportStatsExcel;
             document.getElementById("addServiceBtn").onclick = () => { let name = document.getElementById("newServiceName").value.trim(); let price = parseInt(document.getElementById("newServicePrice").value); if (name && price > 0) { services.push({ id: Date.now(), name, price }); saveServices(); renderServices(); renderAdmin(); } else alert("Введите название и цену"); };
             document.getElementById("adminAddGoodsBtn").onclick = () => { let name = document.getElementById("adminNewGoodsName").value.trim(); let price = parseFloat(document.getElementById("adminNewGoodsPrice").value); let stock = parseInt(document.getElementById("adminNewGoodsStock").value); if (name && price > 0 && !isNaN(stock)) { goods.push({ id: Date.now(), name: name, price: price, stock: stock, unit: "шт" }); saveGoods(); renderGoods(); renderAdmin(); showSyncStatus("✅ Товар добавлен"); document.getElementById("adminNewGoodsName").value = ""; document.getElementById("adminNewGoodsPrice").value = ""; document.getElementById("adminNewGoodsStock").value = ""; } else alert("Заполните все поля"); };
-            window.onclick = (e) => { if (e.target === admModal) admModal.style.display = "none"; if (e.target === reportChoiceModal) reportChoiceModal.style.display = "none"; };
+            window.onclick = (e) => { if (e.target === admModal) admModal.style.display = "none"; if (e.target === document.getElementById("reportChoiceModal")) document.getElementById("reportChoiceModal").style.display = "none"; };
         });
     </script>
 </body>
