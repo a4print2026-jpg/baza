@@ -151,6 +151,7 @@
         .btn-danger { background: var(--red); }
         .btn-warning { background: var(--orange); }
         
+        /* Улучшенная полоса статуса смены с финансовой информацией */
         .shift-bar {
             background: var(--white);
             border-radius: 12px;
@@ -164,6 +165,29 @@
             font-weight: 500;
             border: 1px solid var(--gray-200);
             box-shadow: var(--shadow);
+        }
+        
+        .shift-stats {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .shift-stat-item {
+            background: var(--gray-100);
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+        
+        .shift-stat-label {
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+        
+        .shift-stat-value {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--blue);
         }
         
         .dashboard {
@@ -629,10 +653,27 @@
                 </div>
             </div>
 
+            <!-- Полоса смены с финансовой информацией -->
             <div class="shift-bar">
-                <span>🕒 Смена: <strong id="shiftStatus">Закрыта</strong></span>
-                <span>🟢 Открыта: <span id="shiftOpenTime">—</span></span>
-                <span>🔴 Закрыта: <span id="shiftCloseTime">—</span></span>
+                <div>
+                    <span>🕒 Смена: <strong id="shiftStatus">Закрыта</strong></span>
+                    <span style="margin-left: 16px;">🟢 Открыта: <span id="shiftOpenTime">—</span></span>
+                    <span style="margin-left: 16px;">🔴 Закрыта: <span id="shiftCloseTime">—</span></span>
+                </div>
+                <div class="shift-stats" id="shiftFinanceStats">
+                    <div class="shift-stat-item">
+                        <div class="shift-stat-label">💰 Выручка за смену</div>
+                        <div class="shift-stat-value" id="shiftRevenue">0 ₽</div>
+                    </div>
+                    <div class="shift-stat-item">
+                        <div class="shift-stat-label">💵 Наличные в кассе</div>
+                        <div class="shift-stat-value" id="shiftCash">0 ₽</div>
+                    </div>
+                    <div class="shift-stat-item">
+                        <div class="shift-stat-label">💳 Карта</div>
+                        <div class="shift-stat-value" id="shiftCard">0 ₽</div>
+                    </div>
+                </div>
             </div>
 
             <div class="dashboard">
@@ -805,26 +846,44 @@
         function saveOrders() { localStorage.setItem(ORDERS_KEY, JSON.stringify(allOrders)); }
         function saveShift() { localStorage.setItem(SHIFT_KEY, JSON.stringify({ open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment, operator: currentUser?.name })); }
 
+        // ========== ФИНАНСЫ ЗА СМЕНУ ==========
+        function getShiftFinance() {
+            if (!shiftOpen) return { revenue: 0, cash: 0, card: 0 };
+            const shiftOrders = allOrders.filter(o => o.date >= shiftOpen && o.shiftOpen === shiftOpen);
+            let revenue = 0, cash = 0, card = 0;
+            shiftOrders.forEach(o => {
+                revenue += o.finalTotal;
+                if (o.paymentMethod === "cash") cash += o.finalTotal;
+                else card += o.finalTotal;
+            });
+            return { revenue, cash, card };
+        }
+        
+        function updateShiftFinanceDisplay() {
+            const finance = getShiftFinance();
+            document.getElementById("shiftRevenue").innerHTML = finance.revenue.toLocaleString() + " ₽";
+            document.getElementById("shiftCash").innerHTML = finance.cash.toLocaleString() + " ₽";
+            document.getElementById("shiftCard").innerHTML = finance.card.toLocaleString() + " ₽";
+        }
+
         function loadData() {
             let s = localStorage.getItem(SERVICES_KEY); if (s) services = JSON.parse(s);
             let g = localStorage.getItem(GOODS_KEY); if (g) goods = JSON.parse(g);
             let o = localStorage.getItem(OPERATORS_KEY); if (o) operators = JSON.parse(o);
             let ord = localStorage.getItem(ORDERS_KEY); if (ord) allOrders = JSON.parse(ord);
             renderServices(); renderGoods(); renderCart(); renderHistory(); loadShift();
+            updateShiftFinanceDisplay();
             document.getElementById("currentOperatorName").innerHTML = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
             document.getElementById("burgerOperatorName").innerText = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
         }
 
-        // ========== СТАТИСТИКА ОПЕРАТОРОВ (только реальные пользователи) ==========
+        // ========== СТАТИСТИКА ОПЕРАТОРОВ ==========
         function getOperatorsStats() {
             let stats = {};
-            // Инициализируем только текущих пользователей из operators
             for (let [login, data] of Object.entries(operators)) {
                 stats[login] = { name: data.name, login: login, orders: 0, revenue: 0, cash: 0, card: 0 };
             }
-            // Собираем данные из заказов
             for (let order of allOrders) {
-                // Находим оператора по имени (в заказе хранится имя)
                 let opLogin = null;
                 for (let [login, data] of Object.entries(operators)) {
                     if (data.name === order.operator) {
@@ -984,12 +1043,13 @@
             let discount = 0, discPct = 0;
             if (discountPct > 0) { discount = subtotal * discountPct / 100; discPct = discountPct; }
             else if (discountAmt > 0) discount = Math.min(discountAmt, subtotal);
-            let order = { id: Date.now(), client, phone, items: cart.map(i => ({ type: i.type, name: i.name, price: i.price, qty: i.qty })), subtotal, discount, discountPercent: discPct, finalTotal: subtotal - discount, paymentMethod: payment, comment, date: new Date().toLocaleString(), operator: currentUser.name };
+            let order = { id: Date.now(), client, phone, items: cart.map(i => ({ type: i.type, name: i.name, price: i.price, qty: i.qty })), subtotal, discount, discountPercent: discPct, finalTotal: subtotal - discount, paymentMethod: payment, comment, date: new Date().toLocaleString(), operator: currentUser.name, shiftOpen: shiftOpen };
             allOrders.push(order); saveOrders();
             cart = []; discountPct = 0; discountAmt = 0;
             document.getElementById("discountPercent").value = 0; document.getElementById("discountAmount").value = 0;
             document.getElementById("clientName").value = ""; document.getElementById("clientPhone").value = ""; document.getElementById("orderComment").value = "";
             renderCart(); renderHistory();
+            updateShiftFinanceDisplay();
             alert(`Заказ №${order.id} на ${order.finalTotal} ₽`);
         }
 
@@ -1032,7 +1092,7 @@
                 html += `<div class="history-item"><div><strong>${escapeHtml(o.client)}</strong> ${o.phone ? `📞 ${escapeHtml(o.phone)}` : ""} | ${o.date} | <strong>${o.finalTotal} ₽</strong></div><div style="font-size:12px; margin-top:6px;">${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div><div style="font-size:11px; margin-top:4px; color:var(--gray-500);">${o.comment ? "📝 " + o.comment : ""}</div><button class="delete-order" data-id="${o.id}" style="margin-top:10px; background:var(--red); border:none; border-radius:8px; padding:5px 14px; color:white; font-size:11px;">Удалить</button></div>`;
             });
             cont.innerHTML = html;
-            document.querySelectorAll(".delete-order").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); allOrders = allOrders.filter(o => o.id !== id); saveOrders(); renderHistory(); });
+            document.querySelectorAll(".delete-order").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); allOrders = allOrders.filter(o => o.id !== id); saveOrders(); renderHistory(); updateShiftFinanceDisplay(); });
         }
 
         function exportExcel() {
@@ -1046,11 +1106,134 @@
         }
 
         // Смена
-        function loadShift() { let s = localStorage.getItem(SHIFT_KEY); if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } } updateShiftUI(); }
-        function updateShiftUI() { let st = document.getElementById("shiftStatus"), op = document.getElementById("shiftOpenTime"), cl = document.getElementById("shiftCloseTime"), btn = document.getElementById("shiftToggleBtn"); if (shiftOpen && !shiftClose) { st.innerText = "🟢 Открыта"; op.innerText = shiftOpen; cl.innerText = "—"; btn.innerText = "🔒 Закрыть смену"; btn.classList.add("btn-danger"); btn.classList.remove("btn-warning"); } else { st.innerText = shiftOpen ? "🔴 Закрыта" : "⚫ Не открыта"; op.innerText = shiftOpen || "—"; cl.innerText = shiftClose || "—"; btn.innerText = "🚀 Открыть смену"; btn.classList.remove("btn-danger"); btn.classList.add("btn-warning"); } }
-        function toggleShiftWithComment() { if (!shiftOpen || shiftClose) { document.getElementById("shiftCommentTitle").innerText = "📝 Комментарий к открытию смены"; document.getElementById("shiftCommentText").value = ""; document.getElementById("shiftCommentModal").style.display = "flex"; window._pendingShiftAction = "open"; } else { document.getElementById("shiftCommentTitle").innerText = "📝 Комментарий к закрытию смены"; document.getElementById("shiftCommentText").value = ""; document.getElementById("shiftCommentModal").style.display = "flex"; window._pendingShiftAction = "close"; } }
-        function confirmShiftWithComment() { let comment = document.getElementById("shiftCommentText").value.trim(); if (window._pendingShiftAction === "open") { shiftOpen = new Date().toLocaleString(); shiftClose = null; shiftOpenComment = comment; shiftCloseComment = ""; saveShift(); updateShiftUI(); alert("Смена открыта: " + shiftOpen); } else if (window._pendingShiftAction === "close") { if (!shiftOpen || shiftClose) { alert("Смена не открыта"); return; } shiftClose = new Date().toLocaleString(); shiftCloseComment = comment; saveShift(); updateShiftUI(); alert("Смена закрыта: " + shiftClose); } document.getElementById("shiftCommentModal").style.display = "none"; }
+        function loadShift() { 
+            let s = localStorage.getItem(SHIFT_KEY); 
+            if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } } 
+            updateShiftUI(); 
+            updateShiftFinanceDisplay();
+        }
+        
+        function updateShiftUI() { 
+            let st = document.getElementById("shiftStatus"), op = document.getElementById("shiftOpenTime"), cl = document.getElementById("shiftCloseTime"), btn = document.getElementById("shiftToggleBtn"); 
+            if (shiftOpen && !shiftClose) { 
+                st.innerText = "🟢 Открыта"; op.innerText = shiftOpen; cl.innerText = "—"; btn.innerText = "🔒 Закрыть смену"; btn.classList.add("btn-danger"); btn.classList.remove("btn-warning"); 
+            } else { 
+                st.innerText = shiftOpen ? "🔴 Закрыта" : "⚫ Не открыта"; op.innerText = shiftOpen || "—"; cl.innerText = shiftClose || "—"; btn.innerText = "🚀 Открыть смену"; btn.classList.remove("btn-danger"); btn.classList.add("btn-warning"); 
+            } 
+        }
+        
+        function toggleShiftWithComment() { 
+            if (!shiftOpen || shiftClose) { 
+                document.getElementById("shiftCommentTitle").innerText = "📝 Комментарий к открытию смены"; 
+                document.getElementById("shiftCommentText").value = ""; 
+                document.getElementById("shiftCommentModal").style.display = "flex"; 
+                window._pendingShiftAction = "open"; 
+            } else { 
+                document.getElementById("shiftCommentTitle").innerText = "📝 Комментарий к закрытию смены"; 
+                document.getElementById("shiftCommentText").value = ""; 
+                document.getElementById("shiftCommentModal").style.display = "flex"; 
+                window._pendingShiftAction = "close"; 
+            } 
+        }
+        
+        function confirmShiftWithComment() { 
+            let comment = document.getElementById("shiftCommentText").value.trim(); 
+            if (window._pendingShiftAction === "open") { 
+                shiftOpen = new Date().toLocaleString(); 
+                shiftClose = null; 
+                shiftOpenComment = comment; 
+                shiftCloseComment = ""; 
+                saveShift(); 
+                updateShiftUI(); 
+                updateShiftFinanceDisplay();
+                alert("Смена открыта: " + shiftOpen); 
+            } else if (window._pendingShiftAction === "close") { 
+                if (!shiftOpen || shiftClose) { alert("Смена не открыта"); return; } 
+                let finance = getShiftFinance();
+                shiftClose = new Date().toLocaleString(); 
+                shiftCloseComment = comment; 
+                saveShift(); 
+                updateShiftUI(); 
+                alert(`Смена закрыта: ${shiftClose}\nВыручка за смену: ${finance.revenue} ₽\nНаличные в кассе: ${finance.cash} ₽\nКарта: ${finance.card} ₽`); 
+            } 
+            document.getElementById("shiftCommentModal").style.display = "none"; 
+        }
+        
         function cancelShiftComment() { document.getElementById("shiftCommentModal").style.display = "none"; }
+
+        // ========== ОТЧЁТ ОПЕРАТОРА (с финансами за смену) ==========
+        function generateReport(orders, title) {
+            let cash = orders.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
+            let card = orders.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
+            let totalRevenue = cash + card;
+            let shiftInfo = '';
+            if (shiftOpen) {
+                let shiftOrders = allOrders.filter(o => o.operator === currentUser.name && o.date >= shiftOpen);
+                let shiftCash = shiftOrders.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
+                let shiftCard = shiftOrders.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
+                let shiftTotal = shiftCash + shiftCard;
+                shiftInfo = `<div style="margin: 15px 0; padding: 12px; background: var(--gray-100); border-radius: 8px;">
+                                <strong>📊 ФИНАНСЫ ЗА ТЕКУЩУЮ СМЕНУ:</strong><br>
+                                💰 Выручка: ${shiftTotal} ₽<br>
+                                💵 Наличные в кассе: ${shiftCash} ₽<br>
+                                💳 Оплата картой: ${shiftCard} ₽
+                            </div>`;
+            }
+            let ordersHtml = orders.map(o => `<div style="border:1px solid #d1d5db; margin:10px 0; padding:12px; border-radius:8px;">
+                <div><strong>№${o.id}</strong> | ${o.date}</div>
+                <div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div>
+                <div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div>
+                <div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div>
+            </div>`).join('');
+            let html = `<div style="font-family: monospace; padding: 20px; max-width: 800px; margin: 0 auto;">
+                <div style="text-align: center;">
+                    <h2>A4-ПРИНТ</h2>
+                    <p>${title}</p>
+                    <p>Оператор: ${currentUser.name}</p>
+                    <p>Дата формирования: ${new Date().toLocaleString()}</p>
+                </div>
+                ${shiftInfo}
+                <hr>
+                <div><strong>ИТОГИ ОТЧЁТА:</strong><br>
+                📦 Заказов: ${orders.length}<br>
+                💰 Выручка: ${totalRevenue} ₽<br>
+                💵 Наличные: ${cash} ₽<br>
+                💳 Карта: ${card} ₽</div>
+                <hr>
+                <div><strong>ДЕТАЛИ ЗАКАЗОВ:</strong></div>
+                ${ordersHtml || '<div>Нет заказов за выбранный период</div>'}
+                <hr>
+                <div style="text-align:center;">Подпись: _______________</div>
+            </div>`;
+            let el = document.createElement('div'); el.innerHTML = html; document.body.appendChild(el);
+            let filename = `A4print_${currentUser.name}_${title.replace(/\s/g, '_')}.pdf`;
+            html2pdf().set({ margin: 0.5, filename: filename, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
+        }
+
+        function showReportChoice() { 
+            let myOrders = getMyOrders();
+            if (myOrders.length === 0 && (!shiftOpen || shiftClose)) {
+                alert("Нет заказов для отчёта");
+                return;
+            }
+            document.getElementById("reportChoiceModal").style.display = "flex"; 
+        }
+        
+        function reportToday() { 
+            let today = new Date().toLocaleDateString(); 
+            let myOrders = getMyOrders(); 
+            let todayOrders = myOrders.filter(o => o.date.includes(today)); 
+            if (todayOrders.length === 0) { alert("За сегодня нет заказов"); return; } 
+            generateReport(todayOrders, `Отчёт за ${today}`); 
+            document.getElementById("reportChoiceModal").style.display = "none"; 
+        }
+        
+        function reportFull() { 
+            let myOrders = getMyOrders(); 
+            if (myOrders.length === 0) { alert("Нет заказов"); return; } 
+            generateReport(myOrders, "Полный отчёт (все заказы)"); 
+            document.getElementById("reportChoiceModal").style.display = "none"; 
+        }
 
         function printOrderBlank() {
             if (cart.length === 0) { alert("Корзина пуста"); return; }
@@ -1063,14 +1246,13 @@
             let final = subtotal - discount;
             let itemsHtml = cart.map(i => `<tr><td style="border:1px solid #d1d5db; padding:8px;">${escapeHtml(i.name)}</td><td style="border:1px solid #d1d5db; text-align:center">${i.qty}</td><td style="border:1px solid #d1d5db; text-align:center">${i.price} ₽</td><td style="border:1px solid #d1d5db; text-align:right">${i.price * i.qty} ₽</td>`).join('');
             let cont = document.getElementById("printBlankContainer"); 
-            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th><tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
+            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th><tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
             window.print(); setTimeout(() => cont.innerHTML = "", 1000);
         }
 
         // Админ
         function renderAdmin() {
             if (currentUser.role !== "admin") { alert("Доступно только администратору"); return; }
-            
             renderOperatorsStats();
             
             let servDiv = document.getElementById("adminServicesList");
@@ -1114,13 +1296,54 @@
         function logout() { currentUser = null; localStorage.removeItem("a4print_current_user"); location.reload(); }
         function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ""; }
         
-        function initBurger() { let btn = document.getElementById("burgerBtn"), menu = document.getElementById("burgerMenu"); if (btn && menu) { btn.onclick = (e) => { e.stopPropagation(); menu.classList.toggle("show"); }; document.addEventListener("click", (e) => { if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove("show"); }); } document.getElementById("burgerThemeToggle").onclick = () => { toggleTheme(); if (menu) menu.classList.remove("show"); }; document.getElementById("burgerAdminBtn").onclick = () => { if (currentUser?.role === "admin") { renderAdmin(); document.getElementById("adminModal").style.display = "flex"; } else alert("Доступно только администратору"); if (menu) menu.classList.remove("show"); }; document.getElementById("burgerShiftBtn").onclick = () => { toggleShiftWithComment(); if (menu) menu.classList.remove("show"); }; document.getElementById("burgerPrintBtn").onclick = () => { printOrderBlank(); if (menu) menu.classList.remove("show"); }; document.getElementById("burgerLogoutBtn").onclick = () => { logout(); if (menu) menu.classList.remove("show"); }; }
+        function initBurger() { 
+            let btn = document.getElementById("burgerBtn"), menu = document.getElementById("burgerMenu"); 
+            if (btn && menu) { 
+                btn.onclick = (e) => { e.stopPropagation(); menu.classList.toggle("show"); }; 
+                document.addEventListener("click", (e) => { if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove("show"); }); 
+            } 
+            document.getElementById("burgerThemeToggle").onclick = () => { toggleTheme(); if (menu) menu.classList.remove("show"); }; 
+            document.getElementById("burgerAdminBtn").onclick = () => { if (currentUser?.role === "admin") { renderAdmin(); document.getElementById("adminModal").style.display = "flex"; } else alert("Доступно только администратору"); if (menu) menu.classList.remove("show"); }; 
+            document.getElementById("burgerShiftBtn").onclick = () => { toggleShiftWithComment(); if (menu) menu.classList.remove("show"); }; 
+            document.getElementById("burgerPrintBtn").onclick = () => { printOrderBlank(); if (menu) menu.classList.remove("show"); }; 
+            document.getElementById("burgerLogoutBtn").onclick = () => { logout(); if (menu) menu.classList.remove("show"); }; 
+        }
 
+        // Модалка выбора отчёта
+        let reportChoiceModal = document.createElement('div');
+        reportChoiceModal.id = "reportChoiceModal";
+        reportChoiceModal.className = "modal";
+        reportChoiceModal.innerHTML = `<div class="modal-card" style="max-width: 380px;">
+            <h3 style="margin-bottom: 20px;">📄 Выберите тип отчёта</h3>
+            <button id="reportTodayBtn" class="btn-primary" style="width:100%; margin-bottom: 10px;">📅 За сегодня</button>
+            <button id="reportFullBtn" class="btn-success" style="width:100%;">📊 Полный (все заказы)</button>
+            <button id="cancelReportBtn" class="btn-outline" style="width:100%; margin-top: 10px;">Отмена</button>
+        </div>`;
+        document.body.appendChild(reportChoiceModal);
+        
         document.addEventListener("DOMContentLoaded", () => {
             let saved = localStorage.getItem("a4print_current_user");
             let theme = localStorage.getItem("a4print_theme");
             if (theme === "dark") document.body.classList.add("dark");
-            if (saved) { try { currentUser = JSON.parse(saved); if (operators[currentUser.username]) { document.getElementById("loginOverlay").style.display = "none"; document.getElementById("mainContent").style.display = "block"; loadData(); initBurger(); initTabs(); initSearch(); initAdminTabs(); } else logout(); } catch(e) { logout(); } } else { initBurger(); initTabs(); initSearch(); initAdminTabs(); }
+            if (saved) { 
+                try { 
+                    currentUser = JSON.parse(saved); 
+                    if (operators[currentUser.username]) { 
+                        document.getElementById("loginOverlay").style.display = "none"; 
+                        document.getElementById("mainContent").style.display = "block"; 
+                        loadData(); 
+                        initBurger(); 
+                        initTabs(); 
+                        initSearch(); 
+                        initAdminTabs(); 
+                    } else logout(); 
+                } catch(e) { logout(); } 
+            } else { 
+                initBurger(); 
+                initTabs(); 
+                initSearch(); 
+                initAdminTabs(); 
+            }
             
             document.getElementById("themeToggleBtn").onclick = toggleTheme;
             document.getElementById("loginBtn").onclick = () => login(document.getElementById("loginUsername").value, document.getElementById("loginPassword").value);
@@ -1136,13 +1359,19 @@
             document.getElementById("shiftCommentConfirm").onclick = confirmShiftWithComment;
             document.getElementById("shiftCommentCancel").onclick = cancelShiftComment;
             
+            // Отчёты
+            document.getElementById("pdfReportBtn").onclick = showReportChoice;
+            document.getElementById("reportTodayBtn").onclick = reportToday;
+            document.getElementById("reportFullBtn").onclick = reportFull;
+            document.getElementById("cancelReportBtn").onclick = () => document.getElementById("reportChoiceModal").style.display = "none";
+            
             let admModal = document.getElementById("adminModal");
             document.getElementById("adminPanelBtn").onclick = () => { renderAdmin(); admModal.style.display = "flex"; };
             document.getElementById("closeAdminModal").onclick = () => admModal.style.display = "none";
             document.getElementById("exportStatsExcelBtn").onclick = exportStatsExcel;
             document.getElementById("addServiceBtn").onclick = () => { let name = document.getElementById("newServiceName").value.trim(); let price = parseInt(document.getElementById("newServicePrice").value); if (name && price > 0) { services.push({ id: Date.now(), name, price }); saveServices(); renderServices(); renderAdmin(); } else alert("Введите название и цену"); };
             document.getElementById("adminAddGoodsBtn").onclick = () => { let name = document.getElementById("adminNewGoodsName").value.trim(); let price = parseFloat(document.getElementById("adminNewGoodsPrice").value); let stock = parseInt(document.getElementById("adminNewGoodsStock").value); if (name && price > 0 && !isNaN(stock)) { goods.push({ id: Date.now(), name: name, price: price, stock: stock, unit: "шт" }); saveGoods(); renderGoods(); renderAdmin(); showSyncStatus("✅ Товар добавлен"); document.getElementById("adminNewGoodsName").value = ""; document.getElementById("adminNewGoodsPrice").value = ""; document.getElementById("adminNewGoodsStock").value = ""; } else alert("Заполните все поля"); };
-            window.onclick = (e) => { if (e.target === admModal) admModal.style.display = "none"; };
+            window.onclick = (e) => { if (e.target === admModal) admModal.style.display = "none"; if (e.target === reportChoiceModal) reportChoiceModal.style.display = "none"; };
         });
     </script>
 </body>
