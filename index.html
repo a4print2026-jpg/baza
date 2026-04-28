@@ -815,14 +815,23 @@
             document.getElementById("burgerOperatorName").innerText = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
         }
 
-        // ========== СТАТИСТИКА ОПЕРАТОРОВ ==========
+        // ========== СТАТИСТИКА ОПЕРАТОРОВ (только реальные пользователи) ==========
         function getOperatorsStats() {
             let stats = {};
+            // Инициализируем только текущих пользователей из operators
             for (let [login, data] of Object.entries(operators)) {
                 stats[login] = { name: data.name, login: login, orders: 0, revenue: 0, cash: 0, card: 0 };
             }
+            // Собираем данные из заказов
             for (let order of allOrders) {
-                let opLogin = Object.keys(operators).find(l => operators[l].name === order.operator);
+                // Находим оператора по имени (в заказе хранится имя)
+                let opLogin = null;
+                for (let [login, data] of Object.entries(operators)) {
+                    if (data.name === order.operator) {
+                        opLogin = login;
+                        break;
+                    }
+                }
                 if (opLogin && stats[opLogin]) {
                     stats[opLogin].orders++;
                     stats[opLogin].revenue += order.finalTotal;
@@ -848,7 +857,7 @@
             for (let [login, st] of Object.entries(stats)) {
                 let avg = st.orders > 0 ? Math.round(st.revenue / st.orders) : 0;
                 html += `<div class="stats-row">
-                            <span style="width: 120px;"><strong>${escapeHtml(st.name)}</strong> ${login === "admin" ? "👑" : ""}</span>
+                            <span style="width: 120px;"><strong>${escapeHtml(st.name)}</strong> ${login === "pavel" ? "👑" : "👤"}</span>
                             <span style="width: 80px;">${st.orders}</span>
                             <span style="width: 120px;">${st.revenue.toLocaleString()}</span>
                             <span style="width: 120px;">${st.cash.toLocaleString()}</span>
@@ -1054,7 +1063,7 @@
             let final = subtotal - discount;
             let itemsHtml = cart.map(i => `<tr><td style="border:1px solid #d1d5db; padding:8px;">${escapeHtml(i.name)}</td><td style="border:1px solid #d1d5db; text-align:center">${i.qty}</td><td style="border:1px solid #d1d5db; text-align:center">${i.price} ₽</td><td style="border:1px solid #d1d5db; text-align:right">${i.price * i.qty} ₽</td>`).join('');
             let cont = document.getElementById("printBlankContainer"); 
-            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></td></thead><tbody>${itemsHtml}</tbody><table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
+            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th><tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
             window.print(); setTimeout(() => cont.innerHTML = "", 1000);
         }
 
