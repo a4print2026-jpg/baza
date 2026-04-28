@@ -505,7 +505,7 @@
     <!-- Модалка комментария к смене -->
     <div id="shiftCommentModal" class="modal">
         <div class="modal-card">
-            <h3 style="margin-bottom: 16px;">📝 Комментарий к смене</h3>
+            <h3 style="margin-bottom: 16px;" id="shiftCommentTitle">📝 Комментарий к смене</h3>
             <textarea id="shiftCommentText" rows="3" style="margin: 16px 0;"></textarea>
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
                 <button id="shiftCommentCancel" class="btn-outline">Отмена</button>
@@ -623,20 +623,39 @@
         function saveGoods() { localStorage.setItem(GOODS_KEY, JSON.stringify(goods)); }
         function saveOperators() { localStorage.setItem(OPERATORS_KEY, JSON.stringify(operators)); }
         function saveOrders() { localStorage.setItem(ORDERS_KEY, JSON.stringify(allOrders)); }
-        function saveShift() { localStorage.setItem(SHIFT_KEY, JSON.stringify({ open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment, operator: currentUser?.name })); }
-        function loadAllShifts() { let s = localStorage.getItem(SHIFTS_LIST_KEY); if (s) allShifts = JSON.parse(s); }
         function saveAllShifts() { localStorage.setItem(SHIFTS_LIST_KEY, JSON.stringify(allShifts)); }
-        function addShiftToHistory(shiftData) { allShifts.push(shiftData); saveAllShifts(); }
+        
+        function loadAllShifts() { 
+            let s = localStorage.getItem(SHIFTS_LIST_KEY); 
+            if (s) allShifts = JSON.parse(s); 
+        }
+        
+        function addShiftToHistory(shiftData) { 
+            let exists = allShifts.some(s => s.open === shiftData.open && s.login === shiftData.login);
+            if (!exists) {
+                allShifts.push(shiftData); 
+                saveAllShifts();
+            }
+        }
 
         // ========== ФИНАНСЫ ЗА СМЕНУ ==========
         function getShiftFinance() {
             if (!shiftOpen) return { revenue: 0, cash: 0, card: 0 };
-            const shiftOrders = allOrders.filter(o => o.operator === currentUser.name && o.date >= shiftOpen && (!shiftClose || o.date <= shiftClose));
+            
+            const shiftOrders = allOrders.filter(o => {
+                if (o.operator !== currentUser.name) return false;
+                if (!shiftClose) {
+                    return o.date >= shiftOpen;
+                } else {
+                    return o.date >= shiftOpen && o.date <= shiftClose;
+                }
+            });
+            
             let revenue = 0, cash = 0, card = 0;
             shiftOrders.forEach(o => {
                 revenue += o.finalTotal;
                 if (o.paymentMethod === "cash") cash += o.finalTotal;
-                else card += o.finalTotal;
+                else if (o.paymentMethod === "card") card += o.finalTotal;
             });
             return { revenue, cash, card };
         }
@@ -661,15 +680,37 @@
         }
 
         // ========== СМЕНА (ИСПРАВЛЕННАЯ) ==========
+        function saveShift() { 
+            localStorage.setItem(SHIFT_KEY, JSON.stringify({ 
+                open: shiftOpen, 
+                close: shiftClose, 
+                openComment: shiftOpenComment, 
+                closeComment: shiftCloseComment, 
+                operator: currentUser?.name 
+            })); 
+        }
+
         function loadShift() { 
             let s = localStorage.getItem(SHIFT_KEY); 
-            if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } } 
+            if (s) { 
+                let d = JSON.parse(s); 
+                if (d.operator === currentUser?.name) { 
+                    shiftOpen = d.open; 
+                    shiftClose = d.close; 
+                    shiftOpenComment = d.openComment || ""; 
+                    shiftCloseComment = d.closeComment || ""; 
+                } 
+            } 
             updateShiftUI(); 
             updateShiftFinanceDisplay();
         }
         
         function updateShiftUI() { 
-            let st = document.getElementById("shiftStatus"), op = document.getElementById("shiftOpenTime"), cl = document.getElementById("shiftCloseTime"), btn = document.getElementById("shiftToggleBtn"); 
+            let st = document.getElementById("shiftStatus");
+            let op = document.getElementById("shiftOpenTime");
+            let cl = document.getElementById("shiftCloseTime");
+            let btn = document.getElementById("shiftToggleBtn");
+            
             if (shiftOpen && !shiftClose) { 
                 st.innerText = "🟢 Открыта"; 
                 op.innerText = shiftOpen + (shiftOpenComment ? " 📝" : ""); 
@@ -703,6 +744,7 @@
         
         function confirmShiftWithComment() { 
             let comment = document.getElementById("shiftCommentText").value.trim(); 
+            
             if (window._pendingShiftAction === "open") { 
                 shiftOpen = new Date().toLocaleString(); 
                 shiftClose = null; 
@@ -711,22 +753,52 @@
                 saveShift(); 
                 updateShiftUI(); 
                 updateShiftFinanceDisplay();
-                alert("Смена открыта: " + shiftOpen); 
+                alert("✅ Смена открыта: " + shiftOpen); 
+                
+                let shiftRecord = { 
+                    login: currentUser.username, 
+                    name: currentUser.name, 
+                    role: currentUser.role, 
+                    open: shiftOpen, 
+                    close: null, 
+                    openComment: shiftOpenComment, 
+                    closeComment: "" 
+                };
+                addShiftToHistory(shiftRecord);
+                
             } else if (window._pendingShiftAction === "close") { 
-                if (!shiftOpen || shiftClose) { alert("Смена не открыта"); return; } 
+                if (!shiftOpen || shiftClose) { 
+                    alert("❌ Смена не открыта или уже закрыта"); 
+                    document.getElementById("shiftCommentModal").style.display = "none"; 
+                    return; 
+                }
+                
                 let finance = getShiftFinance();
                 shiftClose = new Date().toLocaleString(); 
                 shiftCloseComment = comment; 
                 saveShift();
-                let shiftRecord = { login: currentUser.username, name: currentUser.name, role: currentUser.role, open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment };
-                addShiftToHistory(shiftRecord);
+                
+                for (let i = allShifts.length - 1; i >= 0; i--) {
+                    if (allShifts[i].login === currentUser.username && !allShifts[i].close) {
+                        allShifts[i].close = shiftClose;
+                        allShifts[i].closeComment = shiftCloseComment;
+                        break;
+                    }
+                }
+                saveAllShifts();
+                
                 updateShiftUI(); 
-                alert(`Смена закрыта: ${shiftClose}\nВыручка за смену: ${finance.revenue} ₽\nНаличные в кассе: ${finance.cash} ₽\nКарта: ${finance.card} ₽`); 
-            } 
+                alert(`🔒 Смена закрыта: ${shiftClose}\n\n📊 ФИНАНСЫ ЗА СМЕНУ:\n💰 Выручка: ${finance.revenue} ₽\n💵 Наличные: ${finance.cash} ₽\n💳 Карта: ${finance.card} ₽`); 
+            }
+            
             document.getElementById("shiftCommentModal").style.display = "none"; 
+            window._pendingShiftAction = null;
         }
         
-        function cancelShiftComment() { document.getElementById("shiftCommentModal").style.display = "none"; }
+        function cancelShiftComment() { 
+            document.getElementById("shiftCommentModal").style.display = "none"; 
+            window._pendingShiftAction = null;
+        }
 
         // ========== РЕДАКТИРОВАНИЕ ЗАКАЗА ==========
         function openEditOrder(order) {
@@ -1053,9 +1125,9 @@
             let subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
             let discount = discountPct ? subtotal * discountPct / 100 : (discountAmt ? Math.min(discountAmt, subtotal) : 0);
             let final = subtotal - discount;
-            let itemsHtml = cart.map(i => `<tr><td style="border:1px solid #d1d5db; padding:8px;">${escapeHtml(i.name)}</td><td style="border:1px solid #d1d5db; text-align:center">${i.qty}</td><td style="border:1px solid #d1d5db; text-align:center">${i.price} ₽</td><td style="border:1px solid #d1d5db; text-align:right">${i.price * i.qty} ₽</td>`).join('');
+            let itemsHtml = cart.map(i => `<tr><td style="border:1px solid #d1d5db; padding:8px;">${escapeHtml(i.name)}</td><td style="border:1px solid #d1d5db; text-align:center">${i.qty}</td><td style="border:1px solid #d1d5db; text-align:center">${i.price} ₽</td><td style="border:1px solid #d1d5db; text-align:right">${i.price * i.qty} ₽</td></tr>`).join('');
             let cont = document.getElementById("printBlankContainer"); 
-            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></td></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead></tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
+            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
             window.print(); setTimeout(() => cont.innerHTML = "", 1000);
         }
 
