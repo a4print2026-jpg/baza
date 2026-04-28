@@ -3,127 +3,578 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>A4-Принт | База данных копировального центра</title>
+    <title>A4-Принт | Услуги + Интернет-магазин</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Светлая тема — без тёмных тонов */
         :root {
-            --primary-blue: #0066B3;
-            --primary-magenta: #C6007E;
-            --primary-yellow: #FFB511;
-            --primary-black: #1A1A1A;
-            --bg-light: #F4F6F9;
-            --card-white: #FFFFFF;
-            --text-dark: #2C3E50;
-            --text-gray: #6B7A8A;
-            --border-light: #E2E8F0;
+            --blue: #3b82f6;
+            --blue-dark: #2563eb;
+            --pink: #ec4899;
+            --orange: #f59e0b;
+            --green: #10b981;
+            --red: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        body { background: var(--bg-light); font-family: 'Segoe UI', sans-serif; padding: 20px; color: var(--text-dark); transition: background 0.2s, color 0.2s; }
-        body.dark { background: #121826; color: #E2E8F0; }
-        body.dark .card, body.dark .cart-panel, body.dark .history-section, body.dark .shift-bar, body.dark .fast-service-card { background: #1E2A3A; border-color: #2D3A4A; }
-        body.dark .service-card, body.dark .cart-item, body.dark .history-item, body.dark .stat-card { background: #0F1722; border-color: #3D3A4C; }
-        body.dark input, body.dark select, body.dark textarea { background: #0F1722; border-color: #2D3A4A; color: #E2E8F0; }
-        .app { max-width: 1600px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; padding: 16px 24px; background: var(--card-white); border-radius: 28px; border-left: 6px solid var(--primary-blue); position: relative; }
-        .logo-area { display: flex; align-items: center; gap: 14px; }
-        .logo { height: 48px; width: auto; border-radius: 12px; background: white; padding: 4px; }
-        h1 { font-size: 22px; font-weight: 700; color: var(--primary-black); }
-        .sub { font-size: 11px; color: var(--text-gray); }
-        .user-bar { display: flex; gap: 12px; align-items: center; background: var(--bg-light); padding: 6px 20px; border-radius: 60px; }
-        .burger-btn { display: none; background: none; border: none; font-size: 32px; cursor: pointer; padding: 8px 12px; color: var(--primary-black); }
-        .burger-menu { position: absolute; top: 70px; right: 20px; background: var(--card-white); border-radius: 24px; padding: 16px; min-width: 220px; display: none; flex-direction: column; gap: 12px; z-index: 200; border: 1px solid var(--border-light); }
-        .burger-menu.show { display: flex; }
-        button { background: var(--primary-black); border: none; padding: 8px 22px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.15s; }
-        button:hover { transform: translateY(-1px); filter: brightness(0.92); }
-        .btn-outline { background: transparent; border: 1.5px solid var(--border-light); color: var(--text-dark); }
-        .btn-primary { background: var(--primary-blue); }
-        .btn-success { background: #1F8A5C; }
-        .btn-danger { background: #C2412C; }
-        .btn-warning { background: #E68A2E; }
-        .btn-info { background: #3B82F6; }
-        .shift-bar { background: var(--card-white); border-radius: 60px; padding: 10px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; font-weight: 500; border-left: 4px solid var(--primary-blue); }
-        .shift-comment-modal, .modal-instruction, .report-choice-modal, .add-service-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1100; }
-        .shift-comment-modal .modal-card, .modal-instruction .modal-card, .report-choice-modal .modal-card, .add-service-modal .modal-card { background: var(--card-white); border-radius: 32px; max-width: 450px; width: 90%; padding: 28px; text-align: center; }
-        .instruction-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-blue); }
-        .close-instruction { background: none; font-size: 28px; padding: 0; width: 36px; height: 36px; border-radius: 50%; }
-        .instruction-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); flex-wrap: wrap; }
-        .tab-btn { background: none; color: var(--text-gray); padding: 10px 16px; border-radius: 30px; cursor: pointer; }
-        .tab-btn.active { background: var(--primary-blue); color: white; }
-        .instruction-content { display: none; }
-        .instruction-content.active { display: block; }
-        .instruction-step { margin-bottom: 16px; padding-left: 24px; position: relative; }
-        .instruction-step:before { content: "✓"; position: absolute; left: 0; color: var(--primary-blue); font-weight: bold; }
-        .instruction-note { background: var(--bg-light); padding: 12px; border-radius: 16px; margin-top: 16px; font-size: 13px; border-left: 3px solid var(--primary-yellow); }
-        .dashboard { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
-        .card { flex: 2; min-width: 300px; background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
-        .cart-panel { flex: 1.2; min-width: 320px; background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
-        .history-section { background: var(--card-white); border-radius: 28px; padding: 24px; border: 1px solid var(--border-light); }
-        .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-gray); margin-bottom: 20px; }
-        .search-container { position: relative; margin-bottom: 20px; }
-        .search-input { width: 100%; padding: 14px 18px; font-size: 15px; border-radius: 30px; background: var(--bg-light); border: 1px solid var(--border-light); }
-        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-white); border: 1px solid var(--border-light); border-radius: 20px; max-height: 250px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        body.dark .search-results { background: #1E2A3A; }
-        .search-result-item { padding: 10px 16px; cursor: pointer; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
-        .search-result-item:hover { background: var(--bg-light); }
-        .search-result-price { font-weight: 600; color: var(--primary-magenta); }
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; max-height: 450px; overflow-y: auto; padding-right: 6px; }
-        .service-card { background: var(--bg-light); border-radius: 24px; padding: 14px; text-align: center; border: 1px solid var(--border-light); cursor: pointer; transition: 0.1s; }
-        .service-card:hover { transform: translateY(-2px); border-color: var(--primary-blue); }
-        .service-name { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
-        .service-price { font-size: 17px; font-weight: 800; color: var(--primary-magenta); margin: 6px 0; }
-        .qty-control { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 6px; }
-        .qty-control input { width: 80px; text-align: center; padding: 8px 0; font-size: 15px; font-weight: 600; border-radius: 30px; }
-        .add-btn { background: var(--primary-blue); width: 100%; padding: 8px; font-size: 12px; font-weight: 600; color: white; }
-        .fast-service-card { background: var(--card-white); border-radius: 20px; padding: 12px; margin-top: 16px; border: 1px dashed var(--primary-blue); }
-        .fast-service-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .cart-list { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; margin-bottom: 18px; }
-        .cart-item { background: var(--bg-light); border-radius: 20px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-left: 4px solid var(--primary-magenta); }
-        .cart-item-info { flex: 2; }
-        .cart-item-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-        .cart-item-detail { font-size: 11px; color: var(--text-gray); }
-        .cart-item-price { font-weight: 800; font-size: 15px; color: var(--primary-magenta); }
-        .remove-btn { background: #FFE4E0; color: #C2412C; padding: 6px 16px; border-radius: 40px; font-size: 11px; font-weight: 600; }
-        input, select, textarea { width: 100%; padding: 12px 16px; background: var(--bg-light); border: 1px solid var(--border-light); border-radius: 24px; font-size: 14px; font-family: inherit; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(0,102,179,0.1); }
-        .total-line { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--border-light); font-weight: 600; font-size: 14px; }
-        .grand-total { font-size: 22px; font-weight: 800; color: var(--primary-blue); }
-        .row-2 { display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap; align-items: flex-end; }
-        .discount-group { flex: 1; min-width: 100px; }
-        .history-list { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; }
-        .history-item { background: var(--bg-light); border-radius: 20px; padding: 14px; border-left: 4px solid var(--primary-yellow); }
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-card { background: var(--card-white); border-radius: 40px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; }
-        .stat-card { background: var(--bg-light); border-radius: 20px; padding: 14px; margin-bottom: 12px; border-left: 4px solid var(--primary-blue); }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
-        .stat-value { font-weight: 800; font-size: 16px; color: var(--primary-magenta); }
-        .monthly-report-block { background: var(--bg-light); border-radius: 20px; padding: 16px; margin-top: 20px; }
-        .date-selector { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: flex-end; }
-        .salary-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        .salary-table th, .salary-table td { border: 1px solid var(--border-light); padding: 10px; text-align: left; }
-        .salary-table th { background: var(--bg-light); font-weight: 600; }
-        .print-blank { display: none; }
-        @media print { body * { visibility: hidden; } .print-blank, .print-blank * { visibility: visible; } .print-blank { display: block; position: absolute; top: 0; left: 0; width: 100%; } .blank-page { page-break-after: always; } }
-        .blank-page { width: 210mm; min-height: 297mm; padding: 15mm; background: white; color: black; font-family: monospace; }
-        @media (max-width: 850px) { body { padding: 12px; } .user-bar { display: none !important; } .burger-btn { display: block; } .services-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 8px; } .service-card { padding: 8px 4px; } .service-name { font-size: 10px; } .service-price { font-size: 13px; } .qty-control input { width: 55px; padding: 4px 0; font-size: 12px; } .add-btn { padding: 5px; font-size: 10px; } }
-        @media (min-width: 851px) { .burger-menu { display: none !important; } }
-        .report-choice-buttons { display: flex; gap: 16px; justify-content: center; margin: 20px 0; }
-        .report-choice-buttons button { min-width: 120px; }
-        .sync-status { position: fixed; bottom: 20px; right: 20px; background: #1a1a1a; color: white; padding: 8px 16px; border-radius: 40px; font-size: 12px; z-index: 999; }
-        .sync-progress { position: fixed; bottom: 80px; right: 20px; background: #1a1a1a; color: white; padding: 8px 16px; border-radius: 40px; font-size: 12px; z-index: 999; display: none; }
-        .add-service-inline { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-light); }
-        .add-service-inline h4 { font-size: 12px; margin-bottom: 10px; color: var(--primary-blue); }
+        
+        body {
+            background: var(--gray-50);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            padding: 24px;
+            color: var(--gray-800);
+        }
+        
+        .app {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Шапка */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px 24px;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            height: 44px;
+            width: auto;
+            border-radius: 8px;
+        }
+        
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+        
+        .sub {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+        
+        .user-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: var(--gray-100);
+            padding: 6px 20px;
+            border-radius: 40px;
+        }
+        
+        /* Кнопки */
+        button {
+            background: var(--blue);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        button:hover {
+            background: var(--blue-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-700);
+        }
+        
+        .btn-outline:hover {
+            background: var(--gray-100);
+            transform: none;
+        }
+        
+        .btn-primary { background: var(--blue); }
+        .btn-success { background: var(--green); }
+        .btn-danger { background: var(--red); }
+        .btn-warning { background: var(--orange); }
+        
+        /* Полоса смены */
+        .shift-bar {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 12px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+        }
+        
+        /* Основная сетка */
+        .dashboard {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        
+        .left-panel {
+            flex: 2;
+            min-width: 300px;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+        }
+        
+        .cart-panel {
+            flex: 1.2;
+            min-width: 320px;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+        }
+        
+        .history-section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+        }
+        
+        .panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+            margin-bottom: 20px;
+        }
+        
+        /* Вкладки */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--gray-200);
+            padding-bottom: 4px;
+        }
+        
+        .category-tab {
+            background: transparent;
+            color: var(--gray-600);
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .category-tab:hover {
+            background: var(--gray-100);
+            transform: none;
+        }
+        
+        .category-tab.active {
+            background: var(--blue);
+            color: white;
+        }
+        
+        /* Поиск */
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border-radius: 10px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 20px;
+            transition: all 0.15s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+        }
+        
+        /* Сетка карточек */
+        .services-grid, .goods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+        
+        .service-card, .goods-card {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .service-card:hover, .goods-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--blue);
+        }
+        
+        .item-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--gray-800);
+        }
+        
+        .item-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--blue);
+            margin: 8px 0;
+        }
+        
+        .item-stock {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-bottom: 10px;
+        }
+        
+        .item-stock.low {
+            color: var(--orange);
+        }
+        
+        .stock-warning {
+            background: var(--orange);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            margin-left: 6px;
+        }
+        
+        .qty-control input {
+            width: 80px;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--gray-300);
+            background: white;
+        }
+        
+        .add-btn {
+            background: var(--blue);
+            width: 100%;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 8px;
+            border-radius: 8px;
+        }
+        
+        /* Блок быстрого добавления */
+        .fast-service-card {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .fast-service-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .fast-service-row input {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        /* Корзина */
+        .cart-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .cart-item {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-left: 3px solid var(--blue);
+        }
+        
+        .cart-item-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        
+        .cart-item-detail {
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+        
+        .cart-item-price {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--blue);
+        }
+        
+        .remove-btn {
+            background: var(--gray-200);
+            color: var(--gray-700);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .remove-btn:hover {
+            background: var(--gray-300);
+            transform: none;
+        }
+        
+        /* Поля ввода */
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--white);
+            border: 1px solid var(--gray-300);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+        }
+        
+        /* Итоги */
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px solid var(--gray-200);
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .grand-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--green);
+        }
+        
+        .row-2 {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        
+        .discount-group {
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .discount-group label {
+            font-size: 11px;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 4px;
+            color: var(--gray-500);
+        }
+        
+        /* История заказов */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 14px;
+            border-left: 3px solid var(--orange);
+        }
+        
+        /* Модальные окна */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-card {
+            background: white;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Адаптив */
+        .burger-btn {
+            display: none;
+            background: transparent;
+            font-size: 24px;
+            color: var(--gray-700);
+            padding: 8px;
+        }
+        
+        .burger-menu {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 200px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: var(--shadow-md);
+            z-index: 200;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .burger-menu.show {
+            display: flex;
+        }
+        
+        .burger-menu button {
+            width: 100%;
+            text-align: center;
+        }
+        
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--gray-800);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 999;
+            box-shadow: var(--shadow);
+        }
+        
+        .instruction-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: transparent;
+            color: var(--gray-600);
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+        
+        .tab-btn.active {
+            background: var(--blue);
+            color: white;
+        }
+        
+        .instruction-content {
+            display: none;
+        }
+        
+        .instruction-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 850px) {
+            body { padding: 16px; }
+            .user-bar { display: none !important; }
+            .burger-btn { display: block; }
+            .services-grid, .goods-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+        }
+        
+        @media (min-width: 851px) {
+            .burger-menu { display: none !important; }
+        }
     </style>
 </head>
 <body>
 
     <div id="loginOverlay" class="modal" style="display: flex;">
         <div class="modal-card" style="max-width: 380px;">
-            <h2 style="text-align:center;">A4-Принт</h2>
-            <input type="text" id="loginUsername" placeholder="Логин" style="margin: 14px 0;">
+            <h2 style="text-align:center; margin-bottom: 20px;">A4-Принт</h2>
+            <input type="text" id="loginUsername" placeholder="Логин" style="margin-bottom: 14px;">
             <input type="password" id="loginPassword" placeholder="Пароль">
             <button id="loginBtn" style="width:100%; margin-top: 20px;">Войти</button>
-            <div id="loginError" style="color:#C2412C; margin-top: 12px; text-align:center;"></div>
+            <div id="loginError" style="color:var(--red); margin-top: 16px; text-align:center;"></div>
         </div>
     </div>
 
@@ -132,26 +583,22 @@
             <div class="header">
                 <div class="logo-area">
                     <img src="https://github.com/a4print2026-jpg/baza/blob/dbcda72ab60f0a9f8d8984e17375f6649cf677f0/images/logo_soc2.png?raw=true" class="logo" onerror="this.style.display='none'">
-                    <div><h1>A4‑ПРИНТ</h1><div class="sub">База данных копировального центра</div></div>
+                    <div><h1>A4‑ПРИНТ</h1><div class="sub">Услуги + Интернет-магазин</div></div>
                 </div>
                 <div class="user-bar">
                     <span id="currentOperatorName" style="font-weight:500;"></span>
-                    <button id="helpBtn" class="btn-info">❓ Помощь</button>
                     <button id="themeToggleBtn" class="btn-outline">🌙 Тёмная</button>
                     <button id="adminPanelBtn" class="btn-primary">Админ</button>
                     <button id="shiftToggleBtn" class="btn-warning">🚀 Открыть смену</button>
-                    <button id="pdfReportBtn" class="btn-success">📄 Отчёт</button>
                     <button id="printBlankBtn" class="btn-primary">🖨️ Бланк заказа</button>
                     <button id="logoutBtn" class="btn-outline">Выйти</button>
                 </div>
                 <button class="burger-btn" id="burgerBtn">☰</button>
                 <div class="burger-menu" id="burgerMenu">
-                    <span id="burgerOperatorName" style="font-weight:600; padding-bottom:6px;"></span>
-                    <button id="burgerHelpBtn">❓ Помощь</button>
+                    <span id="burgerOperatorName" style="font-weight:600; padding-bottom:8px;"></span>
                     <button id="burgerThemeToggle">🌙 Тёмная</button>
                     <button id="burgerAdminBtn">Админ</button>
                     <button id="burgerShiftBtn">🚀 Смена</button>
-                    <button id="burgerPdfBtn">📄 Отчёт</button>
                     <button id="burgerPrintBtn">🖨️ Бланк</button>
                     <button id="burgerLogoutBtn">Выйти</button>
                 </div>
@@ -164,40 +611,46 @@
             </div>
 
             <div class="dashboard">
-                <div class="card">
-                    <div class="panel-title">📋 УСЛУГИ</div>
-                    <div class="search-container">
-                        <input type="text" id="searchService" class="search-input" placeholder="🔍 Поиск услуги (начните вводить название...)" autocomplete="off">
-                        <div id="searchResults" class="search-results"></div>
+                <div class="left-panel">
+                    <div class="category-tabs">
+                        <button class="category-tab active" data-cat="services">📋 УСЛУГИ</button>
+                        <button class="category-tab" data-cat="goods">🛍️ ТОВАРЫ</button>
                     </div>
-                    <div id="servicesGrid" class="services-grid"></div>
                     
-                    <div class="add-service-inline">
-                        <h4>➕ Новая услуга (сохранится в общую базу)</h4>
-                        <div class="fast-service-row">
-                            <input type="text" id="newCustomServiceName" placeholder="Название новой услуги" style="flex:2;">
-                            <input type="number" id="newCustomServicePrice" placeholder="Цена ₽" style="flex:1;" value="0" step="10">
-                            <button id="addNewCustomServiceBtn" class="btn-primary" style="white-space: nowrap;">➕ Добавить в базу</button>
+                    <div id="servicesPanel" class="instruction-content active">
+                        <input type="text" id="searchService" class="search-input" placeholder="Поиск услуги...">
+                        <div id="servicesGrid" class="services-grid"></div>
+                        <div class="fast-service-card">
+                            <div class="fast-service-row">
+                                <input type="text" id="fastServiceName" placeholder="Разовая услуга">
+                                <input type="number" id="fastServicePrice" placeholder="Цена ₽">
+                                <button id="addFastServiceBtn" class="btn-primary">➕ Добавить</button>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="fast-service-card">
-                        <div class="fast-service-row">
-                            <input type="text" id="fastServiceName" placeholder="Разовая услуга (для этого заказа)" style="flex:2;">
-                            <input type="number" id="fastServicePrice" placeholder="Цена ₽" style="flex:1;" value="0" step="10">
-                            <button id="addFastServiceBtn" class="btn-primary" style="white-space: nowrap;">➕ Добавить в корзину</button>
+                    <div id="goodsPanel" class="instruction-content">
+                        <input type="text" id="searchGoods" class="search-input" placeholder="Поиск товара...">
+                        <div id="goodsGrid" class="goods-grid"></div>
+                        <div class="fast-service-card">
+                            <div class="fast-service-row">
+                                <input type="text" id="newGoodsName" placeholder="Новый товар">
+                                <input type="number" id="newGoodsPrice" placeholder="Цена ₽">
+                                <input type="number" id="newGoodsStock" placeholder="Кол-во">
+                                <button id="addNewGoodsBtn" class="btn-primary">➕ Добавить товар</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="cart-panel">
-                    <div class="panel-title">🧾 ОФОРМЛЕНИЕ ЗАКАЗА</div>
+                    <div class="panel-title">🧾 КОРЗИНА</div>
                     <input type="text" id="clientName" placeholder="Имя клиента (необязательно)" style="margin-bottom: 12px;">
-                    <input type="tel" id="clientPhone" placeholder="Телефон клиента (необязательно)" style="margin-bottom: 16px;">
+                    <input type="tel" id="clientPhone" placeholder="Телефон клиента" style="margin-bottom: 20px;">
                     <div class="cart-list" id="cartList"></div>
                     <div class="row-2">
-                        <div class="discount-group"><label>Скидка, %</label><input type="number" id="discountPercent" value="0" step="1" placeholder="%"></div>
-                        <div class="discount-group"><label>Скидка, ₽</label><input type="number" id="discountAmount" value="0" step="10" placeholder="₽"></div>
+                        <div class="discount-group"><label>Скидка, %</label><input type="number" id="discountPercent" value="0" step="1"></div>
+                        <div class="discount-group"><label>Скидка, ₽</label><input type="number" id="discountAmount" value="0" step="10"></div>
                         <button id="applyDiscountBtn" class="btn-outline" style="margin-top: 22px;">Применить</button>
                     </div>
                     <div class="row-2">
@@ -218,10 +671,7 @@
             <div class="history-section">
                 <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                     <div class="panel-title" style="margin-bottom:0;">📜 ИСТОРИЯ ЗАКАЗОВ</div>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="exportExcelBtn" class="btn-success">📎 Excel (полный отчёт)</button>
-                        <button id="clearHistoryBtn" class="btn-danger">🗑 Очистить мои</button>
-                    </div>
+                    <button id="exportExcelBtn" class="btn-success">📎 Excel</button>
                 </div>
                 <div id="historyList" class="history-list"></div>
             </div>
@@ -229,23 +679,11 @@
     </div>
 
     <div id="syncStatus" class="sync-status">💾 Готово</div>
-    <div id="syncProgress" class="sync-progress">🔄 Синхронизация...</div>
 
-    <div id="reportChoiceModal" class="report-choice-modal">
+    <div id="shiftCommentModal" class="modal">
         <div class="modal-card">
-            <h3>📄 Выберите тип отчёта</h3>
-            <div class="report-choice-buttons">
-                <button id="reportTodayBtn" class="btn-primary">📅 За сегодня</button>
-                <button id="reportFullBtn" class="btn-success">📊 Полный (все заказы)</button>
-            </div>
-            <button id="cancelReportBtn" class="btn-outline" style="margin-top: 16px;">Отмена</button>
-        </div>
-    </div>
-
-    <div id="shiftCommentModal" class="shift-comment-modal">
-        <div class="modal-card">
-            <h3 id="shiftCommentTitle" style="margin-bottom: 12px;">📝 Комментарий к открытию смены</h3>
-            <textarea id="shiftCommentText" rows="3" placeholder="Укажите причину, финансовые замечания, проблемы с оборудованием и т.д."></textarea>
+            <h3 style="margin-bottom: 16px;">📝 Комментарий к смене</h3>
+            <textarea id="shiftCommentText" rows="3" style="margin: 16px 0;"></textarea>
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
                 <button id="shiftCommentCancel" class="btn-outline">Отмена</button>
                 <button id="shiftCommentConfirm" class="btn-primary">Подтвердить</button>
@@ -253,124 +691,53 @@
         </div>
     </div>
 
-    <div class="print-blank" id="printBlankContainer"></div>
-
     <div id="adminModal" class="modal">
-        <div class="modal-card">
-            <div style="display:flex; justify-content:space-between;">
+        <div class="modal-card" style="max-width: 750px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
                 <h2>Администрирование</h2>
-                <button id="closeAdminModal" style="background:none; font-size:28px;">✕</button>
+                <button id="closeAdminModal" style="background:none; font-size: 24px; padding: 0;">✕</button>
             </div>
-            
-            <!-- ВКЛАДКИ АДМИНКИ -->
-            <div class="instruction-tabs" style="margin-bottom: 16px;">
-                <button class="tab-btn active" data-tab="admin-stats">📊 Статистика</button>
-                <button class="tab-btn" data-tab="admin-salary">💰 Зарплаты</button>
+            <div class="instruction-tabs">
+                <button class="tab-btn active" data-tab="admin-users">👥 Пользователи</button>
                 <button class="tab-btn" data-tab="admin-services">📋 Услуги</button>
-                <button class="tab-btn" data-tab="admin-operators">👥 Операторы</button>
-                <button class="tab-btn" data-tab="admin-sync">☁️ Синхронизация</button>
+                <button class="tab-btn" data-tab="admin-goods">🛍️ Товары</button>
             </div>
-            
-            <!-- Вкладка: Статистика операторов -->
-            <div id="admin-stats" class="instruction-content active">
-                <button id="viewOperatorsStatsBtn" class="btn-primary" style="width:100%; margin-bottom: 16px;">📊 Статистика операторов</button>
-                <div id="operatorsStatsContent"></div>
-                <button id="exportStatsExcelBtn" class="btn-success" style="margin-top:16px; width:100%;">📎 Экспорт статистики в Excel</button>
-            </div>
-            
-            <!-- Вкладка: Зарплаты -->
-            <div id="admin-salary" class="instruction-content">
-                <h3>💰 Расчёт заработной платы</h3>
-                <div class="monthly-report-block" style="margin-top: 0;">
-                    <div class="date-selector">
-                        <select id="salaryMonth">
-                            <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option>
-                            <option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option>
-                            <option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option>
-                            <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
-                        </select>
-                        <select id="salaryYear"></select>
-                        <button id="calculateSalaryBtn" class="btn-primary">Рассчитать зарплату</button>
-                        <button id="exportSalaryBtn" class="btn-success">📎 Ведомость на выплату</button>
-                    </div>
-                    <div id="salaryReportContent"></div>
-                </div>
-                <div class="instruction-note">
-                    💰 Ставки: Оператор — 2000 ₽/смена (8 часов), Администратор — 2500 ₽/смена.<br>
-                    При неполной смене зарплата рассчитывается пропорционально отработанному времени.
+            <div id="admin-users" class="instruction-content active">
+                <h3 style="margin: 16px 0;">Операторы</h3>
+                <div id="operatorsList"></div>
+                <div style="display:flex; gap:12px; margin:20px 0; flex-wrap:wrap;">
+                    <input type="text" id="newOpLogin" placeholder="Логин" style="flex:1;">
+                    <input type="text" id="newOpName" placeholder="Имя" style="flex:1;">
+                    <input type="text" id="newOpPass" placeholder="Пароль" style="flex:1;">
+                    <button id="addOperatorBtn" class="btn-primary">Добавить</button>
                 </div>
             </div>
-            
-            <!-- Вкладка: Управление услугами -->
             <div id="admin-services" class="instruction-content">
-                <h3>📋 Управление услугами</h3>
+                <h3 style="margin: 16px 0;">Управление услугами</h3>
                 <div id="adminServicesList"></div>
-                <div style="display:flex; gap:12px; margin:16px 0;">
-                    <input type="text" id="newServiceName" placeholder="Название">
-                    <input type="number" id="newServicePrice" placeholder="Цена">
+                <div style="display:flex; gap:12px; margin:20px 0; flex-wrap:wrap;">
+                    <input type="text" id="newServiceName" placeholder="Название" style="flex:2;">
+                    <input type="number" id="newServicePrice" placeholder="Цена" style="flex:1;">
                     <button id="addServiceBtn" class="btn-primary">Добавить</button>
                 </div>
             </div>
-            
-            <!-- Вкладка: Управление операторами -->
-            <div id="admin-operators" class="instruction-content">
-                <h3>👥 Управление операторами</h3>
-                <div id="operatorsList"></div>
-                <div style="display:flex; gap:12px; margin:16px 0;">
-                    <input type="text" id="newOpLogin" placeholder="Логин">
-                    <input type="text" id="newOpName" placeholder="Имя">
-                    <input type="text" id="newOpPass" placeholder="Пароль">
-                    <button id="addOperatorBtn" class="btn-primary">Добавить</button>
+            <div id="admin-goods" class="instruction-content">
+                <h3 style="margin: 16px 0;">Товары (склад)</h3>
+                <div id="adminGoodsList"></div>
+                <div style="display:flex; gap:12px; margin:20px 0; flex-wrap:wrap;">
+                    <input type="text" id="adminNewGoodsName" placeholder="Название товара" style="flex:2;">
+                    <input type="number" id="adminNewGoodsPrice" placeholder="Цена" style="flex:1;">
+                    <input type="number" id="adminNewGoodsStock" placeholder="Кол-во" style="flex:1;">
+                    <button id="adminAddGoodsBtn" class="btn-primary">Добавить</button>
                 </div>
-                <div class="instruction-note">🔐 Текущие учётные: pavel / pavel123 | ksenia / ksenia123 | natalia / natalia123</div>
-            </div>
-            
-            <!-- Вкладка: Синхронизация -->
-            <div id="admin-sync" class="instruction-content">
-                <h3>☁️ Облачная синхронизация</h3>
-                <div class="date-selector">
-                    <input type="text" id="googleScriptUrl" placeholder="URL веб-приложения Apps Script" style="flex:3;">
-                    <button id="saveGoogleSettingsBtn" class="btn-primary">Сохранить</button>
-                    <button id="testSyncBtn" class="btn-info">Тест</button>
-                    <button id="syncAllOrdersBtn" class="btn-warning">🔼 Отправить все</button>
-                    <button id="restoreFromCloudBtn" class="btn-success">⬇️ Восстановить</button>
-                </div>
-                <div class="instruction-note">⚙️ Автоматическая синхронизация каждые 2 минуты</div>
             </div>
         </div>
     </div>
 
-    <div id="instructionModal" class="modal-instruction">
-        <div class="modal-card" style="max-width: 650px;">
-            <div class="instruction-header"><h2>📘 Инструкция</h2><button id="closeInstructionBtn" class="close-instruction">✕</button></div>
-            <div class="instruction-tabs">
-                <button class="tab-btn active" data-tab="operator">👤 Оператор</button>
-                <button class="tab-btn" data-tab="admin">👑 Администратор</button>
-            </div>
-            <div class="instruction-content active" id="tab-operator">
-                <div class="instruction-step"><strong>1. Вход</strong><br>Логин/пароль → «Войти».</div>
-                <div class="instruction-step"><strong>2. Открыть смену</strong><br>«🚀 Открыть смену» → при необходимости комментарий.</div>
-                <div class="instruction-step"><strong>3. Поиск услуги</strong><br>Начните вводить название в поле поиска.</div>
-                <div class="instruction-step"><strong>4. Приём заказа</strong><br>Выберите услугу → количество → «Добавить».</div>
-div>
-                <div class="instruction-step"><strong>5. Новая услуга</strong><br>Если нужной услуги нет — добавьте через поле «➕ Новая услуга».</div>
-                <div class="instruction-step"><strong>6. Оформление</strong><br>Клиент, скидка, оплата, комментарий → «Оформить».</div>
-                <div class="instruction-step"><strong>7. Зарплата</strong><br>Зарплата рассчитывается автоматически исходя из отработанного времени.</div>
-                <div class="instruction-step"><strong>8. Закрыть смену</strong><br>«🔒 Закрыть смену» → затем «Отчёт» для бухгалтерии.</div>
-            </div>
-            <div class="instruction-content" id="tab-admin">
-                <div class="instruction-step"><strong>Вход админа</strong><br>pavel / pavel123</div>
-                <div class="instruction-step"><strong>Управление услугами</strong><br>Цены, удаление, добавление.</div>
-                <div class="instruction-step"><strong>Управление операторами</strong><br>Смена пароля, добавление, удаление.</div>
-                <div class="instruction-step"><strong>Статистика операторов</strong><br>Заказы, выручка, средний чек.</div>
-                <div class="instruction-step"><strong>Расчёт зарплаты</strong><br>Выберите месяц → «Рассчитать зарплату» → увидите сумму каждому.</div>
-                <div class="instruction-step"><strong>Выплата зарплаты</strong><br>«Ведомость на выплату» → PDF с таблицей и местом для подписи.</div>
-            </div>
-        </div>
-    </div>
+    <div id="printBlankContainer" style="display: none;"></div>
 
     <script>
-        // ========== БАЗА ДАННЫХ ==========
+        // ========== ДАННЫЕ ==========
         let services = [
             { id: 1, name: "Копирование ч/б A4 (1-20)", price: 25 }, { id: 2, name: "Копирование цветное A4 (1-20)", price: 35 },
             { id: 3, name: "Сканирование A4", price: 25 }, { id: 4, name: "Ламинирование A6", price: 50 },
@@ -387,459 +754,144 @@ div>
             { id: 25, name: "Фото в рамке 10х15", price: 200 }
         ];
 
-        let operators = {
-            "pavel": { password: "pavel123", name: "Павел", role: "admin", rate: 2500 },
-            "ksenia": { password: "ksenia123", name: "Ксения", role: "operator", rate: 2000 },
-            "natalia": { password: "natalia123", name: "Наталья", role: "operator", rate: 2000 }
-        };
+        let goods = [
+            { id: 1001, name: "Бумага А4 80г/м2 (500 листов)", price: 350, stock: 50, unit: "пачка" },
+            { id: 1002, name: "Тонер чёрный HP", price: 1200, stock: 8, unit: "шт" },
+            { id: 1003, name: "Плёнка для ламинации А4 (100шт)", price: 1500, stock: 15, unit: "упаковка" },
+            { id: 1004, name: "Фоторамка А4", price: 400, stock: 12, unit: "шт" },
+            { id: 1005, name: "Фоторамка 10х15", price: 200, stock: 20, unit: "шт" },
+            { id: 1006, name: "USB-флешка 16Gb", price: 450, stock: 10, unit: "шт" }
+        ];
 
+        let operators = { "pavel": { password: "pavel123", name: "Павел", role: "admin" }, "ksenia": { password: "ksenia123", name: "Ксения", role: "operator" }, "natalia": { password: "natalia123", name: "Наталья", role: "operator" } };
         let allOrders = [], currentUser = null, cart = [], discountPct = 0, discountAmt = 0;
         let shiftOpen = null, shiftClose = null, shiftOpenComment = "", shiftCloseComment = "";
-        let googleScriptUrl = localStorage.getItem("googleScriptUrl") || "";
-        let syncedOrders = new Set(JSON.parse(localStorage.getItem("syncedOrders") || "[]"));
-        let autoSyncInterval = null;
 
-        const SERVICES_KEY = "a4print_services", OPERATORS_KEY = "a4print_operators", ORDERS_KEY = "a4print_orders", SHIFT_KEY = "a4print_shift";
+        const SERVICES_KEY = "a4print_services_v5", GOODS_KEY = "a4print_goods_v5", OPERATORS_KEY = "a4print_operators", ORDERS_KEY = "a4print_orders", SHIFT_KEY = "a4print_shift";
 
         function saveServices() { localStorage.setItem(SERVICES_KEY, JSON.stringify(services)); }
+        function saveGoods() { localStorage.setItem(GOODS_KEY, JSON.stringify(goods)); }
         function saveOperators() { localStorage.setItem(OPERATORS_KEY, JSON.stringify(operators)); }
         function saveOrders() { localStorage.setItem(ORDERS_KEY, JSON.stringify(allOrders)); }
         function saveShift() { localStorage.setItem(SHIFT_KEY, JSON.stringify({ open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment, operator: currentUser?.name })); }
-        function saveSyncedOrders() { localStorage.setItem("syncedOrders", JSON.stringify([...syncedOrders])); }
 
-        // ========== ФУНКЦИИ ДЛЯ ЗАРПЛАТЫ ==========
-        function calculateSalaryForShift(shiftRecord) {
-            if (!shiftRecord.open || !shiftRecord.close) return 0;
-            const SALT_OPERATOR = 2000;
-            const SALT_ADMIN = 2500;
-            const FULL_SHIFT_HOURS = 8;
-            
-            let openDate = new Date(shiftRecord.open);
-            let closeDate = new Date(shiftRecord.close);
-            let hoursWorked = (closeDate - openDate) / (1000 * 60 * 60);
-            hoursWorked = Math.min(hoursWorked, FULL_SHIFT_HOURS);
-            
-            let rate = shiftRecord.role === "admin" ? SALT_ADMIN : SALT_OPERATOR;
-            let salary = (rate / FULL_SHIFT_HOURS) * hoursWorked;
-            return Math.round(salary);
+        function loadData() {
+            let s = localStorage.getItem(SERVICES_KEY); if (s) services = JSON.parse(s);
+            let g = localStorage.getItem(GOODS_KEY); if (g) goods = JSON.parse(g);
+            let o = localStorage.getItem(OPERATORS_KEY); if (o) operators = JSON.parse(o);
+            let ord = localStorage.getItem(ORDERS_KEY); if (ord) allOrders = JSON.parse(ord);
+            renderServices(); renderGoods(); renderCart(); renderHistory(); loadShift();
+            document.getElementById("currentOperatorName").innerHTML = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
+            document.getElementById("burgerOperatorName").innerText = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
         }
 
-        function getAllShifts() {
-            let shifts = [];
-            for (let [login, data] of Object.entries(operators)) {
-                let shiftKey = localStorage.getItem(`shift_${login}`);
-                if (shiftKey) {
-                    let shift = JSON.parse(shiftKey);
-                    shift.login = login;
-                    shift.name = data.name;
-                    shift.role = data.role;
-                    shifts.push(shift);
-                }
-                // Также проверяем SHIFT_KEY (для текущего пользователя)
-                let mainShift = localStorage.getItem(SHIFT_KEY);
-                if (mainShift && !shifts.find(s => s.login === login)) {
-                    let mainShiftData = JSON.parse(mainShift);
-                    if (mainShiftData.operator === data.name) {
-                        shifts.push({ ...mainShiftData, login: login, name: data.name, role: data.role });
-                    }
-                }
-            }
-            // Добавляем смены из истории заказов (если есть закрытые смены)
-            for (let order of allOrders) {
-                let opLogin = Object.keys(operators).find(l => operators[l].name === order.operator);
-                if (opLogin && order.shiftOpen && order.shiftClose) {
-                    let existing = shifts.find(s => s.login === opLogin && s.open === order.shiftOpen);
-                    if (!existing) {
-                        shifts.push({
-                            login: opLogin,
-                            name: operators[opLogin].name,
-                            role: operators[opLogin].role,
-                            open: order.shiftOpen,
-                            close: order.shiftClose,
-                            openComment: order.shiftOpenComment || "",
-                            closeComment: order.shiftCloseComment || ""
-                        });
-                    }
-                }
-            }
-            return shifts;
+        function renderServices(filtered = null) {
+            const grid = document.getElementById("servicesGrid");
+            const data = filtered !== null ? filtered : services;
+            grid.innerHTML = "";
+            data.forEach(s => {
+                let card = document.createElement("div");
+                card.className = "service-card";
+                card.innerHTML = `<div class="item-name">${escapeHtml(s.name)}</div><div class="item-price">${s.price} ₽</div><div class="qty-control"><input type="number" id="qty_srv_${s.id}" value="0" min="0" step="1" placeholder="кол-во"></div><button class="add-btn" data-type="service" data-id="${s.id}">➕ Добавить</button>`;
+                grid.appendChild(card);
+            });
+            document.querySelectorAll(".add-btn").forEach(btn => btn.onclick = () => { let type = btn.getAttribute("data-type"); let id = parseInt(btn.getAttribute("data-id")); addToCart(type, id); });
         }
 
-        function calculateSalaryForMonth(month, year) {
-            let shifts = getAllShifts();
-            let salaryMap = new Map();
-            
-            for (let shift of shifts) {
-                if (!shift.open || !shift.close) continue;
-                let openDate = new Date(shift.open);
-                if (openDate.getMonth() + 1 === month && openDate.getFullYear() === year) {
-                    let salary = calculateSalaryForShift(shift);
-                    let key = shift.login;
-                    let current = salaryMap.get(key) || { name: shift.name, total: 0, count: 0, role: shift.role };
-                    current.total += salary;
-                    current.count++;
-                    salaryMap.set(key, current);
-                }
-            }
-            return salaryMap;
+        function renderGoods(filtered = null) {
+            const grid = document.getElementById("goodsGrid");
+            const data = filtered !== null ? filtered : goods;
+            grid.innerHTML = "";
+            data.forEach(g => {
+                let lowStock = g.stock <= 3;
+                let card = document.createElement("div");
+                card.className = "goods-card";
+                card.innerHTML = `<div class="item-name">${escapeHtml(g.name)}</div><div class="item-price">${g.price} ₽</div><div class="item-stock ${lowStock ? 'low' : ''}">📦 Остаток: ${g.stock} ${g.unit || 'шт'}${lowStock ? ' <span class="stock-warning">мало</span>' : ''}</div><div class="qty-control"><input type="number" id="qty_goods_${g.id}" value="0" min="0" max="${g.stock}" step="1" placeholder="кол-во"></div><button class="add-btn" data-type="goods" data-id="${g.id}">➕ В корзину</button>`;
+                grid.appendChild(card);
+            });
+            document.querySelectorAll(".add-btn").forEach(btn => btn.onclick = () => { let type = btn.getAttribute("data-type"); let id = parseInt(btn.getAttribute("data-id")); addToCart(type, id); });
         }
 
-        function showSalaryReport() {
-            let month = parseInt(document.getElementById("salaryMonth").value);
-            let year = parseInt(document.getElementById("salaryYear").value);
-            let salaryMap = calculateSalaryForMonth(month, year);
-            let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-            
-            let html = `<table class="salary-table"><thead><tr><th>Оператор</th><th>Роль</th><th>Количество смен</th><th>Ставка за смену</th><th>Итого к выплате (₽)</th></tr></thead><tbody>`;
-            let totalSalary = 0;
-            for (let [login, data] of salaryMap) {
-                let rate = data.role === "admin" ? 2500 : 2000;
-                html += `<tr><td>${escapeHtml(data.name)}</td><td>${data.role === "admin" ? "Администратор" : "Оператор"}</td><td>${data.count}</td><td>${rate} ₽</td><td style="font-weight:bold;">${data.total.toLocaleString()} ₽</td></tr>`;
-                totalSalary += data.total;
+        function addToCart(type, id) {
+            let qtyInput = document.getElementById(`qty_${type === 'service' ? 'srv' : 'goods'}_${id}`);
+            let qty = parseInt(qtyInput?.value) || 1;
+            if (qty <= 0) qty = 1;
+            if (type === 'service') {
+                let service = services.find(s => s.id === id);
+                if (!service) return;
+                let existing = cart.find(i => i.type === 'service' && i.id === id);
+                if (existing) existing.qty += qty;
+                else cart.push({ type: 'service', id: id, name: service.name, price: service.price, qty: qty });
+            } else if (type === 'goods') {
+                let good = goods.find(g => g.id === id);
+                if (!good) return;
+                if (qty > good.stock) { alert(`На складе только ${good.stock} шт.`); return; }
+                let existing = cart.find(i => i.type === 'goods' && i.id === id);
+                if (existing) existing.qty += qty;
+                else cart.push({ type: 'goods', id: id, name: good.name, price: good.price, qty: qty });
             }
-            html += `<tr style="background: var(--primary-blue); color: white;"><td colspan="4"><strong>ИТОГО:</strong></td><td><strong>${totalSalary.toLocaleString()} ₽</strong></td></tr>`;
-            html += `</tbody></table>`;
-            document.getElementById("salaryReportContent").innerHTML = html;
-            window._currentSalaryData = { month, year, salaryMap, totalSalary };
-        }
-
-        function exportSalaryPayslip() {
-            if (!window._currentSalaryData) {
-                alert("Сначала рассчитайте зарплату за месяц");
-                return;
-            }
-            let { month, year, salaryMap, totalSalary } = window._currentSalaryData;
-            let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-            let date = new Date().toLocaleDateString();
-            
-            let tableRows = "";
-            for (let [login, data] of salaryMap) {
-                let rate = data.role === "admin" ? 2500 : 2000;
-                tableRows += `<tr><td style="border:1px solid #000; padding:8px;">${escapeHtml(data.name)}</td><td style="border:1px solid #000; padding:8px;">${data.role === "admin" ? "Администратор" : "Оператор"}</td><td style="border:1px solid #000; padding:8px;">${data.count}</td><td style="border:1px solid #000; padding:8px;">${rate} ₽</td><td style="border:1px solid #000; padding:8px;">${data.total.toLocaleString()} ₽</td><td style="border:1px solid #000; padding:8px;">_________________</td></tr>`;
-            }
-            
-            let html = `
-            <div style="font-family: monospace; padding: 20px; max-width: 800px; margin: 0 auto;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h2>A4-ПРИНТ</h2>
-                    <p>Копировальный центр</p>
-                    <h3>ВЕДОМОСТЬ НА ВЫПЛАТУ ЗАРАБОТНОЙ ПЛАТЫ</h3>
-                    <p>за ${monthNames[month-1]} ${year} года</p>
-                    <p>Дата формирования: ${date}</p>
-                </div>
-                <table style="width:100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #f0f0f0;">
-                            <th style="border:1px solid #000; padding:8px;">ФИО</th>
-                            <th style="border:1px solid #000; padding:8px;">Должность</th>
-                            <th style="border:1px solid #000; padding:8px;">Смен</th>
-                            <th style="border:1px solid #000; padding:8px;">Ставка</th>
-                            <th style="border:1px solid #000; padding:8px;">Сумма (₽)</th>
-                            <th style="border:1px solid #000; padding:8px;">Подпись</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                        <tr style="background: #e8f0fe;">
-                            <td colspan="4" style="border:1px solid #000; padding:8px;"><strong>ИТОГО К ВЫПЛАТЕ:</strong></td>
-                            <td colspan="2" style="border:1px solid #000; padding:8px;"><strong>${totalSalary.toLocaleString()} ₽</strong></td>
-                        </tr>
-                    </tbody>
-                ……
-                <div style="margin-top: 40px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <div>Главный бухгалтер: _______________</div>
-                        <div>Руководитель: _______________</div>
-                    </div>
-                    <div style="margin-top: 20px;">
-                        <div>Деньги получил(а):</div>
-                        <div style="margin-top: 20px;">_________________ / _________________ /</div>
-                    </div>
-                </div>
-            </div>`;
-            
-            let el = document.createElement('div');
-            el.innerHTML = html;
-            document.body.appendChild(el);
-            html2pdf().set({ margin: 0.5, filename: `A4print_зарплата_${monthNames[month-1]}_${year}.pdf`, html2canvas: { scale: 2 } }).from(el).save().then(() => el.remove());
-        }
-
-        // Добавление новой услуги
-        function addNewCustomService() {
-            const name = document.getElementById("newCustomServiceName").value.trim();
-            const price = parseFloat(document.getElementById("newCustomServicePrice").value);
-            if (!name) { alert("Введите название услуги"); return; }
-            if (isNaN(price) || price <= 0) { alert("Введите корректную цену"); return; }
-            const existing = services.find(s => s.name.toLowerCase() === name.toLowerCase());
-            if (existing) { alert("Такая услуга уже существует"); return; }
-            services.push({ id: Date.now(), name: name, price: price });
-            saveServices();
-            renderServices();
-            showSyncStatus(`✅ Услуга "${name}" добавлена`);
-            alert(`Услуга "${name}" добавлена в общую базу!`);
-            document.getElementById("newCustomServiceName").value = "";
-            document.getElementById("newCustomServicePrice").value = "";
+            if (qtyInput) qtyInput.value = "0";
+            renderCart();
         }
 
         function addFastService() {
             let name = document.getElementById("fastServiceName").value.trim();
             let price = parseFloat(document.getElementById("fastServicePrice").value);
-            if (!name) { alert("Введите название услуги"); return; }
-            if (isNaN(price) || price <= 0) { alert("Введите корректную цену"); return; }
-            let qty = 1;
-            let existing = cart.find(i => i.name === name && i.isFast === true);
-            if (existing) existing.qty += qty;
-            else cart.push({ id: Date.now(), name: name, price: price, qty: qty, isFast: true });
+            if (!name) { alert("Введите название"); return; }
+            if (isNaN(price) || price <= 0) { alert("Введите цену"); return; }
+            cart.push({ type: 'service', id: Date.now(), name: name, price: price, qty: 1, isFast: true });
             document.getElementById("fastServiceName").value = "";
             document.getElementById("fastServicePrice").value = "";
             renderCart();
         }
 
-        function parseItemsString(itemsStr) {
-            const items = [];
-            const parts = itemsStr.split(", ");
-            for (const part of parts) {
-                const match = part.match(/(.+)\s+x(\d+)$/);
-                if (match) {
-                    const name = match[1];
-                    const qty = parseInt(match[2]);
-                    const service = services.find(s => s.name === name);
-                    const price = service ? service.price : 0;
-                    items.push({ name: name, price: price, qty: qty });
+        function addNewGoods() {
+            let name = document.getElementById("newGoodsName").value.trim();
+            let price = parseFloat(document.getElementById("newGoodsPrice").value);
+            let stock = parseInt(document.getElementById("newGoodsStock").value);
+            if (!name) { alert("Введите название товара"); return; }
+            if (isNaN(price) || price <= 0) { alert("Введите цену"); return; }
+            if (isNaN(stock) || stock < 0) stock = 0;
+            goods.push({ id: Date.now(), name: name, price: price, stock: stock, unit: "шт" });
+            saveGoods();
+            renderGoods();
+            showSyncStatus(`✅ Товар "${name}" добавлен на склад`);
+            document.getElementById("newGoodsName").value = "";
+            document.getElementById("newGoodsPrice").value = "";
+            document.getElementById("newGoodsStock").value = "";
+        }
+
+        async function completeOrder() {
+            if (cart.length === 0) { alert("Корзина пуста"); return; }
+            if (!shiftOpen || shiftClose) { alert("Смена не открыта!"); return; }
+            for (let item of cart) {
+                if (item.type === 'goods') {
+                    let good = goods.find(g => g.id === item.id);
+                    if (good && good.stock < item.qty) { alert(`Недостаточно товара: ${good.name}. Доступно: ${good.stock}`); return; }
                 }
             }
-            return items;
-        }
-
-        async function restoreFromCloud() {
-            if (!googleScriptUrl) { alert("Настройте URL веб-приложения"); return; }
-            showSyncStatus("🔄 Загрузка из облака...");
-            const progressDiv = document.getElementById("syncProgress");
-            progressDiv.style.display = "block";
-            try {
-                const response = await fetch(`${googleScriptUrl}?action=getData&t=${Date.now()}`);
-                const data = await response.json();
-                if (data.success && data.orders && data.orders.length > 0) {
-                    const cloudOrders = [];
-                    for (const row of data.orders) {
-                        if (row[0] && row[0] !== "ID") {
-                            cloudOrders.push({
-                                id: parseInt(row[0]), date: row[1] || "", client: row[2] || "Клиент",
-                                phone: row[3] || "", items: parseItemsString(row[4] || ""),
-                                subtotal: parseFloat(row[5]) || 0, discount: parseFloat(row[6]) || 0,
-                                finalTotal: parseFloat(row[7]) || 0,
-                                paymentMethod: row[8] === "Наличные" ? "cash" : "card",
-                                operator: row[9] || "", comment: row[10] || ""
-                            });
-                        }
-                    }
-                    const existingIds = new Set(allOrders.map(o => o.id));
-                    const newOrders = cloudOrders.filter(o => !existingIds.has(o.id));
-                    if (newOrders.length > 0) {
-                        allOrders = [...newOrders, ...allOrders];
-                        saveOrders();
-                        renderHistory();
-                        showSyncStatus(`✅ Загружено ${newOrders.length} заказов`);
-                        alert(`Загружено ${newOrders.length} заказов`);
-                    } else { alert("Новых заказов не найдено"); }
+            for (let item of cart) {
+                if (item.type === 'goods') {
+                    let good = goods.find(g => g.id === item.id);
+                    if (good) { good.stock -= item.qty; if (good.stock < 0) good.stock = 0; }
                 }
-            } catch(e) { alert("Ошибка загрузки"); }
-            progressDiv.style.display = "none";
-        }
-
-        async function syncOrderToGoogle(order) {
-            if (!googleScriptUrl) return false;
-            try {
-                await fetch(googleScriptUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-                    id: order.id, date: order.date, client: order.client, phone: order.phone || "",
-                    items: order.items.map(i => `${i.name} x${i.qty}`).join(", "),
-                    subtotal: order.subtotal, discount: order.discount, finalTotal: order.finalTotal,
-                    paymentMethod: order.paymentMethod === "cash" ? "Наличные" : "Карта",
-                    operator: order.operator, comment: order.comment || ""
-                }) });
-                return true;
-            } catch(e) { return false; }
-        }
-
-        async function syncAllOrdersToGoogle() {
-            if (!googleScriptUrl) { alert("Настройте URL"); return; }
-            if (allOrders.length === 0) { alert("Нет заказов"); return; }
-            const progressDiv = document.getElementById("syncProgress");
-            progressDiv.style.display = "block";
-            let success = 0;
-            for (let i = 0; i < allOrders.length; i++) {
-                progressDiv.textContent = `🔼 Синхронизация: ${i+1} из ${allOrders.length}`;
-                if (await syncOrderToGoogle(allOrders[i])) success++;
-                await new Promise(r => setTimeout(r, 200));
             }
-            progressDiv.style.display = "none";
-            alert(`Отправлено: ${success} из ${allOrders.length}`);
-        }
-
-        function saveGoogleSettings() {
-            const url = document.getElementById("googleScriptUrl").value.trim();
-            if (url) { googleScriptUrl = url; localStorage.setItem("googleScriptUrl", url); alert("Сохранено"); }
-            else alert("Введите URL");
-        }
-
-        function loadGoogleSettings() {
-            const saved = localStorage.getItem("googleScriptUrl");
-            if (saved) { googleScriptUrl = saved; const inp = document.getElementById("googleScriptUrl"); if(inp) inp.value = saved; }
-        }
-
-        function showSyncStatus(msg) {
-            const statusDiv = document.getElementById("syncStatus");
-            if (statusDiv) { statusDiv.textContent = msg; setTimeout(() => { if(statusDiv.textContent === msg) statusDiv.textContent = "💾 Готово"; }, 3000); }
-        }
-
-        function loadShift() {
-            let s = localStorage.getItem(SHIFT_KEY);
-            if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } }
-            updateShiftUI();
-        }
-
-        function updateShiftUI() {
-            let st = document.getElementById("shiftStatus"), op = document.getElementById("shiftOpenTime"), cl = document.getElementById("shiftCloseTime"), btn = document.getElementById("shiftToggleBtn");
-            if (shiftOpen && !shiftClose) {
-                st.innerText = "🟢 Открыта";
-                op.innerText = shiftOpen + (shiftOpenComment ? " 📝" : "");
-                cl.innerText = "—";
-                btn.innerText = "🔒 Закрыть смену";
-                btn.classList.add("btn-danger"); btn.classList.remove("btn-warning");
-            } else {
-                st.innerText = shiftOpen ? "🔴 Закрыта" : "⚫ Не открыта";
-                op.innerText = shiftOpen || "—";
-                cl.innerText = shiftClose || "—" + (shiftCloseComment ? " 📝" : "");
-                btn.innerText = "🚀 Открыть смену";
-                btn.classList.remove("btn-danger"); btn.classList.add("btn-warning");
-            }
-        }
-
-        function toggleShiftWithComment() {
-            if (!shiftOpen || shiftClose) {
-                document.getElementById("shiftCommentTitle").innerText = "📝 Комментарий к открытию смены";
-                document.getElementById("shiftCommentText").value = "";
-                document.getElementById("shiftCommentModal").style.display = "flex";
-                window._pendingShiftAction = "open";
-            } else {
-                document.getElementById("shiftCommentTitle").innerText = "📝 Комментарий к закрытию смены";
-                document.getElementById("shiftCommentText").value = "";
-                document.getElementById("shiftCommentModal").style.display = "flex";
-                window._pendingShiftAction = "close";
-            }
-        }
-
-        function confirmShiftWithComment() {
-            let comment = document.getElementById("shiftCommentText").value.trim();
-            if (window._pendingShiftAction === "open") {
-                shiftOpen = new Date().toLocaleString();
-                shiftClose = null;
-                shiftOpenComment = comment;
-                shiftCloseComment = "";
-                saveShift();
-                updateShiftUI();
-                alert("Смена открыта: " + shiftOpen + (comment ? "\nКомментарий: " + comment : ""));
-            } else if (window._pendingShiftAction === "close") {
-                if (!shiftOpen || shiftClose) { alert("Смена не открыта"); return; }
-                shiftClose = new Date().toLocaleString();
-                shiftCloseComment = comment;
-                saveShift();
-                updateShiftUI();
-                alert("Смена закрыта: " + shiftClose + (comment ? "\nКомментарий: " + comment : ""));
-            }
-            document.getElementById("shiftCommentModal").style.display = "none";
-            window._pendingShiftAction = null;
-        }
-
-        function cancelShiftComment() {
-            document.getElementById("shiftCommentModal").style.display = "none";
-            window._pendingShiftAction = null;
-        }
-
-        function loadData() {
-            let s = localStorage.getItem(SERVICES_KEY); if (s) services = JSON.parse(s);
-            let o = localStorage.getItem(OPERATORS_KEY); if (o) operators = JSON.parse(o);
-            let ord = localStorage.getItem(ORDERS_KEY); if (ord) allOrders = JSON.parse(ord);
-            let savedSynced = localStorage.getItem("syncedOrders");
-            if (savedSynced) syncedOrders = new Set(JSON.parse(savedSynced));
-            renderServices(); renderCart(); renderHistory(); loadShift();
-            let nameSpan = document.getElementById("currentOperatorName");
-            if (nameSpan) nameSpan.innerHTML = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
-            let burgerSpan = document.getElementById("burgerOperatorName");
-            if (burgerSpan) burgerSpan.innerText = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
-            loadGoogleSettings();
-        }
-        
-        let searchTimeout;
-        function initSearch() {
-            const searchInput = document.getElementById('searchService');
-            const searchResults = document.getElementById('searchResults');
-            if (!searchInput) return;
-            searchInput.addEventListener('input', function(e) {
-                const query = e.target.value.toLowerCase().trim();
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    if (query.length === 0) { searchResults.style.display = 'none'; renderServices(); return; }
-                    const filtered = services.filter(s => s.name.toLowerCase().includes(query));
-                    if (filtered.length === 0) { searchResults.style.display = 'none'; renderServices([]); return; }
-                    searchResults.innerHTML = filtered.map(s => `<div class="search-result-item" data-id="${s.id}"><span>${escapeHtml(s.name)}</span><span class="search-result-price">${s.price} ₽</span></div>`).join('');
-                    searchResults.style.display = 'block';
-                    document.querySelectorAll('.search-result-item').forEach(el => {
-                        el.addEventListener('click', (e) => {
-                            const id = parseInt(el.getAttribute('data-id'));
-                            const service = services.find(s => s.id === id);
-                            if (service) {
-                                const qtyInput = document.getElementById(`qty_${id}`);
-                                let qty = qtyInput ? parseInt(qtyInput.value) : 1;
-                                if (!qty || qty <= 0) qty = 1;
-                                addToCartById(service, qty);
-                                if (qtyInput) qtyInput.value = 0;
-                                searchInput.value = '';
-                                searchResults.style.display = 'none';
-                                renderServices();
-                            }
-                        });
-                    });
-                }, 300);
-            });
-            document.addEventListener('click', function(e) {
-                if (searchResults && !searchResults.contains(e.target) && e.target !== searchInput) {
-                    searchResults.style.display = 'none';
-                }
-            });
-        }
-        
-        function addToCartById(service, qty) {
-            if (qty <= 0) return;
-            let existing = cart.find(i => i.id === service.id);
-            if (existing) existing.qty += qty;
-            else cart.push({ id: service.id, name: service.name, price: service.price, qty: qty });
-            renderCart();
-        }
-
-        function renderServices(filteredList = null) {
-            const grid = document.getElementById("servicesGrid");
-            const servicesToShow = filteredList !== null ? filteredList : services;
-            grid.innerHTML = "";
-            servicesToShow.forEach(s => {
-                let card = document.createElement("div");
-                card.className = "service-card";
-                card.innerHTML = `<div class="service-name">${escapeHtml(s.name)}</div><div class="service-price">${s.price} ₽</div><div class="qty-control"><input type="number" id="qty_${s.id}" value="0" min="0" step="1" placeholder="кол-во" class="qty-input"></div><button class="add-btn" data-id="${s.id}">➕ Добавить</button>`;
-                grid.appendChild(card);
-            });
-            document.querySelectorAll(".add-btn").forEach(btn => btn.onclick = (e) => { e.stopPropagation(); let id = parseInt(btn.getAttribute("data-id")); addServiceById(id); });
-        }
-
-        function addServiceById(serviceId) {
-            let service = services.find(s => s.id === serviceId);
-            let qtyInput = document.getElementById(`qty_${serviceId}`);
-            let qty = parseInt(qtyInput?.value) || 0;
-            if (qty <= 0) { alert("Введите количество (1 и больше)"); return; }
-            let existing = cart.find(i => i.id === serviceId);
-            if (existing) existing.qty += qty;
-            else cart.push({ id: serviceId, name: service.name, price: service.price, qty: qty });
-            if (qtyInput) qtyInput.value = "0";
-            renderCart();
+            saveGoods(); renderGoods();
+            let client = document.getElementById("clientName").value.trim() || "Клиент";
+            let phone = document.getElementById("clientPhone").value.trim();
+            let comment = document.getElementById("orderComment").value;
+            let payment = document.querySelector('input[name="payment"]:checked').value;
+            let subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            let discount = 0, discPct = 0;
+            if (discountPct > 0) { discount = subtotal * discountPct / 100; discPct = discountPct; }
+            else if (discountAmt > 0) discount = Math.min(discountAmt, subtotal);
+            let order = { id: Date.now(), client, phone, items: cart.map(i => ({ type: i.type, name: i.name, price: i.price, qty: i.qty })), subtotal, discount, discountPercent: discPct, finalTotal: subtotal - discount, paymentMethod: payment, comment, date: new Date().toLocaleString(), operator: currentUser.name };
+            allOrders.push(order); saveOrders();
+            cart = []; discountPct = 0; discountAmt = 0;
+            document.getElementById("discountPercent").value = 0; document.getElementById("discountAmount").value = 0;
+            document.getElementById("clientName").value = ""; document.getElementById("clientPhone").value = ""; document.getElementById("orderComment").value = "";
+            renderCart(); renderHistory();
+            alert(`Заказ №${order.id} на ${order.finalTotal} ₽`);
         }
 
         function renderCart() {
@@ -848,9 +900,10 @@ div>
             cart.forEach((item, idx) => {
                 let sum = item.price * item.qty;
                 subtotal += sum;
-                html += `<div class="cart-item"><div class="cart-item-info"><div class="cart-item-name">${escapeHtml(item.name)}</div><div class="cart-item-detail">${item.qty} шт × ${item.price} ₽</div></div><div class="cart-item-price">${sum} ₽</div><button class="remove-btn" data-idx="${idx}">Удалить</button></div>`;
+                let typeIcon = item.type === 'service' ? '📋' : '🛍️';
+                html += `<div class="cart-item"><div class="cart-item-info"><div class="cart-item-name">${typeIcon} ${escapeHtml(item.name)}</div><div class="cart-item-detail">${item.qty} шт × ${item.price} ₽</div></div><div class="cart-item-price">${sum} ₽</div><button class="remove-btn" data-idx="${idx}">Удалить</button></div>`;
             });
-            container.innerHTML = html || "<div style='padding:30px;text-align:center;color:var(--text-gray);'>Корзина пуста</div>";
+            container.innerHTML = html || "<div style='padding:30px;text-align:center;color:var(--gray-500);'>Корзина пуста</div>";
             document.querySelectorAll(".remove-btn").forEach(btn => btn.onclick = () => { let idx = parseInt(btn.getAttribute("data-idx")); cart.splice(idx, 1); renderCart(); });
             let discount = 0;
             if (discountPct > 0) discount = subtotal * discountPct / 100;
@@ -869,201 +922,36 @@ div>
             renderCart();
         }
 
-        async function completeOrder() {
-            if (cart.length === 0) { alert("Корзина пуста"); return; }
-            if (!shiftOpen || shiftClose) { alert("Смена не открыта!"); return; }
-            let client = document.getElementById("clientName").value.trim() || "Клиент";
-            let phone = document.getElementById("clientPhone").value.trim();
-            let comment = document.getElementById("orderComment").value;
-            let payment = document.querySelector('input[name="payment"]:checked').value;
-            let subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            let discount = 0, discPct = 0;
-            if (discountPct > 0) { discount = subtotal * discountPct / 100; discPct = discountPct; }
-            else if (discountAmt > 0) discount = Math.min(discountAmt, subtotal);
-            let order = { id: Date.now(), client, phone, items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty })), subtotal, discount, discountPercent: discPct, finalTotal: subtotal - discount, paymentMethod: payment, comment, date: new Date().toLocaleString(), operator: currentUser.name, shiftOpen: shiftOpen, shiftClose: null, shiftOpenComment: shiftOpenComment, shiftCloseComment: null };
-            allOrders.push(order); saveOrders();
-            await syncOrderToGoogle(order);
-            cart = []; discountPct = 0; discountAmt = 0;
-            document.getElementById("discountPercent").value = 0; document.getElementById("discountAmount").value = 0;
-            document.getElementById("clientName").value = ""; document.getElementById("clientPhone").value = ""; document.getElementById("orderComment").value = "";
-            renderCart(); renderHistory();
-            alert(`Заказ №${order.id} на ${order.finalTotal} ₽`);
-        }
-
-        function getMyOrders() { 
-            if (currentUser.role === "admin") return allOrders;
-            return allOrders.filter(o => o.operator === currentUser.name);
-        }
-
+        function getMyOrders() { return currentUser.role === "admin" ? allOrders : allOrders.filter(o => o.operator === currentUser.name); }
+        
         function renderHistory() {
             let my = getMyOrders();
             let cont = document.getElementById("historyList");
-            if (!my.length) { cont.innerHTML = "<div style='padding:40px;text-align:center;color:var(--text-gray);'>Нет заказов</div>"; return; }
+            if (!my.length) { cont.innerHTML = "<div style='padding:40px;text-align:center;color:var(--gray-500);'>Нет заказов</div>"; return; }
             let html = "";
             [...my].reverse().forEach(o => {
-                html += `<div class="history-item"><div><strong>${escapeHtml(o.client)}</strong> ${o.phone ? `📞 ${escapeHtml(o.phone)}` : ""} | ${o.date} | ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "💵 Наличные" : "💳 Карта"}</div><div style="font-size:11px;">${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div><div style="font-size:11px;">${o.comment ? "📝 " + o.comment : ""}</div><button class="delete-order" data-id="${o.id}" style="margin-top:8px; background:#C2412C; border:none; border-radius:30px; padding:5px 14px; color:white;">Удалить</button></div>`;
+                html += `<div class="history-item"><div><strong>${escapeHtml(o.client)}</strong> ${o.phone ? `📞 ${escapeHtml(o.phone)}` : ""} | ${o.date} | <strong>${o.finalTotal} ₽</strong></div><div style="font-size:12px; margin-top:6px;">${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div><div style="font-size:11px; margin-top:4px; color:var(--gray-500);">${o.comment ? "📝 " + o.comment : ""}</div><button class="delete-order" data-id="${o.id}" style="margin-top:10px; background:var(--red); border:none; border-radius:8px; padding:5px 14px; color:white; font-size:11px;">Удалить</button></div>`;
             });
             cont.innerHTML = html;
             document.querySelectorAll(".delete-order").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); allOrders = allOrders.filter(o => o.id !== id); saveOrders(); renderHistory(); });
         }
 
-        function clearMyOrders() {
-            if (confirm("Очистить все свои заказы?")) {
-                if (currentUser.role === "admin") allOrders = [];
-                else allOrders = allOrders.filter(o => o.operator !== currentUser.name);
-                saveOrders(); renderHistory();
-            }
-        }
-
-        function exportExcelFull() {
+        function exportExcel() {
             let my = getMyOrders();
             if (!my.length) return alert("Нет данных");
-            let detailsData = [["ID", "Дата", "Клиент", "Телефон", "Услуги", "Сумма", "Скидка", "Итого", "Оплата", "Оператор", "Комментарий"]];
-            my.forEach(o => { detailsData.push([o.id, o.date, o.client, o.phone || "", o.items.map(i => `${i.name} x${i.qty}`).join("; "), o.subtotal, o.discount, o.finalTotal, o.paymentMethod === "cash" ? "Наличные" : "Карта", o.operator, o.comment || ""]); });
-            const dailyStats = new Map();
-            my.forEach(order => { const date = order.date.split(',')[0]; if (!dailyStats.has(date)) dailyStats.set(date, { orders: 0, total: 0, cash: 0, card: 0 }); const stat = dailyStats.get(date); stat.orders++; stat.total += order.finalTotal; if (order.paymentMethod === "cash") stat.cash += order.finalTotal; else stat.card += order.finalTotal; });
-            let dailyData = [["Дата", "Кол-во заказов", "Выручка (₽)", "Наличные (₽)", "Карта (₽)"]];
-            for (let [date, stat] of dailyStats) { dailyData.push([date, stat.orders, stat.total, stat.cash, stat.card]); }
-            const totalOrders = my.length, totalRevenue = my.reduce((s,o) => s + o.finalTotal, 0), totalCash = my.filter(o => o.paymentMethod === "cash").reduce((s,o) => s + o.finalTotal, 0), totalCard = my.filter(o => o.paymentMethod === "card").reduce((s,o) => s + o.finalTotal, 0);
-            dailyData.push(["ИТОГО:", totalOrders, totalRevenue, totalCash, totalCard]);
-            const wb = XLSX.utils.book_new();
-            const wsDetails = XLSX.utils.aoa_to_sheet(detailsData);
-            wsDetails['!cols'] = [{wch:12},{wch:20},{wch:20},{wch:15},{wch:40},{wch:10},{wch:10},{wch:12},{wch:12},{wch:15},{wch:25}];
-            XLSX.utils.book_append_sheet(wb, wsDetails, "Детали заказов");
-            const wsDaily = XLSX.utils.aoa_to_sheet(dailyData);
-            wsDaily['!cols'] = [{wch:12},{wch:15},{wch:15},{wch:15},{wch:15}];
-            XLSX.utils.book_append_sheet(wb, wsDaily, "Ежедневная сводка");
-            XLSX.writeFile(wb, `A4print_${currentUser.name}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
-        }
-
-        function generateReport(orders, title) {
-            let cash = orders.filter(o => o.paymentMethod === "cash").reduce((s, o) => s + o.finalTotal, 0);
-            let card = orders.filter(o => o.paymentMethod === "card").reduce((s, o) => s + o.finalTotal, 0);
-            let ordersHtml = orders.map(o => `<div style="border:1px solid #aaa; margin:10px 0; padding:8px;"><div>№${o.id} | ${o.date}</div><div>${o.client} ${o.phone ? `📞 ${o.phone}` : ""}</div><div>${o.items.map(i => `${i.name} x${i.qty}`).join(", ")}</div><div>Итого: ${o.finalTotal} ₽ | ${o.paymentMethod === "cash" ? "Наличные" : "Карта"} ${o.comment ? " | " + o.comment : ""}</div></div>`).join('');
-            let html = `<div style="font-family: monospace; padding: 20px;"><div style="text-align: center;"><h2>A4-ПРИНТ</h2><p>${title}</p><p>Оператор: ${currentUser.name}</p><p>Дата: ${new Date().toLocaleString()}</p></div><hr><div><strong>ИТОГИ:</strong><br>📦 Заказов: ${orders.length}<br>💰 Выручка: ${cash + card} ₽<br>💵 Наличные: ${cash} ₽<br>💳 Карта: ${card} ₽</div><hr><div><strong>ДЕТАЛИ:</strong></div>${ordersHtml}<hr><div style="text-align:center;">Подпись: _______________</div></div>`;
-            let el = document.createElement('div'); el.innerHTML = html; document.body.appendChild(el);
-            html2pdf().set({ margin: 0.5, filename: `A4print_${currentUser.name}_${title.replace(/\s/g, '_')}.pdf` }).from(el).save().then(() => el.remove());
-        }
-
-        function showReportChoice() { document.getElementById("reportChoiceModal").style.display = "flex"; }
-        function reportToday() { let today = new Date().toLocaleDateString(); let myOrders = getMyOrders(); let todayOrders = myOrders.filter(o => o.date.includes(today)); if(todayOrders.length === 0) alert("За сегодня нет заказов"); else generateReport(todayOrders, `Отчёт за ${today}`); document.getElementById("reportChoiceModal").style.display = "none"; }
-        function reportFull() { let myOrders = getMyOrders(); if(myOrders.length === 0) alert("Нет заказов"); else generateReport(myOrders, "Полный отчёт"); document.getElementById("reportChoiceModal").style.display = "none"; }
-
-        function getOperatorsStats() {
-            let stats = {};
-            for (let [login, data] of Object.entries(operators)) stats[login] = { name: data.name, orders: 0, revenue: 0, cash: 0, card: 0 };
-            allOrders.forEach(o => { let op = Object.keys(operators).find(l => operators[l].name === o.operator); if (op) { stats[op].orders++; stats[op].revenue += o.finalTotal; if (o.paymentMethod === "cash") stats[op].cash += o.finalTotal; else stats[op].card += o.finalTotal; } });
-            return stats;
-        }
-
-        function showOperatorsStats() {
-            if (currentUser.role !== "admin") { alert("Доступно только администратору"); return; }
-            let stats = getOperatorsStats();
-            let html = "";
-            for (let [login, st] of Object.entries(stats)) { let avg = st.orders ? Math.round(st.revenue / st.orders) : 0; html += `<div class="stat-card"><div><strong>${st.name}</strong> ${login === "admin" ? "👑" : "👤"}</div><div>📦 Заказов: ${st.orders}</div><div>💰 Выручка: ${st.revenue.toLocaleString()} ₽</div><div>💵 Наличные: ${st.cash.toLocaleString()} ₽</div><div>💳 Карта: ${st.card.toLocaleString()} ₽</div><div>📊 Средний чек: ${avg.toLocaleString()} ₽</div></div>`; }
-            document.getElementById("operatorsStatsContent").innerHTML = html;
-        }
-
-        function exportStatsExcel() {
-            if (currentUser.role !== "admin") { alert("Доступно только администратору"); return; }
-            let stats = getOperatorsStats();
-            let data = [["Оператор", "Заказов", "Выручка (₽)", "Наличные", "Карта", "Средний чек"]];
-            for (let [login, st] of Object.entries(stats)) { let avg = st.orders ? Math.round(st.revenue / st.orders) : 0; data.push([st.name, st.orders, st.revenue, st.cash, st.card, avg]); }
+            let data = [["ID", "Дата", "Клиент", "Телефон", "Товары/Услуги", "Сумма", "Скидка", "Итого", "Оплата", "Оператор", "Комментарий"]];
+            my.forEach(o => { data.push([o.id, o.date, o.client, o.phone || "", o.items.map(i => `${i.name} x${i.qty}`).join("; "), o.subtotal, o.discount, o.finalTotal, o.paymentMethod === "cash" ? "Наличные" : "Карта", o.operator, o.comment || ""]); });
             let ws = XLSX.utils.aoa_to_sheet(data), wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Статистика_операторов");
-            XLSX.writeFile(wb, `A4print_stats_operators.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Заказы");
+            XLSX.writeFile(wb, `A4print_${currentUser.name}_${new Date().toISOString().slice(0,19)}.xlsx`);
         }
 
-        function initYearSelect() {
-            let yearSelect = document.getElementById("salaryYear");
-            if (!yearSelect) return;
-            let currentYear = new Date().getFullYear();
-            yearSelect.innerHTML = "";
-            for (let y = 2023; y <= currentYear + 1; y++) { let opt = document.createElement("option"); opt.value = y; opt.textContent = y; if (y === currentYear) opt.selected = true; yearSelect.appendChild(opt); }
-        }
-
-        function renderAdmin() {
-            if (currentUser.role !== "admin") { alert("Доступно только администратору"); return; }
-            let aDiv = document.getElementById("adminServicesList");
-            aDiv.innerHTML = "";
-            services.forEach(s => { aDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:90px;"><button class="updateService" data-id="${s.id}" style="background:var(--primary-blue);">💾</button><button class="deleteService" data-id="${s.id}" style="background:#C2412C;">🗑</button></div>`; });
-            document.querySelectorAll(".updateService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); let s = services.find(x => x.id === id); if (s) { s.price = parseInt(document.getElementById(`price_${id}`).value); saveServices(); renderServices(); renderAdmin(); } });
-            document.querySelectorAll(".deleteService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); if (services.length <= 1) return alert("Нельзя удалить последнюю услугу"); services = services.filter(x => x.id !== id); saveServices(); renderServices(); renderAdmin(); });
-            let opDiv = document.getElementById("operatorsList");
-            opDiv.innerHTML = "";
-            for (let [login, data] of Object.entries(operators)) { if (login === "admin") continue; opDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap;"><span>${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="Новый пароль"><button class="changePass" data-login="${login}" style="background:var(--primary-yellow); color:black;">🔑</button><button class="deleteOp" data-login="${login}" style="background:#C2412C;">🗑</button></div>`; }
-            document.querySelectorAll(".changePass").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); let p = document.getElementById(`pass_${log}`).value; if (p) { operators[log].password = p; saveOperators(); alert("Пароль изменён"); } });
-            document.querySelectorAll(".deleteOp").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); if (confirm("Удалить оператора?")) { delete operators[log]; saveOperators(); renderAdmin(); } });
-            const urlInput = document.getElementById("googleScriptUrl");
-            if (urlInput && googleScriptUrl) urlInput.value = googleScriptUrl;
-        }
-
-        function initHelpModal() {
-            const modal = document.getElementById('instructionModal');
-            const helpBtns = [document.getElementById('helpBtn'), document.getElementById('burgerHelpBtn')];
-            const closeBtn = document.getElementById('closeInstructionBtn');
-            if (!modal) return;
-            helpBtns.forEach(btn => { if (btn) { btn.onclick = (e) => { e.preventDefault(); modal.style.display = 'flex'; }; } });
-            if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
-            modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
-            const tabs = modal.querySelectorAll('.tab-btn');
-            const contents = modal.querySelectorAll('.instruction-content');
-            tabs.forEach(tab => { tab.onclick = () => { const tabId = tab.getAttribute('data-tab'); tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); contents.forEach(c => c.classList.remove('active')); const activeContent = modal.querySelector(`#tab-${tabId}`); if (activeContent) activeContent.classList.add('active'); }; });
-        }
-
-        function initAdminTabs() {
-            const tabs = document.querySelectorAll('#adminModal .tab-btn');
-            const contents = document.querySelectorAll('#adminModal .instruction-content');
-            tabs.forEach(tab => {
-                tab.onclick = () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    contents.forEach(c => c.classList.remove('active'));
-                    const activeContent = document.getElementById(tabId);
-                    if (activeContent) activeContent.classList.add('active');
-                };
-            });
-        }
-
-        let theme = localStorage.getItem("a4print_theme");
-        if (theme === "dark") document.body.classList.add("dark");
-        function toggleTheme() { if (document.body.classList.contains("dark")) { document.body.classList.remove("dark"); localStorage.setItem("a4print_theme", "light"); } else { document.body.classList.add("dark"); localStorage.setItem("a4print_theme", "dark"); } }
-
-        function login(username, password) {
-            let u = operators[username.toLowerCase()];
-            if (u && u.password === password) {
-                currentUser = { ...u, username: username.toLowerCase() };
-                localStorage.setItem("a4print_current_user", JSON.stringify(currentUser));
-                document.getElementById("loginOverlay").style.display = "none";
-                document.getElementById("mainContent").style.display = "block";
-                loadData();
-                initHelpModal();
-                initYearSelect();
-                initSearch();
-                initAdminTabs();
-                return true;
-            }
-            document.getElementById("loginError").innerText = "Неверный логин или пароль";
-            return false;
-        }
-
-        function logout() { currentUser = null; localStorage.removeItem("a4print_current_user"); location.reload(); }
-        function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ""; }
-
-        function initBurger() {
-            let btn = document.getElementById("burgerBtn"), menu = document.getElementById("burgerMenu");
-            if (btn && menu) {
-                btn.onclick = (e) => { e.stopPropagation(); menu.classList.toggle("show"); };
-                document.addEventListener("click", (e) => { if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove("show"); });
-            }
-            document.getElementById("burgerThemeToggle").onclick = () => { toggleTheme(); if (menu) menu.classList.remove("show"); };
-            document.getElementById("burgerAdminBtn").onclick = () => { if (currentUser?.role === "admin") { renderAdmin(); document.getElementById("adminModal").style.display = "flex"; } else alert("Доступно только администратору"); if (menu) menu.classList.remove("show"); };
-            document.getElementById("burgerShiftBtn").onclick = () => { toggleShiftWithComment(); if (menu) menu.classList.remove("show"); };
-            document.getElementById("burgerPdfBtn").onclick = () => { showReportChoice(); if (menu) menu.classList.remove("show"); };
-            document.getElementById("burgerPrintBtn").onclick = () => { printOrderBlank(); if (menu) menu.classList.remove("show"); };
-            document.getElementById("burgerLogoutBtn").onclick = () => { logout(); if (menu) menu.classList.remove("show"); };
-        }
+        // Смена
+        function loadShift() { let s = localStorage.getItem(SHIFT_KEY); if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } } updateShiftUI(); }
+        function updateShiftUI() { let st = document.getElementById("shiftStatus"), op = document.getElementById("shiftOpenTime"), cl = document.getElementById("shiftCloseTime"), btn = document.getElementById("shiftToggleBtn"); if (shiftOpen && !shiftClose) { st.innerText = "🟢 Открыта"; op.innerText = shiftOpen; cl.innerText = "—"; btn.innerText = "🔒 Закрыть смену"; btn.classList.add("btn-danger"); btn.classList.remove("btn-warning"); } else { st.innerText = shiftOpen ? "🔴 Закрыта" : "⚫ Не открыта"; op.innerText = shiftOpen || "—"; cl.innerText = shiftClose || "—"; btn.innerText = "🚀 Открыть смену"; btn.classList.remove("btn-danger"); btn.classList.add("btn-warning"); } }
+        function toggleShiftWithComment() { if (!shiftOpen || shiftClose) { document.getElementById("shiftCommentTitle").innerText = "📝 Комментарий к открытию смены"; document.getElementById("shiftCommentText").value = ""; document.getElementById("shiftCommentModal").style.display = "flex"; window._pendingShiftAction = "open"; } else { document.getElementById("shiftCommentTitle").innerText = "📝 Комментарий к закрытию смены"; document.getElementById("shiftCommentText").value = ""; document.getElementById("shiftCommentModal").style.display = "flex"; window._pendingShiftAction = "close"; } }
+        function confirmShiftWithComment() { let comment = document.getElementById("shiftCommentText").value.trim(); if (window._pendingShiftAction === "open") { shiftOpen = new Date().toLocaleString(); shiftClose = null; shiftOpenComment = comment; shiftCloseComment = ""; saveShift(); updateShiftUI(); alert("Смена открыта: " + shiftOpen); } else if (window._pendingShiftAction === "close") { if (!shiftOpen || shiftClose) { alert("Смена не открыта"); return; } shiftClose = new Date().toLocaleString(); shiftCloseComment = comment; saveShift(); updateShiftUI(); alert("Смена закрыта: " + shiftClose); } document.getElementById("shiftCommentModal").style.display = "none"; }
+        function cancelShiftComment() { document.getElementById("shiftCommentModal").style.display = "none"; }
 
         function printOrderBlank() {
             if (cart.length === 0) { alert("Корзина пуста"); return; }
@@ -1074,69 +962,70 @@ div>
             let subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
             let discount = discountPct ? subtotal * discountPct / 100 : (discountAmt ? Math.min(discountAmt, subtotal) : 0);
             let final = subtotal - discount;
-            let itemsHtml = cart.map(i => `<tr><td style="border:1px solid #000; padding:5px;">${escapeHtml(i.name)}</td><td style="border:1px solid #000; text-align:center">${i.qty}</td><td style="border:1px solid #000; text-align:center">${i.price} ₽</td><td style="border:1px solid #000; text-align:right">${i.price * i.qty} ₽</td>`).join('');
-            let phoneLine = phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : '';
-            let html = `<div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div style="text-align:center; margin-top:10px;">──────── ОСНОВНОЙ ЭКЗЕМПЛЯР ────────</div></div><div class="blank-page"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phoneLine}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0;"><thead><tr><th>Услуга</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div><div style="text-align:center; margin-top:10px;">─────────── КОПИЯ КЛИЕНТА ───────────</div></div>`;
-            let cont = document.getElementById("printBlankContainer"); cont.innerHTML = html;
+            let itemsHtml = cart.map(i => `<tr><td style="border:1px solid #d1d5db; padding:8px;">${escapeHtml(i.name)}</td><td style="border:1px solid #d1d5db; text-align:center">${i.qty}</td><td style="border:1px solid #d1d5db; text-align:center">${i.price} ₽</td><td style="border:1px solid #d1d5db; text-align:right">${i.price * i.qty} ₽</td>`).join('');
+            let cont = document.getElementById("printBlankContainer"); 
+            cont.innerHTML = `<div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div><div class="blank-page" style="padding:20mm; background:white; color:black; font-family:monospace;"><div style="text-align:center;"><h2>A4-ПРИНТ</h2><p>Копировальный центр — КОПИЯ</p></div><div><strong>№ заказа:</strong> ${Date.now()}</div><div><strong>Дата:</strong> ${new Date().toLocaleString()}</div><div><strong>Оператор:</strong> ${currentUser.name}</div><div><strong>Клиент:</strong> ${escapeHtml(client)}</div>${phone ? `<div><strong>Телефон:</strong> ${escapeHtml(phone)}</div>` : ""}<div><strong>Оплата:</strong> ${payment === "cash" ? "Наличные" : "Карта"}</div><table border="1" cellpadding="5" cellspacing="0" style="width:100%; margin:15px 0; border-color:#d1d5db;"><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${itemsHtml}</tbody></table><div style="text-align:right;">Подытог: ${subtotal} ₽<br>${discount ? `Скидка: -${discount} ₽<br>` : ""}<strong>ИТОГО: ${final} ₽</strong></div>${comment ? `<div>Комментарий: ${escapeHtml(comment)}</div>` : ""}<div style="margin-top:30px; text-align:center;">Спасибо за заказ!</div></div>`;
             window.print(); setTimeout(() => cont.innerHTML = "", 1000);
         }
 
+        // Админ
+        function renderAdmin() {
+            if (currentUser.role !== "admin") { alert("Доступно только администратору"); return; }
+            let opDiv = document.getElementById("operatorsList");
+            opDiv.innerHTML = "";
+            for (let [login, data] of Object.entries(operators)) { if (login === "admin") continue;
+                opDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; align-items:center;"><span style="min-width:100px;">${data.name} (${login})</span><input type="password" id="pass_${login}" placeholder="Новый пароль" style="flex:1;"><button class="changePass" data-login="${login}" class="btn-primary" style="background:var(--orange); color:black;">🔑</button><button class="deleteOp" data-login="${login}" class="btn-danger">🗑</button></div>`;
+            }
+            document.querySelectorAll(".changePass").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); let p = document.getElementById(`pass_${log}`).value; if (p) { operators[log].password = p; saveOperators(); alert("Пароль изменён"); } });
+            document.querySelectorAll(".deleteOp").forEach(btn => btn.onclick = () => { let log = btn.getAttribute("data-login"); if (confirm("Удалить оператора?")) { delete operators[log]; saveOperators(); renderAdmin(); } });
+            let servDiv = document.getElementById("adminServicesList");
+            servDiv.innerHTML = "";
+            services.forEach(s => { servDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:90px;"><button class="updateService" data-id="${s.id}" class="btn-primary">💾</button><button class="deleteService" data-id="${s.id}" class="btn-danger">🗑</button></div>`; });
+            document.querySelectorAll(".updateService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); let s = services.find(x => x.id === id); if (s) { s.price = parseInt(document.getElementById(`price_${id}`).value); saveServices(); renderServices(); renderAdmin(); } });
+            document.querySelectorAll(".deleteService").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); if (services.length <= 1) return alert("Нельзя удалить последнюю услугу"); services = services.filter(x => x.id !== id); saveServices(); renderServices(); renderAdmin(); });
+            let goodsDiv = document.getElementById("adminGoodsList");
+            goodsDiv.innerHTML = "";
+            goods.forEach(g => { goodsDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; align-items:center;"><span style="flex:2;">${g.name}</span><span style="width:80px;">💰 ${g.price} ₽</span><input type="number" id="stock_${g.id}" value="${g.stock}" style="width:80px;"><button class="updateGoodsStock" data-id="${g.id}" class="btn-primary">📦</button><button class="updateGoodsPrice" data-id="${g.id}" class="btn-primary" style="background:var(--orange); color:black;">💰</button><button class="deleteGoods" data-id="${g.id}" class="btn-danger">🗑</button></div>`;
+            });
+            document.querySelectorAll(".updateGoodsStock").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); let g = goods.find(x => x.id === id); if (g) { g.stock = parseInt(document.getElementById(`stock_${id}`).value); if (g.stock < 0) g.stock = 0; saveGoods(); renderGoods(); renderAdmin(); showSyncStatus("✅ Склад обновлён"); } });
+            document.querySelectorAll(".updateGoodsPrice").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); let newPrice = prompt("Новая цена:"); if (newPrice && !isNaN(newPrice)) { let g = goods.find(x => x.id === id); if (g) { g.price = parseInt(newPrice); saveGoods(); renderGoods(); renderAdmin(); showSyncStatus("✅ Цена обновлена"); } } });
+            document.querySelectorAll(".deleteGoods").forEach(btn => btn.onclick = () => { let id = parseInt(btn.getAttribute("data-id")); if (confirm("Удалить товар?")) { goods = goods.filter(x => x.id !== id); saveGoods(); renderGoods(); renderAdmin(); } });
+        }
+
+        function initTabs() { const tabs = document.querySelectorAll('.category-tab'); const panels = { services: document.getElementById('servicesPanel'), goods: document.getElementById('goodsPanel') }; tabs.forEach(tab => { tab.onclick = () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); Object.values(panels).forEach(p => p.classList.remove('active')); panels[tab.getAttribute('data-cat')].classList.add('active'); }; }); }
+        function initAdminTabs() { const tabs = document.querySelectorAll('#adminModal .tab-btn'); const contents = { 'admin-users': document.getElementById('admin-users'), 'admin-services': document.getElementById('admin-services'), 'admin-goods': document.getElementById('admin-goods') }; tabs.forEach(tab => { tab.onclick = () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); Object.values(contents).forEach(c => c.classList.remove('active')); contents[tab.getAttribute('data-tab')].classList.add('active'); }; }); }
+        function initSearch() { let searchService = document.getElementById('searchService'); let searchGoods = document.getElementById('searchGoods'); if (searchService) { searchService.oninput = () => { let q = searchService.value.toLowerCase(); renderServices(services.filter(s => s.name.toLowerCase().includes(q))); }; } if (searchGoods) { searchGoods.oninput = () => { let q = searchGoods.value.toLowerCase(); renderGoods(goods.filter(g => g.name.toLowerCase().includes(q))); }; } }
+        function showSyncStatus(msg) { let d = document.getElementById("syncStatus"); if (d) { d.textContent = msg; setTimeout(() => { if (d.textContent === msg) d.textContent = "💾 Готово"; }, 2000); } }
+        function toggleTheme() { document.body.classList.toggle("dark"); localStorage.setItem("a4print_theme", document.body.classList.contains("dark") ? "dark" : "light"); }
+        function login(login, pwd) { let u = operators[login.toLowerCase()]; if (u && u.password === pwd) { currentUser = { ...u, username: login.toLowerCase() }; localStorage.setItem("a4print_current_user", JSON.stringify(currentUser)); document.getElementById("loginOverlay").style.display = "none"; document.getElementById("mainContent").style.display = "block"; loadData(); initTabs(); initSearch(); initAdminTabs(); return true; } document.getElementById("loginError").innerText = "Неверный логин или пароль"; return false; }
+        function logout() { currentUser = null; localStorage.removeItem("a4print_current_user"); location.reload(); }
+        function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ""; }
+        function initBurger() { let btn = document.getElementById("burgerBtn"), menu = document.getElementById("burgerMenu"); if (btn && menu) { btn.onclick = (e) => { e.stopPropagation(); menu.classList.toggle("show"); }; document.addEventListener("click", (e) => { if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove("show"); }); } document.getElementById("burgerThemeToggle").onclick = () => { toggleTheme(); if (menu) menu.classList.remove("show"); }; document.getElementById("burgerAdminBtn").onclick = () => { if (currentUser?.role === "admin") { renderAdmin(); document.getElementById("adminModal").style.display = "flex"; } else alert("Доступно только администратору"); if (menu) menu.classList.remove("show"); }; document.getElementById("burgerShiftBtn").onclick = () => { toggleShiftWithComment(); if (menu) menu.classList.remove("show"); }; document.getElementById("burgerPrintBtn").onclick = () => { printOrderBlank(); if (menu) menu.classList.remove("show"); }; document.getElementById("burgerLogoutBtn").onclick = () => { logout(); if (menu) menu.classList.remove("show"); }; }
+
         document.addEventListener("DOMContentLoaded", () => {
             let saved = localStorage.getItem("a4print_current_user");
-            if (saved) {
-                try {
-                    currentUser = JSON.parse(saved);
-                    if (operators[currentUser.username]) {
-                        document.getElementById("loginOverlay").style.display = "none";
-                        document.getElementById("mainContent").style.display = "block";
-                        loadData();
-                        initBurger();
-                        initHelpModal();
-                        initYearSelect();
-                        initSearch();
-                        initAdminTabs();
-                    } else logout();
-                } catch (e) { logout(); }
-            } else {
-                initBurger();
-                initHelpModal();
-                initYearSelect();
-                initSearch();
-                initAdminTabs();
-            }
-
+            let theme = localStorage.getItem("a4print_theme");
+            if (theme === "dark") document.body.classList.add("dark");
+            if (saved) { try { currentUser = JSON.parse(saved); if (operators[currentUser.username]) { document.getElementById("loginOverlay").style.display = "none"; document.getElementById("mainContent").style.display = "block"; loadData(); initBurger(); initTabs(); initSearch(); initAdminTabs(); } else logout(); } catch(e) { logout(); } } else { initBurger(); initTabs(); initSearch(); initAdminTabs(); }
             document.getElementById("themeToggleBtn").onclick = toggleTheme;
             document.getElementById("loginBtn").onclick = () => login(document.getElementById("loginUsername").value, document.getElementById("loginPassword").value);
             document.getElementById("logoutBtn").onclick = logout;
             document.getElementById("applyDiscountBtn").onclick = applyDiscount;
             document.getElementById("completeOrderBtn").onclick = completeOrder;
             document.getElementById("clearCartBtn").onclick = () => { cart = []; discountPct = 0; discountAmt = 0; renderCart(); };
-            document.getElementById("exportExcelBtn").onclick = exportExcelFull;
-            document.getElementById("clearHistoryBtn").onclick = clearMyOrders;
-            document.getElementById("pdfReportBtn").onclick = showReportChoice;
+            document.getElementById("exportExcelBtn").onclick = exportExcel;
             document.getElementById("printBlankBtn").onclick = printOrderBlank;
             document.getElementById("addFastServiceBtn").onclick = addFastService;
-            document.getElementById("addNewCustomServiceBtn").onclick = addNewCustomService;
+            document.getElementById("addNewGoodsBtn").onclick = addNewGoods;
             document.getElementById("shiftToggleBtn").onclick = toggleShiftWithComment;
             document.getElementById("shiftCommentConfirm").onclick = confirmShiftWithComment;
             document.getElementById("shiftCommentCancel").onclick = cancelShiftComment;
-            document.getElementById("reportTodayBtn").onclick = reportToday;
-            document.getElementById("reportFullBtn").onclick = reportFull;
-            document.getElementById("cancelReportBtn").onclick = () => document.getElementById("reportChoiceModal").style.display = "none";
-
             let admModal = document.getElementById("adminModal");
             document.getElementById("adminPanelBtn").onclick = () => { renderAdmin(); admModal.style.display = "flex"; };
             document.getElementById("closeAdminModal").onclick = () => admModal.style.display = "none";
-            document.getElementById("viewOperatorsStatsBtn").onclick = showOperatorsStats;
-            document.getElementById("exportStatsExcelBtn").onclick = exportStatsExcel;
-            document.getElementById("calculateSalaryBtn").onclick = showSalaryReport;
-            document.getElementById("exportSalaryBtn").onclick = exportSalaryPayslip;
-            document.getElementById("saveGoogleSettingsBtn").onclick = saveGoogleSettings;
-            document.getElementById("testSyncBtn").onclick = () => alert("Тест: проверьте настройки");
-            document.getElementById("syncAllOrdersBtn").onclick = syncAllOrdersToGoogle;
-            document.getElementById("restoreFromCloudBtn").onclick = restoreFromCloud;
+            document.getElementById("addOperatorBtn").onclick = () => { let lgn = document.getElementById("newOpLogin").value.trim().toLowerCase(); let nm = document.getElementById("newOpName").value.trim(); let ps = document.getElementById("newOpPass").value.trim(); if (lgn && nm && ps) { if (operators[lgn]) alert("Логин уже есть"); else { operators[lgn] = { password: ps, name: nm, role: "operator" }; saveOperators(); renderAdmin(); } } else alert("Заполните все поля"); };
             document.getElementById("addServiceBtn").onclick = () => { let name = document.getElementById("newServiceName").value.trim(); let price = parseInt(document.getElementById("newServicePrice").value); if (name && price > 0) { services.push({ id: Date.now(), name, price }); saveServices(); renderServices(); renderAdmin(); } else alert("Введите название и цену"); };
-            document.getElementById("addOperatorBtn").onclick = () => { let lgn = document.getElementById("newOpLogin").value.trim().toLowerCase(); let nm = document.getElementById("newOpName").value.trim(); let ps = document.getElementById("newOpPass").value.trim(); if (lgn && nm && ps) { if (operators[lgn]) alert("Логин уже есть"); else { operators[lgn] = { password: ps, name: nm, role: "operator", rate: 2000 }; saveOperators(); renderAdmin(); } } else alert("Заполните все поля"); };
+            document.getElementById("adminAddGoodsBtn").onclick = () => { let name = document.getElementById("adminNewGoodsName").value.trim(); let price = parseFloat(document.getElementById("adminNewGoodsPrice").value); let stock = parseInt(document.getElementById("adminNewGoodsStock").value); if (name && price > 0 && !isNaN(stock)) { goods.push({ id: Date.now(), name: name, price: price, stock: stock, unit: "шт" }); saveGoods(); renderGoods(); renderAdmin(); showSyncStatus("✅ Товар добавлен"); document.getElementById("adminNewGoodsName").value = ""; document.getElementById("adminNewGoodsPrice").value = ""; document.getElementById("adminNewGoodsStock").value = ""; } else alert("Заполните все поля"); };
             window.onclick = (e) => { if (e.target === admModal) admModal.style.display = "none"; };
         });
     </script>
