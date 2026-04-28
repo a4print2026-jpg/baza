@@ -43,8 +43,8 @@
         .btn-warning { background: #E68A2E; }
         .btn-info { background: #3B82F6; }
         .shift-bar { background: var(--card-white); border-radius: 60px; padding: 10px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; font-weight: 500; border-left: 4px solid var(--primary-blue); }
-        .shift-comment-modal, .modal-instruction, .report-choice-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1100; }
-        .shift-comment-modal .modal-card, .modal-instruction .modal-card, .report-choice-modal .modal-card { background: var(--card-white); border-radius: 32px; max-width: 450px; width: 90%; padding: 28px; text-align: center; }
+        .shift-comment-modal, .modal-instruction, .report-choice-modal, .add-service-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1100; }
+        .shift-comment-modal .modal-card, .modal-instruction .modal-card, .report-choice-modal .modal-card, .add-service-modal .modal-card { background: var(--card-white); border-radius: 32px; max-width: 450px; width: 90%; padding: 28px; text-align: center; }
         .instruction-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-blue); }
         .close-instruction { background: none; font-size: 28px; padding: 0; width: 36px; height: 36px; border-radius: 50%; }
         .instruction-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); flex-wrap: wrap; }
@@ -108,6 +108,8 @@
         .report-choice-buttons button { min-width: 120px; }
         .sync-status { position: fixed; bottom: 20px; right: 20px; background: #1a1a1a; color: white; padding: 8px 16px; border-radius: 40px; font-size: 12px; z-index: 999; }
         .sync-progress { position: fixed; bottom: 80px; right: 20px; background: #1a1a1a; color: white; padding: 8px 16px; border-radius: 40px; font-size: 12px; z-index: 999; display: none; }
+        .add-service-inline { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-light); }
+        .add-service-inline h4 { font-size: 12px; margin-bottom: 10px; color: var(--primary-blue); }
     </style>
 </head>
 <body>
@@ -166,11 +168,23 @@
                         <div id="searchResults" class="search-results"></div>
                     </div>
                     <div id="servicesGrid" class="services-grid"></div>
+                    
+                    <!-- Блок добавления новой услуги (доступен всем) -->
+                    <div class="add-service-inline">
+                        <h4>➕ Новая услуга (сохранится в общую базу)</h4>
+                        <div class="fast-service-row">
+                            <input type="text" id="newCustomServiceName" placeholder="Название новой услуги" style="flex:2;">
+                            <input type="number" id="newCustomServicePrice" placeholder="Цена ₽" style="flex:1;" value="0" step="10">
+                            <button id="addNewCustomServiceBtn" class="btn-primary" style="white-space: nowrap;">➕ Добавить в базу</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Быстрая услуга (для текущего заказа, не сохраняется в общую базу) -->
                     <div class="fast-service-card">
                         <div class="fast-service-row">
-                            <input type="text" id="fastServiceName" placeholder="Название услуги (любое)" style="flex:2;">
+                            <input type="text" id="fastServiceName" placeholder="Разовая услуга (для этого заказа)" style="flex:2;">
                             <input type="number" id="fastServicePrice" placeholder="Цена ₽" style="flex:1;" value="0" step="10">
-                            <button id="addFastServiceBtn" class="btn-primary">➕ Быстрая услуга</button>
+                            <button id="addFastServiceBtn" class="btn-primary" style="white-space: nowrap;">➕ Добавить в корзину</button>
                         </div>
                     </div>
                 </div>
@@ -279,7 +293,7 @@
                     <button id="syncAllOrdersBtn" class="btn-warning">🔼 Отправить все в облако</button>
                     <button id="restoreFromCloudBtn" class="btn-success">⬇️ Восстановить из облака</button>
                 </div>
-                <div id="syncSettingsInfo" class="instruction-note" style="margin-top: 8px;">⚙️ Автоматическая синхронизация каждые 2 минуты. Кнопка «Восстановить из облака» загрузит все заказы из Google Таблицы.</div>
+                <div id="syncSettingsInfo" class="instruction-note" style="margin-top: 8px;">⚙️ Автоматическая синхронизация каждые 2 минуты</div>
             </div>
             
             <hr>
@@ -299,7 +313,7 @@
                 <input type="text" id="newOpPass" placeholder="Пароль">
                 <button id="addOperatorBtn" class="btn-primary">Добавить</button>
             </div>
-            <div class="instruction-note" style="margin-top: 16px;">🔐 Текущие учётные: admin / admin123 | kseniia / 2525255 | sergey / sergey321</div>
+            <div class="instruction-note" style="margin-top: 16px;">🔐 Текущие учётные: pavel / pavel123 | ksenia / ksenia123 | natalia / natalia123</div>
         </div>
     </div>
 
@@ -326,13 +340,14 @@
                 <div class="instruction-step"><strong>2. Открыть смену</strong><br>«🚀 Открыть смену» → при необходимости комментарий.</div>
                 <div class="instruction-step"><strong>3. Поиск услуги</strong><br>Начните вводить название в поле поиска — появятся подходящие варианты.</div>
                 <div class="instruction-step"><strong>4. Приём заказа</strong><br>Выберите услугу → количество → «Добавить».</div>
-                <div class="instruction-step"><strong>5. Оформление</strong><br>Клиент, скидка, оплата, комментарий → «Оформить».</div>
-                <div class="instruction-step"><strong>6. Автосинхронизация</strong><br>Каждые 2 минуты система автоматически сохраняет заказы в облако.</div>
-                <div class="instruction-step"><strong>7. Excel отчёт</strong><br>«📎 Excel» — полный отчёт с ежедневной выручкой и итогами по кассе.</div>
-                <div class="instruction-step"><strong>8. Закрыть смену</strong><br>«🔒 Закрыть смену» → затем «Отчёт» для бухгалтерии.</div>
+                <div class="instruction-step"><strong>5. Новая услуга</strong><br>Если нужной услуги нет в списке — добавьте её через поле «➕ Новая услуга». Она сохранится в общую базу.</div>
+                <div class="instruction-step"><strong>6. Оформление</strong><br>Клиент, скидка, оплата, комментарий → «Оформить».</div>
+                <div class="instruction-step"><strong>7. Автосинхронизация</strong><br>Каждые 2 минуты система автоматически сохраняет заказы в облако.</div>
+                <div class="instruction-step"><strong>8. Excel отчёт</strong><br>«📎 Excel» — полный отчёт с ежедневной выручкой и итогами по кассе.</div>
+                <div class="instruction-step"><strong>9. Закрыть смену</strong><br>«🔒 Закрыть смену» → затем «Отчёт» для бухгалтерии.</div>
             </div>
             <div class="instruction-content" id="tab-admin">
-                <div class="instruction-step"><strong>Вход админа</strong><br>admin / admin123</div>
+                <div class="instruction-step"><strong>Вход админа</strong><br>pavel / pavel123</div>
                 <div class="instruction-step"><strong>Управление услугами</strong><br>Цены, удаление, добавление.</div>
                 <div class="instruction-step"><strong>Управление операторами</strong><br>Смена пароля, добавление, удаление.</div>
                 <div class="instruction-step"><strong>Статистика операторов</strong><br>Заказы, выручка, средний чек по каждому.</div>
@@ -343,7 +358,7 @@
     </div>
 
     <script>
-        // ========== ПОЛНЫЙ СПИСОК УСЛУГ ==========
+        // ========== БАЗА ДАННЫХ ==========
         let services = [
             { id: 1, name: "Копирование ч/б A4 (1-20)", price: 25 }, { id: 2, name: "Копирование цветное A4 (1-20)", price: 35 },
             { id: 3, name: "Сканирование A4", price: 25 }, { id: 4, name: "Ламинирование A6", price: 50 },
@@ -360,10 +375,11 @@
             { id: 25, name: "Фото в рамке 10х15", price: 200 }
         ];
 
+        // НОВЫЕ ПОЛЬЗОВАТЕЛИ
         let operators = {
-            "admin": { password: "admin123", name: "Администратор", role: "admin" },
-            "anna": { password: "anna321", name: "Анна", role: "operator" },
-            "sergey": { password: "sergey321", name: "Сергей", role: "operator" }
+            "pavel": { password: "pavel123", name: "Павел", role: "admin" },
+            "ksenia": { password: "ksenia123", name: "Ксения", role: "operator" },
+            "natalia": { password: "natalia123", name: "Наталья", role: "operator" }
         };
 
         let allOrders = [], currentUser = null, cart = [], discountPct = 0, discountAmt = 0;
@@ -380,6 +396,47 @@
         function saveShift() { localStorage.setItem(SHIFT_KEY, JSON.stringify({ open: shiftOpen, close: shiftClose, openComment: shiftOpenComment, closeComment: shiftCloseComment, operator: currentUser?.name })); }
         function saveSyncedOrders() { localStorage.setItem("syncedOrders", JSON.stringify([...syncedOrders])); }
 
+        // ДОБАВЛЕНИЕ НОВОЙ УСЛУГИ В ОБЩУЮ БАЗУ (доступно всем)
+        function addNewCustomService() {
+            const name = document.getElementById("newCustomServiceName").value.trim();
+            const price = parseFloat(document.getElementById("newCustomServicePrice").value);
+            
+            if (!name) { alert("Введите название услуги"); return; }
+            if (isNaN(price) || price <= 0) { alert("Введите корректную цену"); return; }
+            
+            // Проверяем, нет ли уже такой услуги
+            const existing = services.find(s => s.name.toLowerCase() === name.toLowerCase());
+            if (existing) {
+                alert("Такая услуга уже существует в базе");
+                return;
+            }
+            
+            const newId = Date.now();
+            services.push({ id: newId, name: name, price: price });
+            saveServices();
+            renderServices();
+            showSyncStatus(`✅ Услуга "${name}" добавлена в базу`);
+            alert(`Услуга "${name}" добавлена в общую базу!`);
+            
+            document.getElementById("newCustomServiceName").value = "";
+            document.getElementById("newCustomServicePrice").value = "";
+        }
+
+        // Добавление разовой услуги (только в текущий заказ)
+        function addFastService() {
+            let name = document.getElementById("fastServiceName").value.trim();
+            let price = parseFloat(document.getElementById("fastServicePrice").value);
+            if (!name) { alert("Введите название услуги"); return; }
+            if (isNaN(price) || price <= 0) { alert("Введите корректную цену"); return; }
+            let qty = 1;
+            let existing = cart.find(i => i.name === name && i.isFast === true);
+            if (existing) existing.qty += qty;
+            else cart.push({ id: Date.now(), name: name, price: price, qty: qty, isFast: true });
+            document.getElementById("fastServiceName").value = "";
+            document.getElementById("fastServicePrice").value = "";
+            renderCart();
+        }
+
         // ========== ФУНКЦИЯ ДЛЯ ПАРСИНГА СТРОКИ УСЛУГ ==========
         function parseItemsString(itemsStr) {
             const items = [];
@@ -389,7 +446,6 @@
                 if (match) {
                     const name = match[1];
                     const qty = parseInt(match[2]);
-                    // Ищем цену в основном списке услуг
                     const service = services.find(s => s.name === name);
                     const price = service ? service.price : 0;
                     items.push({ name: name, price: price, qty: qty });
@@ -411,14 +467,12 @@
             progressDiv.textContent = "🔄 Чтение данных из Google Sheets...";
             
             try {
-                // Добавляем параметр action=getData для получения всех заказов
                 const response = await fetch(`${googleScriptUrl}?action=getData&t=${Date.now()}`);
                 const data = await response.json();
                 
                 if (data.success && data.orders && data.orders.length > 0) {
                     progressDiv.textContent = `📥 Обработка ${data.orders.length} записей...`;
                     
-                    // Конвертируем данные из формата таблицы
                     const cloudOrders = [];
                     for (const row of data.orders) {
                         if (row[0] && row[0] !== "ID" && row[0] !== "") {
@@ -436,7 +490,6 @@
                                 comment: row[10] || ""
                             };
                             
-                            // Если у заказа нет позиций, но есть сумма, создаём одну позицию
                             if (order.items.length === 0 && order.finalTotal > 0) {
                                 order.items = [{ name: "Услуга", price: order.finalTotal, qty: 1 }];
                             }
@@ -445,7 +498,6 @@
                         }
                     }
                     
-                    // Объединяем с локальными заказами (без дублей по ID)
                     const existingIds = new Set(allOrders.map(o => o.id));
                     const newOrders = cloudOrders.filter(o => !existingIds.has(o.id));
                     
@@ -466,7 +518,7 @@
             } catch (error) {
                 console.error("Ошибка восстановления:", error);
                 showSyncStatus("❌ Ошибка восстановления из облака");
-                alert("Ошибка при загрузке данных. Проверьте URL и доступ к таблице.\n\n" + error);
+                alert("Ошибка при загрузке данных. Проверьте URL и доступ к таблице.");
             }
             
             progressDiv.style.display = "none";
@@ -696,7 +748,7 @@
             showSyncStatus("📎 Excel отчёт скачан");
         }
 
-        // ========== ОСТАЛЬНЫЕ ФУНКЦИИ (загрузка данных, рендер, корзина и т.д.) ==========
+        // ========== ОСТАЛЬНЫЕ ФУНКЦИИ ==========
         function loadShift() {
             let s = localStorage.getItem(SHIFT_KEY);
             if (s) { let d = JSON.parse(s); if (d.operator === currentUser?.name) { shiftOpen = d.open; shiftClose = d.close; shiftOpenComment = d.openComment || ""; shiftCloseComment = d.closeComment || ""; } }
@@ -774,9 +826,9 @@
             renderHistory();
             loadShift();
             let nameSpan = document.getElementById("currentOperatorName");
-            if (nameSpan) nameSpan.innerHTML = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : ""}`;
+            if (nameSpan) nameSpan.innerHTML = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
             let burgerSpan = document.getElementById("burgerOperatorName");
-            if (burgerSpan) burgerSpan.innerText = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : ""}`;
+            if (burgerSpan) burgerSpan.innerText = `${currentUser.name} ${currentUser.role === "admin" ? "👑" : "👤"}`;
             loadGoogleSettings();
         }
         
@@ -875,20 +927,6 @@
             renderCart();
         }
 
-        function addFastService() {
-            let name = document.getElementById("fastServiceName").value.trim();
-            let price = parseFloat(document.getElementById("fastServicePrice").value);
-            if (!name) { alert("Введите название услуги"); return; }
-            if (isNaN(price) || price <= 0) { alert("Введите корректную цену"); return; }
-            let qty = 1;
-            let existing = cart.find(i => i.name === name && i.isFast === true);
-            if (existing) existing.qty += qty;
-            else cart.push({ id: Date.now(), name: name, price: price, qty: qty, isFast: true });
-            document.getElementById("fastServiceName").value = "";
-            document.getElementById("fastServicePrice").value = "";
-            renderCart();
-        }
-
         function renderCart() {
             let container = document.getElementById("cartList");
             let subtotal = 0, html = "";
@@ -941,7 +979,10 @@
             alert(`Заказ №${order.id} на ${order.finalTotal} ₽`);
         }
 
-        function getMyOrders() { return currentUser.role === "admin" ? allOrders : allOrders.filter(o => o.operator === currentUser.name); }
+        function getMyOrders() { 
+            if (currentUser.role === "admin") return allOrders;
+            return allOrders.filter(o => o.operator === currentUser.name);
+        }
 
         function renderHistory() {
             let my = getMyOrders();
@@ -1004,7 +1045,7 @@
             document.getElementById("reportChoiceModal").style.display = "none";
         }
 
-        // Статистика операторов
+        // Статистика операторов (только для админа)
         function getOperatorsStats() {
             let stats = {};
             for (let [login, data] of Object.entries(operators)) stats[login] = { name: data.name, orders: 0, revenue: 0, cash: 0, card: 0 };
@@ -1021,6 +1062,10 @@
         }
 
         function showOperatorsStats() {
+            if (currentUser.role !== "admin") {
+                alert("Доступно только администратору");
+                return;
+            }
             let stats = getOperatorsStats();
             let html = "";
             for (let [login, st] of Object.entries(stats)) {
@@ -1032,6 +1077,10 @@
         }
 
         function exportStatsExcel() {
+            if (currentUser.role !== "admin") {
+                alert("Доступно только администратору");
+                return;
+            }
             let stats = getOperatorsStats();
             let data = [["Оператор", "Заказов", "Выручка (₽)", "Наличные", "Карта", "Средний чек"]];
             for (let [login, st] of Object.entries(stats)) {
@@ -1043,7 +1092,7 @@
             XLSX.writeFile(wb, `A4print_stats_operators_${new Date().toISOString().slice(0, 19)}.xlsx`);
         }
 
-        // Отчёт за произвольную дату
+        // Отчёт за произвольную дату (админ)
         function getOrdersByDate(dateStr) { if (!dateStr) return []; return allOrders.filter(o => o.date.includes(dateStr)); }
         function showDateReport() {
             let date = document.getElementById("reportDate").value;
@@ -1092,6 +1141,7 @@
                 yearSelect.appendChild(option);
             }
         }
+        
         function getMonthlyReport() {
             let month = parseInt(document.getElementById("reportMonth").value);
             let year = parseInt(document.getElementById("reportYear").value);
@@ -1101,6 +1151,7 @@
             filteredOrders.forEach(o => { let op = Object.keys(operators).find(l => operators[l].name === o.operator); if (op) { stats[op].orders++; stats[op].revenue += o.finalTotal; if (o.paymentMethod === "cash") stats[op].cash += o.finalTotal; else stats[op].card += o.finalTotal; } });
             return { stats, filteredOrders, month, year };
         }
+        
         function showMonthlyReport() {
             let { stats, filteredOrders, month, year } = getMonthlyReport();
             let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
@@ -1114,6 +1165,7 @@
             html += `<div class="stat-card" style="background: var(--primary-blue); color: white;"><div class="stat-row"><span><strong>ИТОГО ПО ЦЕНТРУ</strong></span><span><strong>${totalOrders} заказов</strong></span></div><div class="stat-row"><span>💰 Общая выручка:</span><span><strong>${totalRevenue.toLocaleString()} ₽</strong></span></div></div>`;
             document.getElementById("monthlyReportContent").innerHTML = html;
         }
+        
         function exportMonthlyReport() {
             let { stats, filteredOrders, month, year } = getMonthlyReport();
             let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
@@ -1145,6 +1197,10 @@
         }
 
         function renderAdmin() {
+            if (currentUser.role !== "admin") {
+                alert("Доступно только администратору");
+                return;
+            }
             let aDiv = document.getElementById("adminServicesList");
             aDiv.innerHTML = "";
             services.forEach(s => { aDiv.innerHTML += `<div style="display:flex; gap:12px; margin-bottom:12px;"><span style="flex:2;">${s.name}</span><input type="number" id="price_${s.id}" value="${s.price}" style="width:90px;"><button class="updateService" data-id="${s.id}" style="background:var(--primary-blue);">💾</button><button class="deleteService" data-id="${s.id}" style="background:#C2412C;">🗑</button></div>`; });
@@ -1180,10 +1236,10 @@
             else { document.body.classList.add("dark"); localStorage.setItem("a4print_theme", "dark"); }
         }
 
-        function login(login, pwd) {
-            let u = operators[login.toLowerCase()];
-            if (u && u.password === pwd) {
-                currentUser = { ...u, username: login.toLowerCase() };
+        function login(username, password) {
+            let u = operators[username.toLowerCase()];
+            if (u && u.password === password) {
+                currentUser = { ...u, username: username.toLowerCase() };
                 localStorage.setItem("a4print_current_user", JSON.stringify(currentUser));
                 document.getElementById("loginOverlay").style.display = "none";
                 document.getElementById("mainContent").style.display = "block";
@@ -1197,7 +1253,12 @@
             return false;
         }
 
-        function logout() { currentUser = null; localStorage.removeItem("a4print_current_user"); location.reload(); }
+        function logout() { 
+            currentUser = null; 
+            localStorage.removeItem("a4print_current_user"); 
+            location.reload(); 
+        }
+        
         function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ""; }
 
         function initBurger() {
@@ -1247,6 +1308,7 @@
             document.getElementById("pdfReportBtn").onclick = showReportChoice;
             document.getElementById("printBlankBtn").onclick = printOrderBlank;
             document.getElementById("addFastServiceBtn").onclick = addFastService;
+            document.getElementById("addNewCustomServiceBtn").onclick = addNewCustomService;
             document.getElementById("shiftToggleBtn").onclick = toggleShiftWithComment;
             document.getElementById("shiftCommentConfirm").onclick = confirmShiftWithComment;
             document.getElementById("shiftCommentCancel").onclick = cancelShiftComment;
