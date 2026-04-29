@@ -47,7 +47,7 @@
             border-color: #475569;
         }
         
-        body.dark .service-card, body.dark .repair-item, body.dark .cart-item, body.dark .history-item {
+        body.dark .service-card, body.dark .repair-item, body.dark .brand-card, body.dark .model-item {
             background: #1e293b;
             border-color: #475569;
         }
@@ -60,7 +60,6 @@
         
         .app { max-width: 1600px; margin: 0 auto; }
         
-        /* Шапка */
         .header {
             display: flex;
             justify-content: space-between;
@@ -154,7 +153,6 @@
             margin-bottom: 20px;
         }
         
-        /* Форма приёма */
         .form-row {
             display: flex;
             gap: 12px;
@@ -188,14 +186,23 @@
             box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
         }
         
-        /* Сетка брендов */
-        .brands-grid {
+        /* Три уровня выбора */
+        .selector-level {
+            margin-bottom: 20px;
+        }
+        .selector-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--gray-600);
+        }
+        .categories-grid, .brands-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
-        .brand-card {
+        .category-card, .brand-card {
             background: var(--gray-100);
             border-radius: 10px;
             padding: 10px;
@@ -203,9 +210,10 @@
             cursor: pointer;
             transition: all 0.15s;
             border: 1px solid var(--gray-200);
+            font-size: 13px;
         }
-        .brand-card:hover { background: var(--gray-200); transform: translateY(-2px); }
-        .brand-card.active {
+        .category-card:hover, .brand-card:hover { background: var(--gray-200); transform: translateY(-2px); }
+        .category-card.active, .brand-card.active {
             background: var(--blue);
             color: white;
             border-color: var(--blue);
@@ -233,8 +241,7 @@
             color: white;
         }
         
-        /* Список ремонтов */
-        .repairs-list {
+        .repairs-list, .completed-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -284,7 +291,6 @@
             margin-bottom: 16px;
         }
         
-        /* Модалка */
         .modal {
             position: fixed;
             top: 0;
@@ -300,8 +306,10 @@
         .modal-card {
             background: white;
             border-radius: 16px;
-            max-width: 500px;
+            max-width: 650px;
             width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
             padding: 24px;
             box-shadow: var(--shadow-md);
         }
@@ -360,7 +368,7 @@
             <div class="header">
                 <div class="logo-area">
                     <img src="https://github.com/a4print2026-jpg/baza/blob/dbcda72ab60f0a9f8d8984e17375f6649cf677f0/images/logo_soc2.png?raw=true" class="logo" onerror="this.style.display='none'">
-                    <div><h1>A4‑ПРИНТ</h1><div class="sub">Сервисный центр | Ремонт оборудования</div></div>
+                    <div><h1>A4‑ПРИНТ</h1><div class="sub">Сервисный центр | Ремонт техники</div></div>
                 </div>
                 <div class="user-bar">
                     <span id="currentOperatorName" style="font-weight:500;"></span>
@@ -393,14 +401,22 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Выберите бренд</label>
-                        <div class="brands-grid" id="brandsGrid"></div>
+                    <!-- Уровень 1: Категория -->
+                    <div class="selector-level">
+                        <div class="selector-title">1. Тип устройства</div>
+                        <div id="categoriesGrid" class="categories-grid"></div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Выберите модель</label>
-                        <div class="models-list" id="modelsList"></div>
+                    <!-- Уровень 2: Бренд -->
+                    <div class="selector-level" id="brandsSection" style="display:none;">
+                        <div class="selector-title">2. Бренд</div>
+                        <div id="brandsGrid" class="brands-grid"></div>
+                    </div>
+                    
+                    <!-- Уровень 3: Модель -->
+                    <div class="selector-level" id="modelsSection" style="display:none;">
+                        <div class="selector-title">3. Модель</div>
+                        <div id="modelsList" class="models-list"></div>
                     </div>
                     
                     <div class="form-row">
@@ -408,11 +424,11 @@
                             <label>Тип поломки</label>
                             <select id="faultType">
                                 <option value="Не включается">Не включается</option>
-                                <option value="Не печатает">Не печатает</option>
-                                <option value="Зажевывает бумагу">Зажевывает бумагу</option>
-                                <option value="Полосы при печати">Полосы при печати</option>
-                                <option value="Ошибка картриджа">Ошибка картриджа</option>
-                                <option value="Проблема с драйвером">Проблема с драйвером</option>
+                                <option value="Не работает">Не работает</option>
+                                <option value="Сломан экран">Сломан экран</option>
+                                <option value="Проблема с питанием">Проблема с питанием</option>
+                                <option value="Замена детали">Замена детали</option>
+                                <option value="Программная ошибка">Программная ошибка</option>
                                 <option value="Механическая поломка">Механическая поломка</option>
                                 <option value="Другое">Другое</option>
                             </select>
@@ -434,7 +450,7 @@
                     
                     <div class="form-group">
                         <label>Комплектация</label>
-                        <textarea id="accessories" rows="1" placeholder="Кабель, блок питания, картриджи..."></textarea>
+                        <textarea id="accessories" rows="1" placeholder="Зарядное устройство, кабель, пульт..."></textarea>
                     </div>
                     
                     <div class="form-row">
@@ -486,18 +502,29 @@
 
     <!-- Админ-панель -->
     <div id="adminModal" class="modal">
-        <div class="modal-card" style="max-width: 600px;">
+        <div class="modal-card" style="max-width: 700px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
                 <h2>Администрирование</h2>
                 <button id="closeAdminModal" style="background:none; font-size: 24px;">✕</button>
             </div>
-            <h3>Управление брендами и моделями</h3>
+            
+            <h3>📁 Категории устройств</h3>
+            <div id="adminCategoriesList"></div>
+            <div style="display:flex; gap:12px; margin: 16px 0;">
+                <input type="text" id="newCategoryName" placeholder="Новая категория" style="flex:2;">
+                <button id="addCategoryBtn" class="btn-primary">Добавить категорию</button>
+            </div>
+            
+            <h3>🏷️ Бренды</h3>
             <div id="adminBrandsList"></div>
             <div style="display:flex; gap:12px; margin: 16px 0;">
-                <input type="text" id="newBrandName" placeholder="Новый бренд">
+                <select id="selectCategoryForBrand" style="flex:1;"></select>
+                <input type="text" id="newBrandName" placeholder="Новый бренд" style="flex:2;">
                 <button id="addBrandBtn" class="btn-primary">Добавить бренд</button>
             </div>
-            <div id="adminModelsList" style="margin-top: 20px;"></div>
+            
+            <h3>📱 Модели</h3>
+            <div id="adminModelsList"></div>
             <div style="display:flex; gap:12px; margin: 16px 0;">
                 <select id="selectBrandForModel" style="flex:1;"></select>
                 <input type="text" id="newModelName" placeholder="Новая модель" style="flex:2;">
@@ -516,48 +543,105 @@
             "natalia": { password: "natalia123", name: "Наталья", role: "operator" } 
         };
         
-        // Бренды и модели
-        let brands = [
-            { id: 1, name: "HP" }, { id: 2, name: "Canon" }, { id: 3, name: "Epson" }, { id: 4, name: "Brother" }, { id: 5, name: "Xerox" }, { id: 6, name: "Kyocera" }, { id: 7, name: "Samsung" }, { id: 8, name: "Ricoh" }
+        // Категории устройств
+        let categories = [
+            { id: 1, name: "📱 Телефон" }, { id: 2, name: "📟 Планшет" }, { id: 3, name: "💻 Ноутбук" },
+            { id: 4, name: "🖥️ ПК / Моноблок" }, { id: 5, name: "🔄 Робот-пылесос" }, { id: 6, name: "🧺 Стиральная машина" },
+            { id: 7, name: "🍲 СВЧ-печь" }, { id: 8, name: "🧊 Холодильник" }, { id: 9, name: "☕ Кофемашина" },
+            { id: 10, name: "📺 Телевизор" }, { id: 11, name: "🎧 Наушники/Колонки" }, { id: 12, name: "🔌 Другая техника" }
         ];
         
+        // Бренды (привязаны к категории)
+        let brands = [
+            { id: 1, categoryId: 1, name: "Apple" }, { id: 2, categoryId: 1, name: "Samsung" }, { id: 3, categoryId: 1, name: "Xiaomi" }, { id: 4, categoryId: 1, name: "Google" },
+            { id: 5, categoryId: 2, name: "Apple" }, { id: 6, categoryId: 2, name: "Samsung" }, { id: 7, categoryId: 2, name: "Xiaomi" }, { id: 8, categoryId: 2, name: "Huawei" },
+            { id: 9, categoryId: 3, name: "Apple" }, { id: 10, categoryId: 3, name: "Lenovo" }, { id: 11, categoryId: 3, name: "HP" }, { id: 12, categoryId: 3, name: "Asus" }, { id: 13, categoryId: 3, name: "Dell" }, { id: 14, categoryId: 3, name: "Acer" },
+            { id: 15, categoryId: 4, name: "HP" }, { id: 16, categoryId: 4, name: "Dell" }, { id: 17, categoryId: 4, name: "Lenovo" }, { id: 18, categoryId: 4, name: "Apple" },
+            { id: 19, categoryId: 5, name: "Xiaomi" }, { id: 20, categoryId: 5, name: "Roborock" }, { id: 21, categoryId: 5, name: "iRobot" }, { id: 22, categoryId: 5, name: "Panda" },
+            { id: 23, categoryId: 6, name: "LG" }, { id: 24, categoryId: 6, name: "Samsung" }, { id: 25, categoryId: 6, name: "Indesit" }, { id: 26, categoryId: 6, name: "Bosch" }, { id: 27, categoryId: 6, name: "Whirlpool" },
+            { id: 28, categoryId: 7, name: "Samsung" }, { id: 29, categoryId: 7, name: "LG" }, { id: 30, categoryId: 7, name: "Panasonic" }, { id: 31, categoryId: 7, name: "Midea" },
+            { id: 32, categoryId: 8, name: "LG" }, { id: 33, categoryId: 8, name: "Samsung" }, { id: 34, categoryId: 8, name: "Bosch" }, { id: 35, categoryId: 8, name: "Haier" }, { id: 36, categoryId: 8, name: "Atlant" },
+            { id: 37, categoryId: 9, name: "De'Longhi" }, { id: 38, categoryId: 9, name: "Saeco" }, { id: 39, categoryId: 9, name: "Philips" }, { id: 40, categoryId: 9, name: "Nivona" },
+            { id: 41, categoryId: 10, name: "LG" }, { id: 42, categoryId: 10, name: "Samsung" }, { id: 43, categoryId: 10, name: "Sony" }, { id: 44, categoryId: 10, name: "Xiaomi" },
+            { id: 45, categoryId: 11, name: "Sony" }, { id: 46, categoryId: 11, name: "JBL" }, { id: 47, categoryId: 11, name: "Apple" }, { id: 48, categoryId: 11, name: "Samsung" }
+        ];
+        
+        // Модели (привязаны к бренду)
         let models = [
-            { id: 1, brandId: 1, name: "LaserJet Pro M404dn" }, { id: 2, brandId: 1, name: "LaserJet M110we" }, { id: 3, brandId: 1, name: "Neverstop 1000" },
-            { id: 4, brandId: 2, name: "Pixma G3411" }, { id: 5, brandId: 2, name: "ImageRunner 2204" }, { id: 6, brandId: 2, name: "LBP 6030" },
-            { id: 7, brandId: 3, name: "L3110" }, { id: 8, brandId: 3, name: "L805" }, { id: 9, brandId: 3, name: "WorkForce Pro" },
-            { id: 10, brandId: 4, name: "HL-1210WR" }, { id: 11, brandId: 4, name: "DCP-L1630WR" }, { id: 12, brandId: 4, name: "MFC-L2700DW" }
+            { id: 1, brandId: 1, name: "iPhone 14" }, { id: 2, brandId: 1, name: "iPhone 13" }, { id: 3, brandId: 1, name: "iPhone 12" },
+            { id: 4, brandId: 2, name: "Galaxy S23" }, { id: 5, brandId: 2, name: "Galaxy A54" }, { id: 6, brandId: 3, name: "Mi 11" }, { id: 7, brandId: 3, name: "Redmi Note 11" },
+            { id: 8, brandId: 9, name: "MacBook Pro" }, { id: 9, brandId: 9, name: "MacBook Air" }, { id: 10, brandId: 10, name: "ThinkPad X1" }, { id: 11, brandId: 10, name: "IdeaPad 3" },
+            { id: 12, brandId: 19, name: "Mi Robot Vacuum" }, { id: 13, brandId: 20, name: "Roborock S7" },
+            { id: 14, brandId: 23, name: "F2J5HS0W" }, { id: 15, brandId: 24, name: "WW80T4040CE" },
+            { id: 16, brandId: 28, name: "ME731K" }, { id: 17, brandId: 32, name: "GA-B459" }
         ];
         
         let repairs = [];
         let completedRepairs = [];
         let currentUser = null;
+        
+        // Текущий выбор
+        let selectedCategoryId = null;
         let selectedBrandId = null;
         let selectedModelId = null;
         
-        const BRANDS_KEY = "service_brands", MODELS_KEY = "service_models", REPAIRS_KEY = "service_repairs", COMPLETED_KEY = "service_completed";
+        const CATEGORIES_KEY = "service_categories", BRANDS_KEY = "service_brands", MODELS_KEY = "service_models", REPAIRS_KEY = "service_repairs", COMPLETED_KEY = "service_completed";
         
+        function saveCategories() { localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories)); }
         function saveBrands() { localStorage.setItem(BRANDS_KEY, JSON.stringify(brands)); }
         function saveModels() { localStorage.setItem(MODELS_KEY, JSON.stringify(models)); }
         function saveRepairs() { localStorage.setItem(REPAIRS_KEY, JSON.stringify(repairs)); }
         function saveCompleted() { localStorage.setItem(COMPLETED_KEY, JSON.stringify(completedRepairs)); }
         
         function loadData() {
+            let c = localStorage.getItem(CATEGORIES_KEY); if (c) categories = JSON.parse(c);
             let b = localStorage.getItem(BRANDS_KEY); if (b) brands = JSON.parse(b);
             let m = localStorage.getItem(MODELS_KEY); if (m) models = JSON.parse(m);
             let r = localStorage.getItem(REPAIRS_KEY); if (r) repairs = JSON.parse(r);
-            let c = localStorage.getItem(COMPLETED_KEY); if (c) completedRepairs = JSON.parse(c);
-            renderBrands();
+            let comp = localStorage.getItem(COMPLETED_KEY); if (comp) completedRepairs = JSON.parse(comp);
+            renderCategories();
             renderRepairs();
             renderCompleted();
             updateStats();
         }
         
-        // Рендер брендов
-        function renderBrands() {
-            const grid = document.getElementById("brandsGrid");
+        // Рендер категорий
+        function renderCategories() {
+            const grid = document.getElementById("categoriesGrid");
             if (!grid) return;
             grid.innerHTML = "";
-            brands.forEach(b => {
+            categories.forEach(c => {
+                let card = document.createElement("div");
+                card.className = "category-card" + (selectedCategoryId === c.id ? " active" : "");
+                card.innerText = c.name;
+                card.onclick = () => { selectCategory(c.id); };
+                grid.appendChild(card);
+            });
+        }
+        
+        function selectCategory(categoryId) {
+            selectedCategoryId = categoryId;
+            selectedBrandId = null;
+            selectedModelId = null;
+            renderCategories();
+            
+            // Фильтруем бренды по выбранной категории
+            const categoryBrands = brands.filter(b => b.categoryId === categoryId);
+            renderBrands(categoryBrands);
+            
+            document.getElementById("brandsSection").style.display = "block";
+            document.getElementById("modelsSection").style.display = "none";
+        }
+        
+        function renderBrands(brandsToShow) {
+            const grid = document.getElementById("brandsGrid");
+            if (!grid) return;
+            if (brandsToShow.length === 0) {
+                grid.innerHTML = "<div style='padding:20px;text-align:center;color:var(--gray-500);'>Нет брендов для выбранной категории</div>";
+                return;
+            }
+            grid.innerHTML = "";
+            brandsToShow.forEach(b => {
                 let card = document.createElement("div");
                 card.className = "brand-card" + (selectedBrandId === b.id ? " active" : "");
                 card.innerText = b.name;
@@ -569,30 +653,28 @@
         function selectBrand(brandId) {
             selectedBrandId = brandId;
             selectedModelId = null;
-            renderBrands();
-            renderModels();
+            renderBrands(brands.filter(b => b.categoryId === selectedCategoryId));
+            
+            const brandModels = models.filter(m => m.brandId === brandId);
+            renderModels(brandModels);
+            document.getElementById("modelsSection").style.display = "block";
         }
         
-        function renderModels() {
+        function renderModels(modelsToShow) {
             const container = document.getElementById("modelsList");
             if (!container) return;
-            if (!selectedBrandId) {
-                container.innerHTML = "<div style='padding:20px;text-align:center;color:var(--gray-500);'>Сначала выберите бренд</div>";
-                return;
-            }
-            const brandModels = models.filter(m => m.brandId === selectedBrandId);
-            if (brandModels.length === 0) {
+            if (modelsToShow.length === 0) {
                 container.innerHTML = "<div style='padding:20px;text-align:center;color:var(--gray-500);'>Нет моделей для выбранного бренда</div>";
                 return;
             }
             container.innerHTML = "";
-            brandModels.forEach(m => {
+            modelsToShow.forEach(m => {
                 let item = document.createElement("div");
                 item.className = "model-item" + (selectedModelId === m.id ? " selected" : "");
                 item.innerHTML = `<span>${m.name}</span>`;
                 item.onclick = () => { 
                     selectedModelId = m.id; 
-                    renderModels(); 
+                    renderModels(modelsToShow);
                 };
                 container.appendChild(item);
             });
@@ -603,9 +685,11 @@
             let client = document.getElementById("clientName").value.trim();
             let phone = document.getElementById("clientPhone").value.trim();
             if (!client && !phone) { alert("Укажите имя или телефон клиента"); return; }
+            if (!selectedCategoryId) { alert("Выберите тип устройства"); return; }
             if (!selectedBrandId) { alert("Выберите бренд"); return; }
             if (!selectedModelId) { alert("Выберите модель"); return; }
             
+            let category = categories.find(c => c.id === selectedCategoryId);
             let brand = brands.find(b => b.id === selectedBrandId);
             let model = models.find(m => m.id === selectedModelId);
             let faultType = document.getElementById("faultType").value;
@@ -620,6 +704,8 @@
                 date: new Date().toLocaleString(),
                 client: client || "Клиент",
                 phone: phone,
+                categoryId: selectedCategoryId,
+                categoryName: category.name,
                 brandId: selectedBrandId,
                 brandName: brand.name,
                 modelId: selectedModelId,
@@ -648,15 +734,17 @@
             document.getElementById("accessories").value = "";
             document.getElementById("prepayment").value = "0";
             document.getElementById("estimatedCost").value = "0";
+            selectedCategoryId = null;
             selectedBrandId = null;
             selectedModelId = null;
-            renderBrands();
-            renderModels();
+            renderCategories();
+            document.getElementById("brandsSection").style.display = "none";
+            document.getElementById("modelsSection").style.display = "none";
             
-            alert(`✅ Ремонт №${newRepair.id} принят!`);
+            alert(`✅ Ремонт №${newRepair.id} принят!\n${category.name} ${brand.name} ${model.name}`);
         }
         
-        function getStatusBadge(status, statusName) {
+        function getStatusBadge(status) {
             const classes = {
                 'new': 'status-new',
                 'diagnostic': 'status-diagnostic',
@@ -671,7 +759,7 @@
                 'ready': 'Готов к выдаче',
                 'given': 'Выдан'
             };
-            return `<span class="status-badge ${classes[status]}">${names[status] || statusName}</span>`;
+            return `<span class="status-badge ${classes[status]}">${names[status]}</span>`;
         }
         
         function renderRepairs() {
@@ -681,7 +769,8 @@
             let filtered = repairs.filter(r => 
                 r.client.toLowerCase().includes(searchTerm) || 
                 r.modelName.toLowerCase().includes(searchTerm) ||
-                r.phone.includes(searchTerm)
+                r.phone.includes(searchTerm) ||
+                (r.categoryName && r.categoryName.toLowerCase().includes(searchTerm))
             );
             if (filtered.length === 0) {
                 container.innerHTML = "<div style='padding:40px;text-align:center;color:var(--gray-500);'>Нет активных ремонтов</div>";
@@ -692,8 +781,8 @@
                 let urgencyIcon = r.urgency === "Срочно" ? "⚠️ " : (r.urgency === "VIP" ? "⭐ " : "");
                 html += `<div class="repair-item" data-id="${r.id}">
                             <div style="display:flex; justify-content:space-between; flex-wrap:wrap;">
-                                <span><strong>${urgencyIcon}${r.client}</strong> | ${r.brandName} ${r.modelName}</span>
-                                <span>${getStatusBadge(r.status, r.statusName)}</span>
+                                <span><strong>${urgencyIcon}${r.client}</strong> | ${r.categoryName} ${r.brandName} ${r.modelName}</span>
+                                <span>${getStatusBadge(r.status)}</span>
                             </div>
                             <div style="font-size:12px; margin-top:6px; color:var(--gray-500);">📞 ${r.phone || "—"} | 🔧 ${r.faultType}</div>
                             <div style="font-size:12px; margin-top:6px;">💰 Предоплата: ${r.prepayment} ₽ | Стоимость: ${r.estimatedCost} ₽</div>
@@ -782,7 +871,7 @@
             let html = "";
             completedRepairs.slice(0, 50).forEach(r => {
                 html += `<div class="repair-item">
-                            <div><strong>${r.client}</strong> | ${r.brandName} ${r.modelName}</div>
+                            <div><strong>${r.client}</strong> | ${r.categoryName || "?"} ${r.brandName} ${r.modelName}</div>
                             <div style="font-size:12px;">📅 Принят: ${r.date} | Выдан: ${r.closeDate}</div>
                             <div style="font-size:12px;">💰 Итого: ${r.finalCost} ₽ (предоплата: ${r.prepayment} ₽)</div>
                             <div style="font-size:12px;">🔧 ${r.faultType} | ${r.comment ? "📝 " + r.comment : ""}</div>
@@ -801,9 +890,9 @@
         }
         
         function exportExcel() {
-            let data = [["ID", "Дата", "Клиент", "Телефон", "Бренд", "Модель", "Тип поломки", "Срочность", "Предоплата", "Итоговая стоимость", "Статус", "Оператор", "Комментарий", "Дата выдачи"]];
+            let data = [["ID", "Дата", "Клиент", "Телефон", "Категория", "Бренд", "Модель", "Тип поломки", "Срочность", "Предоплата", "Итоговая стоимость", "Статус", "Оператор", "Комментарий", "Дата выдачи"]];
             [...repairs, ...completedRepairs].forEach(r => {
-                data.push([r.id, r.date, r.client, r.phone || "", r.brandName, r.modelName, r.faultType, r.urgency, r.prepayment, r.finalCost || "", r.status === "given" ? "Выдан" : r.statusName, r.operator, r.comment || "", r.closeDate || ""]);
+                data.push([r.id, r.date, r.client, r.phone || "", r.categoryName || "", r.brandName, r.modelName, r.faultType, r.urgency, r.prepayment, r.finalCost || "", r.status === "given" ? "Выдан" : r.statusName, r.operator, r.comment || "", r.closeDate || ""]);
             });
             let ws = XLSX.utils.aoa_to_sheet(data);
             let wb = XLSX.utils.book_new();
@@ -824,38 +913,58 @@
         
         // Админ-панель
         function renderAdminPanel() {
+            // Категории
+            let catDiv = document.getElementById("adminCategoriesList");
+            catDiv.innerHTML = "";
+            categories.forEach(c => {
+                catDiv.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${c.name}</span><button class="delete-category" data-id="${c.id}" style="background:var(--red); padding:4px 12px;">🗑</button></div>`;
+            });
+            document.querySelectorAll(".delete-category").forEach(btn => {
+                btn.onclick = () => {
+                    let id = parseInt(btn.getAttribute("data-id"));
+                    if (categories.length <= 1) { alert("Нельзя удалить последнюю категорию"); return; }
+                    let hasBrands = brands.some(b => b.categoryId === id);
+                    if (hasBrands) { alert("Сначала удалите бренды этой категории"); return; }
+                    categories = categories.filter(c => c.id !== id);
+                    saveCategories();
+                    renderAdminPanel();
+                    renderCategories();
+                };
+            });
+            
+            // Бренды
             let brandsDiv = document.getElementById("adminBrandsList");
             brandsDiv.innerHTML = "";
             brands.forEach(b => {
-                brandsDiv.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${b.name}</span><button class="delete-brand" data-id="${b.id}" style="background:var(--red); padding:4px 12px;">🗑</button></div>`;
+                let cat = categories.find(c => c.id === b.categoryId);
+                brandsDiv.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${cat?.name || "?"} — ${b.name}</span><button class="delete-brand" data-id="${b.id}" style="background:var(--red); padding:4px 12px;">🗑</button></div>`;
             });
             document.querySelectorAll(".delete-brand").forEach(btn => {
                 btn.onclick = () => {
                     let id = parseInt(btn.getAttribute("data-id"));
-                    if (brands.length <= 1) { alert("Нельзя удалить последний бренд"); return; }
                     let hasModels = models.some(m => m.brandId === id);
                     if (hasModels) { alert("Сначала удалите модели этого бренда"); return; }
                     brands = brands.filter(b => b.id !== id);
                     saveBrands();
                     renderAdminPanel();
-                    renderBrands();
                 };
             });
             
+            // Модели
             let modelsDiv = document.getElementById("adminModelsList");
-            modelsDiv.innerHTML = "<h4>Модели</h4>";
+            modelsDiv.innerHTML = "";
             models.forEach(m => {
                 let brand = brands.find(b => b.id === m.brandId);
-                modelsDiv.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${brand?.name || "?"} — ${m.name}</span><button class="delete-model" data-id="${m.id}" style="background:var(--red); padding:4px 12px;">🗑</button></div>`;
+                brandsDiv.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${brand?.name || "?"} — ${m.name}</span><button class="delete-model" data-id="${m.id}" style="background:var(--red); padding:4px 12px;">🗑</button></div>`;
             });
-            document.querySelectorAll(".delete-model").forEach(btn => {
-                btn.onclick = () => {
-                    let id = parseInt(btn.getAttribute("data-id"));
-                    models = models.filter(m => m.id !== id);
-                    saveModels();
-                    renderAdminPanel();
-                    renderModels();
-                };
+            
+            let catSelect = document.getElementById("selectCategoryForBrand");
+            catSelect.innerHTML = "";
+            categories.forEach(c => {
+                let opt = document.createElement("option");
+                opt.value = c.id;
+                opt.textContent = c.name;
+                catSelect.appendChild(opt);
             });
             
             let brandSelect = document.getElementById("selectBrandForModel");
@@ -943,17 +1052,29 @@
             let admModal = document.getElementById("adminModal");
             document.getElementById("adminPanelBtn").onclick = () => { renderAdminPanel(); admModal.style.display = "flex"; };
             document.getElementById("closeAdminModal").onclick = () => admModal.style.display = "none";
-            document.getElementById("addBrandBtn").onclick = () => {
-                let name = document.getElementById("newBrandName").value.trim();
+            document.getElementById("addCategoryBtn").onclick = () => {
+                let name = document.getElementById("newCategoryName").value.trim();
                 if (name) {
                     let newId = Date.now();
-                    brands.push({ id: newId, name: name });
+                    categories.push({ id: newId, name: name });
+                    saveCategories();
+                    renderAdminPanel();
+                    renderCategories();
+                    document.getElementById("newCategoryName").value = "";
+                    showSyncStatus(`✅ Категория "${name}" добавлена`);
+                } else alert("Введите название категории");
+            };
+            document.getElementById("addBrandBtn").onclick = () => {
+                let categoryId = parseInt(document.getElementById("selectCategoryForBrand").value);
+                let name = document.getElementById("newBrandName").value.trim();
+                if (name && categoryId) {
+                    let newId = Date.now();
+                    brands.push({ id: newId, categoryId: categoryId, name: name });
                     saveBrands();
                     renderAdminPanel();
-                    renderBrands();
                     document.getElementById("newBrandName").value = "";
                     showSyncStatus(`✅ Бренд "${name}" добавлен`);
-                } else alert("Введите название бренда");
+                } else alert("Выберите категорию и введите название бренда");
             };
             document.getElementById("addModelBtn").onclick = () => {
                 let brandId = parseInt(document.getElementById("selectBrandForModel").value);
@@ -963,7 +1084,6 @@
                     models.push({ id: newId, brandId: brandId, name: name });
                     saveModels();
                     renderAdminPanel();
-                    renderModels();
                     document.getElementById("newModelName").value = "";
                     showSyncStatus(`✅ Модель "${name}" добавлена`);
                 } else alert("Выберите бренд и введите название модели");
